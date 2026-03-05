@@ -1,8 +1,11 @@
 package com.akitain.enchantmentoverhaul;
 
+import com.akitain.enchantmentoverhaul.client.CatalogueScreen;
+import com.akitain.enchantmentoverhaul.enchant.ModScreenHandlers;
 import com.akitain.enchantmentoverhaul.enchant.SlotSystem;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback;
+import net.minecraft.client.gui.screen.ingame.HandledScreens;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
@@ -11,6 +14,8 @@ public class EnchantmentOverhaulClient implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
+        HandledScreens.register(ModScreenHandlers.CATALOGUE, CatalogueScreen::new);
+
         ItemTooltipCallback.EVENT.register((stack, context, type, lines) -> {
             if (SlotSystem.getBaseMaxSlots(stack) <= 0) return;
             lines.add(Text.literal(slotText(stack)).formatted(slotColor(stack)));

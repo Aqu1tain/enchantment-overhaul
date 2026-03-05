@@ -10,7 +10,9 @@
         "MobEntityMixin",
         "EnchantBookFactoryMixin",
         "EnchantmentNameMixin",
-        "ItemGroupsMixin"
+        "ItemGroupsMixin",
+        "EnchantingTableBlockMixin",
+        "GrindstoneScreenHandlerMixin"
     ],
     "client": [],
     "injectors": {
