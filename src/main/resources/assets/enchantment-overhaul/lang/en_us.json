@@ -2,5 +2,14 @@
   "item.enchantment-overhaul.honing_template": "Honing Smithing Template",
   "item.enchantment-overhaul.warding_template": "Warding Smithing Template",
   "item.enchantment-overhaul.tempering_template": "Tempering Smithing Template",
-  "item.enchantment-overhaul.grinding_template": "Grinding Smithing Template"
+  "item.enchantment-overhaul.grinding_template": "Grinding Smithing Template",
+  "enchantment.enchantment-overhaul.step_up": "Step-Up",
+  "enchantment.enchantment-overhaul.venom": "Venom",
+  "enchantment.enchantment-overhaul.last_stand": "Last Stand",
+  "enchantment.enchantment-overhaul.curse_of_fragility": "Curse of Fragility",
+  "enchantment.enchantment-overhaul.curse_of_hunger": "Curse of Hunger",
+  "enchantment.enchantment-overhaul.veil": "Veil",
+  "enchantment.enchantment-overhaul.buoyancy": "Buoyancy",
+  "enchantment.enchantment-overhaul.magnetic": "Magnetic",
+  "enchantment.enchantment-overhaul.homing": "Homing"
 }
