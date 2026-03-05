@@ -8,7 +8,9 @@
         "EnchantWithLevelsLootFunctionMixin",
         "EnchantRandomlyLootFunctionMixin",
         "MobEntityMixin",
-        "EnchantBookFactoryMixin"
+        "EnchantBookFactoryMixin",
+        "EnchantmentNameMixin",
+        "ItemGroupsMixin"
     ],
     "client": [],
     "injectors": {
