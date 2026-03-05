@@ -37,38 +37,45 @@ public class CatalogueScreen extends HandledScreen<CatalogueScreenHandler> {
     private static final int BG_H = 230;
 
     private static final int CAT_X = 52;
-    private static final int CAT_Y = 20;
-    private static final int CAT_W = 216;
+    private static final int CAT_Y = 18;
+    private static final int CAT_W = 220;
     private static final int ROW_H = 20;
     private static final int VISIBLE_ROWS = 5;
     private static final int CAT_H = ROW_H * VISIBLE_ROWS;
-
     private static final int SCROLLBAR_W = 6;
 
-    private static final int BTN_X = 8;
+    private static final int BTN_X = 6;
     private static final int BTN_Y = 108;
-    private static final int BTN_W = 36;
+    private static final int BTN_W = 38;
     private static final int BTN_H = 14;
 
-    private static final int SLOT_BAR_Y = 126;
+    private static final int SLOT_BAR_Y = 124;
 
-    private static final int PURPLE_DARK = 0xFF1A0A2E;
+    // Vanilla-inspired row colors
+    private static final int ROW_BG = 0xFF56493D;
+    private static final int ROW_HOVER = 0xFF6B5D4E;
+    private static final int ROW_SELECTED = 0xFF80507A;
+    private static final int ROW_BORDER_L = 0xFF7A6B5A;
+    private static final int ROW_BORDER_D = 0xFF3A3028;
+
+    // General colors
+    private static final int PANEL_BG = 0xFF1A0A2E;
     private static final int PURPLE_MID = 0xFF2D1250;
     private static final int PURPLE_LIGHT = 0xFF8050C0;
     private static final int PURPLE_BRIGHT = 0xFFC080FF;
     private static final int TEXT_LIGHT = 0xFFE0D8F0;
     private static final int TEXT_DIM = 0xFF9080B0;
-    private static final int GREEN = 0xFF55FF55;
-    private static final int RED = 0xFFFF5555;
     private static final int GOLD = 0xFFFFAA00;
     private static final int BG = 0xFFC6C6C6;
-    private static final Style SGA_STYLE = Style.EMPTY.withFont(new StyleSpriteSource.Font(Identifier.of("minecraft", "alt"))).withColor(0x6040A0);
     private static final int SLOT_BG = 0xFF8B8B8B;
     private static final int BORDER_L = 0xFFFFFFFF;
     private static final int BORDER_D = 0xFF555555;
 
+    private static final Style SGA_STYLE = Style.EMPTY
+            .withFont(new StyleSpriteSource.Font(Identifier.of("minecraft", "alt")));
     private static final String SGA_CHARS = "abcdefghijklmnopqrstuvwxyz";
-    private String sgaLine = randomSga(40);
+
+    private final String[] sgaRows = new String[20];
 
     private float scrollAmount;
     private int scrollOffset;
@@ -83,6 +90,7 @@ public class CatalogueScreen extends HandledScreen<CatalogueScreenHandler> {
         this.titleY = 6;
         this.playerInventoryTitleX = 59;
         this.playerInventoryTitleY = BG_H - 94;
+        for (int i = 0; i < sgaRows.length; i++) sgaRows[i] = randomSga(28);
     }
 
     @Override
@@ -109,6 +117,8 @@ public class CatalogueScreen extends HandledScreen<CatalogueScreenHandler> {
         }
     }
 
+    // --- Drawing ---
+
     @Override
     protected void drawBackground(DrawContext context, float deltaTicks, int mouseX, int mouseY) {
         int x = this.x, y = this.y;
@@ -116,12 +126,48 @@ public class CatalogueScreen extends HandledScreen<CatalogueScreenHandler> {
         context.fill(x, y, x + BG_W, y + BG_H, BG);
         border3D(context, x, y, BG_W, BG_H, BORDER_L, BORDER_D);
 
+        drawBook(context, x, y);
         drawInputSlots(context, x, y);
         drawCatalogue(context, x, y, mouseX, mouseY);
-        drawSgaDecoration(context, x, y);
         drawSlotBar(context, x, y);
         drawEnchantButton(context, x, y, mouseX, mouseY);
         drawPlayerSlotBorders(context, x, y);
+    }
+
+    @Override
+    protected void drawForeground(DrawContext context, int mouseX, int mouseY) {
+        context.drawText(textRenderer, Text.literal("Enchant"), titleX, titleY, 0x404040, false);
+        context.drawText(textRenderer, this.playerInventoryTitle, playerInventoryTitleX, playerInventoryTitleY, 0x404040, false);
+    }
+
+    private void drawBook(DrawContext context, int x, int y) {
+        int bx = x + 10, by = y + 18;
+        // Spine
+        context.fill(bx + 15, by, bx + 17, by + 22, 0xFF5C3A1E);
+        // Left page
+        context.fill(bx + 2, by + 1, bx + 15, by + 21, 0xFFD8C8A0);
+        context.fill(bx + 1, by + 2, bx + 2, by + 20, 0xFFD8C8A0);
+        // Right page
+        context.fill(bx + 17, by + 1, bx + 30, by + 21, 0xFFD8C8A0);
+        context.fill(bx + 30, by + 2, bx + 31, by + 20, 0xFFD8C8A0);
+        // Left cover edges
+        context.fill(bx, by + 2, bx + 1, by + 20, 0xFF8B5A2B);
+        context.fill(bx + 1, by, bx + 15, by + 1, 0xFF8B5A2B);
+        context.fill(bx + 1, by + 21, bx + 15, by + 22, 0xFF6B3A1B);
+        // Right cover edges
+        context.fill(bx + 31, by + 2, bx + 32, by + 20, 0xFF8B5A2B);
+        context.fill(bx + 17, by, bx + 31, by + 1, 0xFF8B5A2B);
+        context.fill(bx + 17, by + 21, bx + 31, by + 22, 0xFF6B3A1B);
+        // Page lines (left)
+        for (int i = 0; i < 4; i++) {
+            int ly = by + 5 + i * 4;
+            context.fill(bx + 4, ly, bx + 13, ly + 1, 0x30000000);
+        }
+        // Page lines (right)
+        for (int i = 0; i < 4; i++) {
+            int ly = by + 5 + i * 4;
+            context.fill(bx + 19, ly, bx + 28, ly + 1, 0x30000000);
+        }
     }
 
     private void drawInputSlots(DrawContext context, int x, int y) {
@@ -131,27 +177,11 @@ public class CatalogueScreen extends HandledScreen<CatalogueScreenHandler> {
         }
     }
 
-    @Override
-    protected void drawForeground(DrawContext context, int mouseX, int mouseY) {
-        context.drawText(textRenderer, this.title, titleX, titleY, 0x404040, false);
-
-        Slot s0 = handler.slots.get(0);
-        Slot s1 = handler.slots.get(1);
-        Slot s2 = handler.slots.get(2);
-        context.drawText(textRenderer, "Item", s0.x - 1, s0.y + 18, TEXT_DIM, true);
-        context.drawText(textRenderer, "Lapis", s1.x - 1, s1.y + 18, TEXT_DIM, true);
-        context.drawText(textRenderer, "Reagent", s2.x - 4, s2.y + 18, TEXT_DIM, true);
-
-        context.drawText(textRenderer, this.playerInventoryTitle, playerInventoryTitleX, playerInventoryTitleY, 0x404040, false);
-    }
-
     private void drawCatalogue(DrawContext context, int x, int y, int mouseX, int mouseY) {
         int cx = x + CAT_X, cy = y + CAT_Y;
 
-        context.fill(cx, cy, cx + CAT_W, cy + CAT_H, PURPLE_DARK);
+        context.fill(cx, cy, cx + CAT_W, cy + CAT_H, PANEL_BG);
         borderInset(context, cx, cy, CAT_W, CAT_H);
-
-        context.drawTextWithShadow(textRenderer, "Catalogue", cx, cy - 12, TEXT_LIGHT);
 
         List<CatalogueEntry> entries = handler.getEntries();
         if (entries.isEmpty()) {
@@ -164,41 +194,54 @@ public class CatalogueScreen extends HandledScreen<CatalogueScreenHandler> {
             return;
         }
 
+        int rowW = CAT_W - SCROLLBAR_W - 4;
         int end = Math.min(scrollOffset + VISIBLE_ROWS, entries.size());
         for (int i = scrollOffset; i < end; i++) {
-            int ry = cy + (i - scrollOffset) * ROW_H;
-            drawRow(context, entries.get(i), i, cx, ry, mouseX, mouseY);
+            int row = i - scrollOffset;
+            int ry = cy + 1 + row * ROW_H;
+            drawRow(context, entries.get(i), i, cx + 1, ry, rowW, mouseX, mouseY);
         }
 
         drawScrollbar(context, cx + CAT_W - SCROLLBAR_W - 1, cy + 1, CAT_H - 2);
     }
 
-    private void drawRow(DrawContext context, CatalogueEntry entry, int idx, int cx, int ry, int mx, int my) {
+    private void drawRow(DrawContext context, CatalogueEntry entry, int idx, int rx, int ry, int rw, int mx, int my) {
         boolean selected = idx == handler.getSelectedIndex();
-        boolean hovered = mx >= cx && mx < cx + CAT_W && my >= ry && my < ry + ROW_H;
+        boolean hovered = mx >= rx && mx < rx + rw && my >= ry && my < ry + ROW_H;
 
-        if (selected) {
-            context.fill(cx + 1, ry, cx + CAT_W - SCROLLBAR_W - 2, ry + ROW_H, 0x50A060FF);
-        } else if (hovered) {
-            context.fill(cx + 1, ry, cx + CAT_W - SCROLLBAR_W - 2, ry + ROW_H, 0x30FFFFFF);
-        }
+        int bg = selected ? ROW_SELECTED : (hovered ? ROW_HOVER : ROW_BG);
+        context.fill(rx, ry, rx + rw, ry + ROW_H - 1, bg);
 
-        int ty = ry + (ROW_H - 8) / 2;
+        // Top/bottom row border
+        int borderTop = selected ? 0xFF9A6090 : ROW_BORDER_L;
+        int borderBot = selected ? 0xFF60305A : ROW_BORDER_D;
+        context.fill(rx, ry, rx + rw, ry + 1, borderTop);
+        context.fill(rx, ry + ROW_H - 2, rx + rw, ry + ROW_H - 1, borderBot);
+
+        // SGA decoration text (subtle behind the name)
+        int sgaColor = selected ? 0xFF9A6898 : 0xFF6B5D50;
+        String sga = sgaRows[idx % sgaRows.length];
+        context.drawText(textRenderer, Text.literal(sga).setStyle(SGA_STYLE), rx + 4, ry + 6, sgaColor, false);
+
+        // Enchantment name overlaid
+        int ty = ry + (ROW_H - 9) / 2;
         boolean curse = entry.entry().isIn(EnchantmentTags.CURSE);
-        int nameColor = curse ? 0xFFFF6666 : TEXT_LIGHT;
+        int nameColor = selected ? 0xFFFFFFFF : (curse ? 0xFFFF6666 : 0xFFE8DCC8);
         String name = entry.entry().value().description().getString();
-        context.drawTextWithShadow(textRenderer, name, cx + 6, ty, nameColor);
+        context.drawTextWithShadow(textRenderer, name, rx + 4, ty, nameColor);
 
-        int lvX = cx + CAT_W - SCROLLBAR_W - 8 - entry.maxLevel() * 14;
+        // Level buttons right-aligned
+        int lvX = rx + rw - 2 - entry.maxLevel() * 14;
         int selLv = selected ? handler.getSelectedLevel() : 0;
 
         for (int lv = 1; lv <= entry.maxLevel(); lv++) {
             boolean lvSel = selected && lv == selLv;
-            int bg = lvSel ? PURPLE_LIGHT : PURPLE_MID;
-            context.fill(lvX, ry + 3, lvX + 12, ry + ROW_H - 3, bg);
+            int lvBg = lvSel ? 0xFF60A040 : (selected ? 0xFF603060 : 0xFF4A3E34);
+            context.fill(lvX, ry + 3, lvX + 12, ry + ROW_H - 4, lvBg);
             String r = toRoman(lv);
             int tw = textRenderer.getWidth(r);
-            context.drawTextWithShadow(textRenderer, r, lvX + (12 - tw) / 2, ty, lvSel ? GOLD : TEXT_DIM);
+            int lvColor = lvSel ? 0xFF80FF40 : (selected ? 0xFFC0A0C0 : 0xFF8A7A6A);
+            context.drawTextWithShadow(textRenderer, r, lvX + (12 - tw) / 2, ty, lvColor);
             lvX += 14;
         }
     }
@@ -303,11 +346,6 @@ public class CatalogueScreen extends HandledScreen<CatalogueScreenHandler> {
         context.drawTextWithShadow(textRenderer, used + "/" + max, sx + totalW + 6, barY, TEXT_LIGHT);
     }
 
-    private void drawSgaDecoration(DrawContext context, int x, int y) {
-        int sgaY = y + CAT_Y + CAT_H + 2;
-        context.drawText(textRenderer, Text.literal(sgaLine).setStyle(SGA_STYLE), x + CAT_X, sgaY, 0x6040A0, false);
-    }
-
     private void drawEnchantButton(DrawContext context, int x, int y, int mx, int my) {
         int bx = x + BTN_X, by = y + BTN_Y;
         boolean can = canEnchantNow();
@@ -339,7 +377,6 @@ public class CatalogueScreen extends HandledScreen<CatalogueScreenHandler> {
         if (handler.getSelectedIndex() >= entries.size()) return false;
 
         CatalogueEntry entry = entries.get(handler.getSelectedIndex());
-
         int level = handler.getSelectedLevel();
         RegistryKey<Enchantment> key = entry.key();
         ItemStack item = handler.getSlot(0).getStack();
@@ -380,14 +417,16 @@ public class CatalogueScreen extends HandledScreen<CatalogueScreenHandler> {
 
     private boolean clickRow(double mx, double my, int x, int y) {
         int cx = x + CAT_X, cy = y + CAT_Y;
-        if (mx < cx || mx >= cx + CAT_W - SCROLLBAR_W || my < cy || my >= cy + CAT_H) return false;
+        int rowW = CAT_W - SCROLLBAR_W - 4;
+        if (mx < cx + 1 || mx >= cx + 1 + rowW || my < cy || my >= cy + CAT_H) return false;
 
         List<CatalogueEntry> entries = handler.getEntries();
         int idx = scrollOffset + (int) (my - cy) / ROW_H;
         if (idx >= entries.size()) return false;
 
         CatalogueEntry entry = entries.get(idx);
-        int lvX = cx + CAT_W - SCROLLBAR_W - 8 - entry.maxLevel() * 14;
+        int rx = cx + 1;
+        int lvX = rx + rowW - 2 - entry.maxLevel() * 14;
         int level = 1;
         if (mx >= lvX) {
             int lvIdx = (int) (mx - lvX) / 14;
@@ -464,9 +503,7 @@ public class CatalogueScreen extends HandledScreen<CatalogueScreenHandler> {
     private static String randomSga(int length) {
         Random rng = new Random();
         StringBuilder sb = new StringBuilder(length);
-        for (int i = 0; i < length; i++) {
-            sb.append(SGA_CHARS.charAt(rng.nextInt(SGA_CHARS.length())));
-        }
+        for (int i = 0; i < length; i++) sb.append(SGA_CHARS.charAt(rng.nextInt(SGA_CHARS.length())));
         return sb.toString();
     }
 
