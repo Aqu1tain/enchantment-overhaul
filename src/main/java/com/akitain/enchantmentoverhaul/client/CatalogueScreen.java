@@ -62,7 +62,7 @@ public class CatalogueScreen extends HandledScreen<CatalogueScreenHandler> {
     private static final int RED = 0xFFFF5555;
     private static final int GOLD = 0xFFFFAA00;
     private static final int BG = 0xFFC6C6C6;
-    private static final Style SGA_STYLE = Style.EMPTY.withFont(new StyleSpriteSource.Font(Identifier.of("minecraft", "alt"))).withColor(0x3A1A5E);
+    private static final Style SGA_STYLE = Style.EMPTY.withFont(new StyleSpriteSource.Font(Identifier.of("minecraft", "alt"))).withColor(0x6040A0);
     private static final int SLOT_BG = 0xFF8B8B8B;
     private static final int BORDER_L = 0xFFFFFFFF;
     private static final int BORDER_D = 0xFF555555;
@@ -118,6 +118,7 @@ public class CatalogueScreen extends HandledScreen<CatalogueScreenHandler> {
 
         drawInputSlots(context, x, y);
         drawCatalogue(context, x, y, mouseX, mouseY);
+        drawSgaDecoration(context, x, y);
         drawSlotBar(context, x, y);
         drawEnchantButton(context, x, y, mouseX, mouseY);
         drawPlayerSlotBorders(context, x, y);
@@ -151,7 +152,6 @@ public class CatalogueScreen extends HandledScreen<CatalogueScreenHandler> {
         borderInset(context, cx, cy, CAT_W, CAT_H);
 
         context.drawTextWithShadow(textRenderer, "Catalogue", cx, cy - 12, TEXT_LIGHT);
-        context.drawText(textRenderer, Text.literal(sgaLine).setStyle(SGA_STYLE), cx + 3, cy + CAT_H - 10, 0x3A1A5E, false);
 
         List<CatalogueEntry> entries = handler.getEntries();
         if (entries.isEmpty()) {
@@ -301,6 +301,11 @@ public class CatalogueScreen extends HandledScreen<CatalogueScreenHandler> {
         }
 
         context.drawTextWithShadow(textRenderer, used + "/" + max, sx + totalW + 6, barY, TEXT_LIGHT);
+    }
+
+    private void drawSgaDecoration(DrawContext context, int x, int y) {
+        int sgaY = y + CAT_Y + CAT_H + 2;
+        context.drawText(textRenderer, Text.literal(sgaLine).setStyle(SGA_STYLE), x + CAT_X, sgaY, 0x6040A0, false);
     }
 
     private void drawEnchantButton(DrawContext context, int x, int y, int mx, int my) {

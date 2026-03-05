@@ -1,18 +1,18 @@
 package com.akitain.enchantmentoverhaul.smithing;
 
-import com.akitain.enchantmentoverhaul.EnchantmentOverhaul;
 import com.akitain.enchantmentoverhaul.component.ModComponents;
 import net.minecraft.component.ComponentType;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.AttributeModifierSlot;
 import net.minecraft.component.type.AttributeModifiersComponent;
+import net.minecraft.entity.attribute.EntityAttribute;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.attribute.EntityAttributes;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.registry.tag.ItemTags;
 import net.minecraft.util.Identifier;
-import net.minecraft.entity.attribute.EntityAttribute;
 
 public enum UpgradeType {
     HONING(ModComponents.HONING_LEVEL),
@@ -49,26 +49,39 @@ public enum UpgradeType {
         stack.set(component, level);
 
         switch (this) {
-            case HONING -> applyAttribute(stack, EntityAttributes.ATTACK_DAMAGE, level, AttributeModifierSlot.MAINHAND);
-            case WARDING -> applyAttribute(stack, EntityAttributes.ARMOR, level, AttributeModifierSlot.ARMOR);
-            case GRINDING -> applyAttribute(stack, EntityAttributes.MINING_EFFICIENCY, level * 5, AttributeModifierSlot.MAINHAND);
-            case TEMPERING -> {} // handled via mixin on item damage calculation
+            case HONING -> boostBaseModifier(stack, EntityAttributes.ATTACK_DAMAGE, Item.BASE_ATTACK_DAMAGE_MODIFIER_ID, level, AttributeModifierSlot.MAINHAND);
+            case WARDING -> addModifier(stack, EntityAttributes.ARMOR, level, AttributeModifierSlot.ARMOR);
+            case GRINDING -> addModifier(stack, EntityAttributes.MINING_EFFICIENCY, level * 5, AttributeModifierSlot.MAINHAND);
+            case TEMPERING -> {}
         }
     }
 
-    private void applyAttribute(ItemStack stack, RegistryEntry<EntityAttribute> attribute, double value, AttributeModifierSlot slot) {
-        Identifier id = Identifier.of(EnchantmentOverhaul.MOD_ID, name().toLowerCase());
-        EntityAttributeModifier modifier = new EntityAttributeModifier(id, value, EntityAttributeModifier.Operation.ADD_VALUE);
-
+    private void boostBaseModifier(ItemStack stack, RegistryEntry<EntityAttribute> attribute, Identifier baseId, double bonus, AttributeModifierSlot slot) {
         AttributeModifiersComponent existing = stack.getOrDefault(DataComponentTypes.ATTRIBUTE_MODIFIERS, AttributeModifiersComponent.DEFAULT);
         AttributeModifiersComponent.Builder builder = AttributeModifiersComponent.builder();
 
+        boolean found = false;
         for (AttributeModifiersComponent.Entry entry : existing.modifiers()) {
-            if (!entry.modifier().idMatches(id)) {
+            if (entry.modifier().idMatches(baseId)) {
+                double newValue = entry.modifier().value() + bonus;
+                EntityAttributeModifier boosted = new EntityAttributeModifier(baseId, newValue, entry.modifier().operation());
+                builder.add(entry.attribute(), boosted, entry.slot(), entry.display());
+                found = true;
+            } else {
                 builder.add(entry.attribute(), entry.modifier(), entry.slot(), entry.display());
             }
         }
-        builder.add(attribute, modifier, slot);
+
+        if (!found) {
+            builder.add(attribute, new EntityAttributeModifier(baseId, bonus, EntityAttributeModifier.Operation.ADD_VALUE), slot);
+        }
+
         stack.set(DataComponentTypes.ATTRIBUTE_MODIFIERS, builder.build());
+    }
+
+    private void addModifier(ItemStack stack, RegistryEntry<EntityAttribute> attribute, double value, AttributeModifierSlot slot) {
+        AttributeModifiersComponent existing = stack.getOrDefault(DataComponentTypes.ATTRIBUTE_MODIFIERS, AttributeModifiersComponent.DEFAULT);
+        stack.set(DataComponentTypes.ATTRIBUTE_MODIFIERS, existing.with(attribute,
+                new EntityAttributeModifier(Identifier.ofVanilla(name().toLowerCase()), value, EntityAttributeModifier.Operation.ADD_VALUE), slot));
     }
 }
