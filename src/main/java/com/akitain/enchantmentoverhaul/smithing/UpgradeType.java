@@ -46,12 +46,13 @@ public enum UpgradeType {
     }
 
     public void applyTo(ItemStack stack, int level) {
+        int oldLevel = currentLevel(stack);
         stack.set(component, level);
 
         switch (this) {
-            case HONING -> boostBaseModifier(stack, EntityAttributes.ATTACK_DAMAGE, Item.BASE_ATTACK_DAMAGE_MODIFIER_ID, level, AttributeModifierSlot.MAINHAND);
-            case WARDING -> addModifier(stack, EntityAttributes.ARMOR, level, AttributeModifierSlot.ARMOR);
-            case GRINDING -> addModifier(stack, EntityAttributes.MINING_EFFICIENCY, level * 5, AttributeModifierSlot.MAINHAND);
+            case HONING -> boostBaseModifier(stack, EntityAttributes.ATTACK_DAMAGE, Item.BASE_ATTACK_DAMAGE_MODIFIER_ID, level - oldLevel, AttributeModifierSlot.MAINHAND);
+            case WARDING -> replaceModifier(stack, EntityAttributes.ARMOR, level, AttributeModifierSlot.ARMOR);
+            case GRINDING -> replaceModifier(stack, EntityAttributes.MINING_EFFICIENCY, level * 5, AttributeModifierSlot.MAINHAND);
             case TEMPERING -> {}
         }
     }
@@ -79,9 +80,16 @@ public enum UpgradeType {
         stack.set(DataComponentTypes.ATTRIBUTE_MODIFIERS, builder.build());
     }
 
-    private void addModifier(ItemStack stack, RegistryEntry<EntityAttribute> attribute, double value, AttributeModifierSlot slot) {
+    private void replaceModifier(ItemStack stack, RegistryEntry<EntityAttribute> attribute, double value, AttributeModifierSlot slot) {
+        Identifier modId = Identifier.ofVanilla(name().toLowerCase());
         AttributeModifiersComponent existing = stack.getOrDefault(DataComponentTypes.ATTRIBUTE_MODIFIERS, AttributeModifiersComponent.DEFAULT);
-        stack.set(DataComponentTypes.ATTRIBUTE_MODIFIERS, existing.with(attribute,
-                new EntityAttributeModifier(Identifier.ofVanilla(name().toLowerCase()), value, EntityAttributeModifier.Operation.ADD_VALUE), slot));
+        AttributeModifiersComponent.Builder builder = AttributeModifiersComponent.builder();
+        for (AttributeModifiersComponent.Entry entry : existing.modifiers()) {
+            if (!entry.modifier().idMatches(modId)) {
+                builder.add(entry.attribute(), entry.modifier(), entry.slot(), entry.display());
+            }
+        }
+        builder.add(attribute, new EntityAttributeModifier(modId, value, EntityAttributeModifier.Operation.ADD_VALUE), slot);
+        stack.set(DataComponentTypes.ATTRIBUTE_MODIFIERS, builder.build());
     }
 }
