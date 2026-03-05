@@ -5,6 +5,8 @@ import net.minecraft.enchantment.Enchantments;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
 import net.minecraft.registry.RegistryKey;
+import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.registry.tag.EnchantmentTags;
 
 import java.util.Map;
 
@@ -70,8 +72,13 @@ public class EnchantmentCosts {
         return XP_BY_LEVEL[level];
     }
 
-    public static int slotCost(RegistryKey<Enchantment> key, int level) {
-        if (key.equals(Enchantments.MENDING)) return 3;
+    public static boolean isReagent(Item item) {
+        return item == Items.LAPIS_LAZULI || REAGENTS.containsValue(item);
+    }
+
+    public static int slotCost(RegistryEntry<Enchantment> entry, int level) {
+        if (entry.isIn(EnchantmentTags.CURSE)) return 0;
+        if (entry.matchesKey(Enchantments.MENDING)) return 3;
         return level;
     }
 }

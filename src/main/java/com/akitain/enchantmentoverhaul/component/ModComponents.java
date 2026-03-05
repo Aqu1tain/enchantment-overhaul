@@ -10,14 +10,22 @@ import net.minecraft.util.Identifier;
 
 public class ModComponents {
 
-    public static final ComponentType<Integer> GRINDSTONE_PENALTY = Registry.register(
-            Registries.DATA_COMPONENT_TYPE,
-            Identifier.of(EnchantmentOverhaul.MOD_ID, "grindstone_penalty"),
-            ComponentType.<Integer>builder()
-                    .codec(Codec.INT)
-                    .packetCodec(PacketCodecs.VAR_INT)
-                    .build()
-    );
+    public static final ComponentType<Integer> GRINDSTONE_PENALTY = intComponent("grindstone_penalty");
+    public static final ComponentType<Integer> HONING_LEVEL = intComponent("honing_level");
+    public static final ComponentType<Integer> WARDING_LEVEL = intComponent("warding_level");
+    public static final ComponentType<Integer> TEMPERING_LEVEL = intComponent("tempering_level");
+    public static final ComponentType<Integer> GRINDING_LEVEL = intComponent("grinding_level");
+
+    private static ComponentType<Integer> intComponent(String name) {
+        return Registry.register(
+                Registries.DATA_COMPONENT_TYPE,
+                Identifier.of(EnchantmentOverhaul.MOD_ID, name),
+                ComponentType.<Integer>builder()
+                        .codec(Codec.INT)
+                        .packetCodec(PacketCodecs.VAR_INT)
+                        .build()
+        );
+    }
 
     public static void register() {
     }

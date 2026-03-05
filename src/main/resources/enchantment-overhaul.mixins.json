@@ -12,7 +12,9 @@
         "EnchantmentNameMixin",
         "ItemGroupsMixin",
         "EnchantingTableBlockMixin",
-        "GrindstoneScreenHandlerMixin"
+        "GrindstoneScreenHandlerMixin",
+        "SmithingScreenHandlerMixin",
+        "ItemStackDamageMixin"
     ],
     "client": [],
     "injectors": {
