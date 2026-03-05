@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "enchantment-overhaul:item/tempering_template"
+  }
+}
