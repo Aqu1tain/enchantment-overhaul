@@ -1,6 +1,7 @@
 package com.akitain.enchantmentoverhaul;
 
 import com.akitain.enchantmentoverhaul.client.CatalogueScreen;
+import com.akitain.enchantmentoverhaul.enchant.InnateMaterialProperties;
 import com.akitain.enchantmentoverhaul.enchant.ModScreenHandlers;
 import com.akitain.enchantmentoverhaul.enchant.SlotSystem;
 import com.akitain.enchantmentoverhaul.smithing.UpgradeType;
@@ -19,6 +20,7 @@ public class EnchantmentOverhaulClient implements ClientModInitializer {
 
         ItemTooltipCallback.EVENT.register((stack, context, type, lines) -> {
             addUpgradeLines(stack, lines);
+            addInnatePropertyLine(stack, lines);
             if (SlotSystem.getBaseMaxSlots(stack) <= 0) return;
             lines.add(Text.literal(slotText(stack)).formatted(slotColor(stack)));
         });
@@ -34,6 +36,14 @@ public class EnchantmentOverhaulClient implements ClientModInitializer {
             String roman = level >= 1 && level <= 5 ? ROMAN[level] : String.valueOf(level);
             lines.add(Text.literal(name + " " + roman).formatted(Formatting.BLUE));
         }
+    }
+
+    private static void addInnatePropertyLine(ItemStack stack, java.util.List<Text> lines) {
+        String material = InnateMaterialProperties.getMaterial(stack);
+        if (material == null) return;
+        String name = InnateMaterialProperties.getResistanceName(material);
+        if (name == null) return;
+        lines.add(Text.literal(name + " (5% per piece)").formatted(Formatting.DARK_AQUA));
     }
 
     private static String slotText(ItemStack stack) {
