@@ -2,7 +2,14 @@
     "required": true,
     "package": "com.music4music.enchantmentoverhaul.mixin",
     "compatibilityLevel": "JAVA_21",
-    "mixins": [],
+    "mixins": [
+        "EnchantmentScreenHandlerMixin",
+        "AnvilScreenHandlerMixin",
+        "EnchantWithLevelsLootFunctionMixin",
+        "EnchantRandomlyLootFunctionMixin",
+        "MobEntityMixin",
+        "EnchantBookFactoryMixin"
+    ],
     "client": [],
     "injectors": {
         "defaultRequire": 1
