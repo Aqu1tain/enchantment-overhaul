@@ -1,6 +1,6 @@
-# Complete Enchantment List (35)
+# Complete Enchantment List (36)
 
-## Vanilla Enchantments Kept (23)
+## Vanilla Enchantments Kept (24)
 
 | Enchantment | Max | Item | Effect |
 |---|---|---|---|
@@ -30,6 +30,7 @@
 | Feather Falling | IV | Boots | Reduce fall damage |
 | Quick Charge | III | Crossbow | Reduce reload time |
 | Lunge | III | Spear | Propel player forward during jab, costs saturation |
+| Lure | III | Fishing Rod | Decrease wait time for fish to bite |
 | Mending | I (3 slots) | Any | XP repairs item instead of filling bar |
 
 ## New Enchantments (12)
@@ -66,7 +67,6 @@
 | Efficiency I-V | Smithing (Grinding) | Stat boost |
 | Bane of Arthropods I-V | Removed | Niche too narrow |
 | Punch I-II | Removed | Redundant |
-| Lure I-III | Bait System | Craftable baits |
 
 ## Reagent Table
 
@@ -96,6 +96,7 @@
 | Breach | Breeze Rod |
 | Knockback | Piston |
 | Lunge | Slime Ball |
+| Lure | Tropical Fish |
 | Feather Falling | Feather |
 | Quick Charge | String |
 | Mending | Amethyst Shard |
@@ -142,6 +143,7 @@
 | Breach | Trial Chambers |
 | Knockback | Woodland Mansion |
 | Lunge | Trial Chambers |
+| Lure | Shipwreck |
 | Feather Falling | Village |
 | Quick Charge | Pillager Outpost |
 | Mending | End City |

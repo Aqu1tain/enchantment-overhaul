@@ -1,7 +1,6 @@
-package com.music4music.enchantmentoverhaul.mixin;
+package com.akitain.enchantmentoverhaul.mixin;
 
 import net.minecraft.component.DataComponentTypes;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.screen.AnvilScreenHandler;
@@ -35,55 +34,60 @@ public abstract class AnvilScreenHandlerMixin extends ForgingScreenHandler {
         ItemStack second = this.input.getStack(1);
 
         if (first.isEmpty()) {
-            this.output.setStack(0, ItemStack.EMPTY);
-            this.levelCost.set(0);
-            ci.cancel();
+            clearOutput(ci);
             return;
         }
 
         ItemStack result = first.copy();
-        boolean hasOperation = false;
+        boolean changed = tryRepair(first, second, result) | tryRename(first, result);
 
-        if (!second.isEmpty() && first.isDamageable() && first.canRepairWith(second)) {
-            int damage = first.getDamage();
-            int repairPerUnit = first.getMaxDamage() / 4;
-
-            for (int i = 0; i < second.getCount() && damage > 0; i++) {
-                damage = Math.max(0, damage - repairPerUnit);
-            }
-
-            if (damage < first.getDamage()) {
-                result.setDamage(damage);
-                hasOperation = true;
-            }
-        }
-
-        if (this.newItemName != null && !this.newItemName.isBlank()) {
-            if (!this.newItemName.equals(first.getName().getString())) {
-                result.set(DataComponentTypes.CUSTOM_NAME, Text.literal(this.newItemName));
-                hasOperation = true;
-            }
-        } else if (first.contains(DataComponentTypes.CUSTOM_NAME)) {
-            result.remove(DataComponentTypes.CUSTOM_NAME);
-            hasOperation = true;
-        }
-
-        if (!second.isEmpty() && !hasOperation) {
-            this.output.setStack(0, ItemStack.EMPTY);
-            this.levelCost.set(0);
-            ci.cancel();
+        if (!second.isEmpty() && !changed) {
+            clearOutput(ci);
             return;
         }
 
-        if (hasOperation) {
-            result.remove(DataComponentTypes.REPAIR_COST);
-            this.levelCost.set(1);
-            this.output.setStack(0, result);
-        } else {
-            this.output.setStack(0, ItemStack.EMPTY);
-            this.levelCost.set(0);
+        if (!changed) {
+            clearOutput(ci);
+            return;
         }
 
+        result.remove(DataComponentTypes.REPAIR_COST);
+        this.levelCost.set(1);
+        this.output.setStack(0, result);
+        ci.cancel();
+    }
+
+    private boolean tryRepair(ItemStack first, ItemStack second, ItemStack result) {
+        if (second.isEmpty() || !first.isDamageable() || !first.canRepairWith(second)) return false;
+
+        int damage = first.getDamage();
+        int repairPerUnit = first.getMaxDamage() / 4;
+
+        for (int i = 0; i < second.getCount() && damage > 0; i++) {
+            damage = Math.max(0, damage - repairPerUnit);
+        }
+
+        if (damage >= first.getDamage()) return false;
+
+        result.setDamage(damage);
+        return true;
+    }
+
+    private boolean tryRename(ItemStack first, ItemStack result) {
+        if (this.newItemName != null && !this.newItemName.isBlank()) {
+            if (this.newItemName.equals(first.getName().getString())) return false;
+            result.set(DataComponentTypes.CUSTOM_NAME, Text.literal(this.newItemName));
+            return true;
+        }
+
+        if (!first.contains(DataComponentTypes.CUSTOM_NAME)) return false;
+        result.remove(DataComponentTypes.CUSTOM_NAME);
+        return true;
+    }
+
+    private void clearOutput(CallbackInfo ci) {
+        this.output.setStack(0, ItemStack.EMPTY);
+        this.levelCost.set(0);
         ci.cancel();
     }
 }

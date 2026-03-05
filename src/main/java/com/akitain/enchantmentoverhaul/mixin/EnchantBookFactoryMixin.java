@@ -1,4 +1,4 @@
-package com.music4music.enchantmentoverhaul.mixin;
+package com.akitain.enchantmentoverhaul.mixin;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.server.world.ServerWorld;
