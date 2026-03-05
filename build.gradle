@@ -10,6 +10,23 @@ base {
     archivesName = project.archives_base_name
 }
 
+loom {
+    runs {
+        client {
+            client()
+            setConfigName("Minecraft Client")
+            ideConfigGenerated(true)
+            runDir("run")
+        }
+        server {
+            server()
+            setConfigName("Minecraft Server")
+            ideConfigGenerated(true)
+            runDir("run")
+        }
+    }
+}
+
 repositories {
 }
 
