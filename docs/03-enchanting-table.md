@@ -22,7 +22,9 @@ Each enchantable item has a max slot count determined by its material. Each ench
 
 ## Unlocking — Unified System
 
-One system, one rule for all 33 enchantments. No common/rare tiers.
+One system, one rule for all 35 enchantments. No common/rare tiers.
+
+**Books are levelless keys.** Since the level is chosen at the enchanting table, books no longer display a level. A "Fortune" book is just a "Fortune" book — it unlocks all levels of that enchantment in the catalogue.
 
 **Chiseled Bookshelves + enchanted book** = unlock. Find a book in exploration, place it in a chiseled bookshelf around the table. The enchantment appears in the catalogue. The book is not consumed — permanent key.
 

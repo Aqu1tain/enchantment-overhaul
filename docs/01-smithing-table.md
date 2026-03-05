@@ -10,8 +10,6 @@ Templates found in structures determine the upgrade type. The material in the se
 | Warding | Protection | General damage reduction | Armorer houses, Bastions |
 | Tempering | Unbreaking | Durability | Toolsmiths, Mineshafts |
 | Grinding | Efficiency | Mining/tool speed | Mineshafts, Trial Chambers |
-| Stringing | Quick Charge | Reload speed | Pillager Outposts |
-| Cushioning | Feather Falling | Fall damage (boots) | Villages |
 
 ## Levels and XP Cost by Material
 

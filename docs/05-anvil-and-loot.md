@@ -21,7 +21,7 @@ The anvil is a maintenance workshop. No interaction with enchantments.
 | Structure loot (books) | Curated | Specific books per structure |
 | Fishing | Dead | No more enchanted items |
 | Mob equipment | Dead | Empty enchantment tag override |
-| Librarian trades | Alive | Books capped at level III, serve as unlock keys |
+| Librarian trades | Alive | Levelless books, serve as unlock keys |
 | /enchant | Intact | Preserved for map makers |
 
 # Bait System (Fishing)

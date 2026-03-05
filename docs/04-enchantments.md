@@ -1,6 +1,6 @@
-# Complete Enchantment List (33)
+# Complete Enchantment List (35)
 
-## Vanilla Enchantments Kept (21)
+## Vanilla Enchantments Kept (23)
 
 | Enchantment | Max | Item | Effect |
 |---|---|---|---|
@@ -27,6 +27,8 @@
 | Sweeping Edge | III | Sword | Increased sweep damage |
 | Breach | IV | Mace | Reduce enemy armor effectiveness |
 | Knockback | II | Sword/Spear | Push target +3 blocks/level |
+| Feather Falling | IV | Boots | Reduce fall damage |
+| Quick Charge | III | Crossbow | Reduce reload time |
 | Lunge | III | Spear | Propel player forward during jab, costs saturation |
 | Mending | I (3 slots) | Any | XP repairs item instead of filling bar |
 
@@ -55,7 +57,6 @@
 | Fire Protection I-IV | Innate (Copper/Netherite) | Material property |
 | Blast Protection I-IV | Innate (Diamond) | Material property |
 | Projectile Protection I-IV | Innate (Iron) | Material property |
-| Feather Falling I-IV | Smithing (Cushioning) | Stat boost |
 | Sharpness I-V | Smithing (Honing) | Stat boost |
 | Smite I-V | Smithing or enchantment (TBD) | Stat/magic border |
 | Power I-V | Smithing (Honing) | Stat boost |
@@ -63,7 +64,6 @@
 | Impaling I-V | TBD | Template or enchantment |
 | Unbreaking I-III | Smithing (Tempering) | Stat boost |
 | Efficiency I-V | Smithing (Grinding) | Stat boost |
-| Quick Charge I-III | Smithing (Stringing) | Stat boost |
 | Bane of Arthropods I-V | Removed | Niche too narrow |
 | Punch I-II | Removed | Redundant |
 | Lure I-III | Bait System | Craftable baits |
@@ -96,6 +96,8 @@
 | Breach | Breeze Rod |
 | Knockback | Piston |
 | Lunge | Slime Ball |
+| Feather Falling | Feather |
+| Quick Charge | String |
 | Mending | Amethyst Shard |
 | Veil | Phantom Membrane |
 | Last Stand | Echo Shard |
@@ -140,6 +142,8 @@
 | Breach | Trial Chambers |
 | Knockback | Woodland Mansion |
 | Lunge | Trial Chambers |
+| Feather Falling | Village |
+| Quick Charge | Pillager Outpost |
 | Mending | End City |
 | Veil | Ancient City |
 | Last Stand | Trial Chambers |
