@@ -19,12 +19,16 @@ import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.tag.EnchantmentTags;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.sound.SoundEvents;
+import net.minecraft.text.Style;
+import net.minecraft.text.StyleSpriteSource;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 @Environment(EnvType.CLIENT)
 public class CatalogueScreen extends HandledScreen<CatalogueScreenHandler> {
@@ -58,9 +62,13 @@ public class CatalogueScreen extends HandledScreen<CatalogueScreenHandler> {
     private static final int RED = 0xFFFF5555;
     private static final int GOLD = 0xFFFFAA00;
     private static final int BG = 0xFFC6C6C6;
+    private static final Style SGA_STYLE = Style.EMPTY.withFont(new StyleSpriteSource.Font(Identifier.of("minecraft", "alt"))).withColor(0x3A1A5E);
     private static final int SLOT_BG = 0xFF8B8B8B;
     private static final int BORDER_L = 0xFFFFFFFF;
     private static final int BORDER_D = 0xFF555555;
+
+    private static final String SGA_CHARS = "abcdefghijklmnopqrstuvwxyz";
+    private String sgaLine = randomSga(40);
 
     private float scrollAmount;
     private int scrollOffset;
@@ -143,6 +151,7 @@ public class CatalogueScreen extends HandledScreen<CatalogueScreenHandler> {
         borderInset(context, cx, cy, CAT_W, CAT_H);
 
         context.drawTextWithShadow(textRenderer, "Catalogue", cx, cy - 12, TEXT_LIGHT);
+        context.drawText(textRenderer, Text.literal(sgaLine).setStyle(SGA_STYLE), cx + 3, cy + CAT_H - 10, 0x3A1A5E, false);
 
         List<CatalogueEntry> entries = handler.getEntries();
         if (entries.isEmpty()) {
@@ -445,6 +454,15 @@ public class CatalogueScreen extends HandledScreen<CatalogueScreenHandler> {
         ctx.fill(x + 17, y + 1, x + 18, y + 18, BORDER_L);
         ctx.fill(x + 1, y + 17, x + 18, y + 18, BORDER_L);
         ctx.fill(x + 1, y + 1, x + 17, y + 17, SLOT_BG);
+    }
+
+    private static String randomSga(int length) {
+        Random rng = new Random();
+        StringBuilder sb = new StringBuilder(length);
+        for (int i = 0; i < length; i++) {
+            sb.append(SGA_CHARS.charAt(rng.nextInt(SGA_CHARS.length())));
+        }
+        return sb.toString();
     }
 
     private static String toRoman(int n) {
