@@ -1,0 +1,24 @@
+{
+    "schemaVersion": 1,
+    "id": "enchantment-overhaul",
+    "version": "${version}",
+    "name": "Enchantment Overhaul",
+    "description": "Separates enchanting into three distinct systems: Smithing Table for stats, innate material properties, and a reworked Enchanting Table for magic only.",
+    "authors": ["Aqu1tain"],
+    "contact": {
+        "sources": "https://github.com/Aqu1tain/enchantment-overhaul"
+    },
+    "license": "All-Rights-Reserved",
+    "icon": "assets/enchantment-overhaul/icon.png",
+    "environment": "*",
+    "entrypoints": {
+        "main": ["com.music4music.enchantmentoverhaul.EnchantmentOverhaul"]
+    },
+    "mixins": ["enchantment-overhaul.mixins.json"],
+    "depends": {
+        "fabricloader": ">=0.18.4",
+        "minecraft": "~1.21.11",
+        "java": ">=21",
+        "fabric-api": "*"
+    }
+}
