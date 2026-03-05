@@ -10,7 +10,8 @@
         "MobEntityMixin",
         "EnchantBookFactoryMixin",
         "EnchantmentNameMixin",
-        "ItemGroupsMixin"
+        "ItemGroupsMixin",
+        "EnchantingTableBlockMixin"
     ],
     "client": [],
     "injectors": {
