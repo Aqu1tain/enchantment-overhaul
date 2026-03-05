@@ -39,6 +39,7 @@ public class EnchantmentOverhaulClient implements ClientModInitializer {
     }
 
     private static void addInnatePropertyLine(ItemStack stack, java.util.List<Text> lines) {
+        if (!stack.isIn(net.minecraft.registry.tag.ItemTags.ARMOR_ENCHANTABLE)) return;
         String material = InnateMaterialProperties.getMaterial(stack);
         if (material == null) return;
         String name = InnateMaterialProperties.getResistanceName(material);

@@ -1,8 +1,13 @@
 package com.akitain.enchantmentoverhaul.mixin;
 
+import com.akitain.enchantmentoverhaul.component.ModComponents;
+import com.akitain.enchantmentoverhaul.enchant.SlotSystem;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
+import net.minecraft.registry.Registries;
 import net.minecraft.screen.AnvilScreenHandler;
 import net.minecraft.screen.ForgingScreenHandler;
 import net.minecraft.screen.Property;
@@ -39,7 +44,8 @@ public abstract class AnvilScreenHandlerMixin extends ForgingScreenHandler {
         }
 
         ItemStack result = first.copy();
-        boolean changed = tryRepair(first, second, result) | tryRename(first, result);
+        int restoreCost = tryRestoreSlot(first, second, result);
+        boolean changed = (restoreCost > 0) | tryRepair(first, second, result) | tryRename(first, result);
 
         if (!second.isEmpty() && !changed) {
             clearOutput(ci);
@@ -52,9 +58,43 @@ public abstract class AnvilScreenHandlerMixin extends ForgingScreenHandler {
         }
 
         result.remove(DataComponentTypes.REPAIR_COST);
-        this.levelCost.set(1);
+        this.levelCost.set(Math.max(1, restoreCost));
         this.output.setStack(0, result);
         ci.cancel();
+    }
+
+    private int tryRestoreSlot(ItemStack first, ItemStack second, ItemStack result) {
+        int penalty = SlotSystem.getGrindstonePenalty(first);
+        if (penalty <= 0 || second.isEmpty()) return 0;
+
+        Item repairIngot = getRepairIngot(first);
+        if (repairIngot == null || !second.isOf(repairIngot)) return 0;
+
+        result.set(ModComponents.GRINDSTONE_PENALTY, penalty - 1);
+        return getRestoreCost(first);
+    }
+
+    private static Item getRepairIngot(ItemStack stack) {
+        String id = Registries.ITEM.getId(stack.getItem()).getPath();
+        if (id.startsWith("netherite_")) return Items.NETHERITE_INGOT;
+        if (id.startsWith("diamond_")) return Items.DIAMOND;
+        if (id.startsWith("golden_")) return Items.GOLD_INGOT;
+        if (id.startsWith("iron_") || id.startsWith("chainmail_")) return Items.IRON_INGOT;
+        if (id.startsWith("copper_")) return Items.COPPER_INGOT;
+        if (id.startsWith("leather_")) return Items.LEATHER;
+        if (id.startsWith("wooden_")) return Items.OAK_PLANKS;
+        if (id.startsWith("stone_")) return Items.COBBLESTONE;
+        return Items.IRON_INGOT;
+    }
+
+    private static int getRestoreCost(ItemStack stack) {
+        String id = Registries.ITEM.getId(stack.getItem()).getPath();
+        if (id.startsWith("netherite_")) return 10;
+        if (id.startsWith("diamond_")) return 8;
+        if (id.startsWith("golden_")) return 5;
+        if (id.startsWith("iron_") || id.startsWith("chainmail_")) return 5;
+        if (id.startsWith("copper_")) return 3;
+        return 2;
     }
 
     private boolean tryRepair(ItemStack first, ItemStack second, ItemStack result) {
