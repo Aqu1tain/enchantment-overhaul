@@ -346,13 +346,13 @@ public class CatalogueScreen extends HandledScreen<CatalogueScreenHandler> {
         ItemStack lapis = handler.getSlot(1).getStack();
         ItemStack reagent = handler.getSlot(2).getStack();
 
+        if (SlotSystem.getAvailableSlots(item) < EnchantmentCosts.slotCost(key, level)) return false;
         if (MinecraftClient.getInstance().player.isCreative()) return true;
 
         return lapis.getCount() >= EnchantmentCosts.lapisCost(level)
                 && reagent.isOf(EnchantmentCosts.reagent(key))
                 && reagent.getCount() >= EnchantmentCosts.reagentCost(level, handler.getNormalBookshelves())
-                && MinecraftClient.getInstance().player.experienceLevel >= EnchantmentCosts.xpCost(key, level)
-                && SlotSystem.getAvailableSlots(item) >= EnchantmentCosts.slotCost(key, level);
+                && MinecraftClient.getInstance().player.experienceLevel >= EnchantmentCosts.xpCost(key, level);
     }
 
     // --- Input ---

@@ -159,12 +159,12 @@ public class CatalogueScreenHandler extends ScreenHandler {
 
     private boolean canAfford(PlayerEntity player, ItemStack item, ItemStack lapis, ItemStack reagent,
                                RegistryKey<Enchantment> key, int lapisNeeded, int reagentNeeded, int xpNeeded, int slotsNeeded) {
+        if (SlotSystem.getAvailableSlots(item) < slotsNeeded) return false;
         if (player.isCreative()) return true;
         if (lapis.getCount() < lapisNeeded) return false;
         if (reagent.getCount() < reagentNeeded) return false;
         if (!reagent.isOf(EnchantmentCosts.reagent(key))) return false;
-        if (player.experienceLevel < xpNeeded) return false;
-        return SlotSystem.getAvailableSlots(item) >= slotsNeeded;
+        return player.experienceLevel >= xpNeeded;
     }
 
     @Override
