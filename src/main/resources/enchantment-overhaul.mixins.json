@@ -15,9 +15,15 @@
         "GrindstoneScreenHandlerMixin",
         "SmithingScreenHandlerMixin",
         "ItemStackDamageMixin",
-        "LivingEntityDamageMixin"
+        "LivingEntityDamageMixin",
+        "PlayerExhaustionMixin",
+        "BuoyancyMixin",
+        "VeilDetectionMixin",
+        "HomingProjectileMixin"
     ],
-    "client": [],
+    "client": [
+        "client.VeilNametagMixin"
+    ],
     "injectors": {
         "defaultRequire": 1
     }
