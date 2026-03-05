@@ -14,7 +14,8 @@
         "EnchantingTableBlockMixin",
         "GrindstoneScreenHandlerMixin",
         "SmithingScreenHandlerMixin",
-        "ItemStackDamageMixin"
+        "ItemStackDamageMixin",
+        "LivingEntityDamageMixin"
     ],
     "client": [],
     "injectors": {
