@@ -11,7 +11,8 @@
         "EnchantBookFactoryMixin",
         "EnchantmentNameMixin",
         "ItemGroupsMixin",
-        "EnchantingTableBlockMixin"
+        "EnchantingTableBlockMixin",
+        "GrindstoneScreenHandlerMixin"
     ],
     "client": [],
     "injectors": {
