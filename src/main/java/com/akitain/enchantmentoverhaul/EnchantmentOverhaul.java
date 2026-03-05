@@ -3,6 +3,7 @@ package com.akitain.enchantmentoverhaul;
 import com.akitain.enchantmentoverhaul.component.ModComponents;
 import com.akitain.enchantmentoverhaul.enchant.MagneticHandler;
 import com.akitain.enchantmentoverhaul.enchant.ModScreenHandlers;
+import com.akitain.enchantmentoverhaul.loot.LootTableModifier;
 import com.akitain.enchantmentoverhaul.smithing.SmithingTemplates;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
@@ -31,6 +32,7 @@ public class EnchantmentOverhaul implements ModInitializer {
         });
 
         ServerTickEvents.END_WORLD_TICK.register(MagneticHandler::tick);
+        LootTableModifier.register();
 
         LOGGER.info("Enchantment Overhaul loaded");
     }
