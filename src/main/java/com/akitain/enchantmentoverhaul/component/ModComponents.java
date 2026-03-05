@@ -1,7 +1,7 @@
-package com.music4music.enchantmentoverhaul.component;
+package com.akitain.enchantmentoverhaul.component;
 
 import com.mojang.serialization.Codec;
-import com.music4music.enchantmentoverhaul.EnchantmentOverhaul;
+import com.akitain.enchantmentoverhaul.EnchantmentOverhaul;
 import net.minecraft.component.ComponentType;
 import net.minecraft.network.codec.PacketCodecs;
 import net.minecraft.registry.Registries;

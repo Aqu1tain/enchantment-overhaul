@@ -1,6 +1,6 @@
-package com.music4music.enchantmentoverhaul;
+package com.akitain.enchantmentoverhaul;
 
-import com.music4music.enchantmentoverhaul.enchant.SlotSystem;
+import com.akitain.enchantmentoverhaul.enchant.SlotSystem;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback;
 import net.minecraft.text.Text;

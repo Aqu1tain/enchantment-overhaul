@@ -1,4 +1,4 @@
-package com.music4music.enchantmentoverhaul.mixin;
+package com.akitain.enchantmentoverhaul.mixin;
 
 import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.util.math.random.Random;

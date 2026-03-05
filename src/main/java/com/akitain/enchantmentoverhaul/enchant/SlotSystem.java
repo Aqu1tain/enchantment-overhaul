@@ -1,6 +1,6 @@
-package com.music4music.enchantmentoverhaul.enchant;
+package com.akitain.enchantmentoverhaul.enchant;
 
-import com.music4music.enchantmentoverhaul.component.ModComponents;
+import com.akitain.enchantmentoverhaul.component.ModComponents;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.ItemEnchantmentsComponent;

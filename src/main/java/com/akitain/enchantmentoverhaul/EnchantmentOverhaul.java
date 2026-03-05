@@ -1,6 +1,6 @@
-package com.music4music.enchantmentoverhaul;
+package com.akitain.enchantmentoverhaul;
 
-import com.music4music.enchantmentoverhaul.component.ModComponents;
+import com.akitain.enchantmentoverhaul.component.ModComponents;
 import net.fabricmc.api.ModInitializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

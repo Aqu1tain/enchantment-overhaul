@@ -12,8 +12,8 @@
     "icon": "assets/enchantment-overhaul/icon.png",
     "environment": "*",
     "entrypoints": {
-        "main": ["com.music4music.enchantmentoverhaul.EnchantmentOverhaul"],
-        "client": ["com.music4music.enchantmentoverhaul.EnchantmentOverhaulClient"]
+        "main": ["com.akitain.enchantmentoverhaul.EnchantmentOverhaul"],
+        "client": ["com.akitain.enchantmentoverhaul.EnchantmentOverhaulClient"]
     },
     "mixins": ["enchantment-overhaul.mixins.json"],
     "depends": {
