@@ -1,0 +1,30 @@
+{
+    "anvil_cost": 2,
+    "description": {
+        "translate": "enchantment.enchantment-overhaul.step_up"
+    },
+    "effects": {
+        "minecraft:attributes": [
+            {
+                "amount": 0.4,
+                "attribute": "minecraft:step_height",
+                "id": "enchantment-overhaul:enchantment.step_up",
+                "operation": "add_value"
+            }
+        ]
+    },
+    "max_cost": {
+        "base": 25,
+        "per_level_above_first": 0
+    },
+    "max_level": 1,
+    "min_cost": {
+        "base": 10,
+        "per_level_above_first": 0
+    },
+    "slots": [
+        "feet"
+    ],
+    "supported_items": "#minecraft:enchantable/foot_armor",
+    "weight": 5
+}

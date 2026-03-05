@@ -44,7 +44,16 @@ public class EnchantmentCosts {
             entry(Enchantments.LURE, Items.TROPICAL_FISH),
             entry(Enchantments.MENDING, Items.AMETHYST_SHARD),
             entry(Enchantments.BINDING_CURSE, Items.IRON_CHAIN),
-            entry(Enchantments.VANISHING_CURSE, Items.PHANTOM_MEMBRANE)
+            entry(Enchantments.VANISHING_CURSE, Items.PHANTOM_MEMBRANE),
+            entry(ModEnchantments.STEP_UP, Items.RABBIT_FOOT),
+            entry(ModEnchantments.VENOM, Items.SPIDER_EYE),
+            entry(ModEnchantments.LAST_STAND, Items.GOLDEN_APPLE),
+            entry(ModEnchantments.CURSE_OF_FRAGILITY, Items.GLASS_PANE),
+            entry(ModEnchantments.CURSE_OF_HUNGER, Items.ROTTEN_FLESH),
+            entry(ModEnchantments.VEIL, Items.FERMENTED_SPIDER_EYE),
+            entry(ModEnchantments.BUOYANCY, Items.LILY_PAD),
+            entry(ModEnchantments.MAGNETIC, Items.COMPASS),
+            entry(ModEnchantments.HOMING, Items.ENDER_EYE)
     );
 
     private static final int[] XP_BY_LEVEL = {0, 2, 4, 7, 10};
