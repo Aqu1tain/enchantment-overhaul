@@ -3,6 +3,7 @@ package com.akitain.enchantmentoverhaul.mixin;
 import com.akitain.enchantmentoverhaul.enchant.BookshelfScanner;
 import com.akitain.enchantmentoverhaul.enchant.CatalogueData;
 import com.akitain.enchantmentoverhaul.enchant.CatalogueScreenHandler;
+import com.akitain.enchantmentoverhaul.enchant.ModAdvancements;
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.EnchantingTableBlock;
@@ -43,6 +44,7 @@ public class EnchantingTableBlockMixin {
                 .map(RegistryKey::getValue)
                 .toList();
         int bookshelves = scan.normalBookshelves();
+        ModAdvancements.checkEndgameBooks(serverPlayer, scan.unlocked());
         Text title = world.getBlockEntity(pos) instanceof EnchantingTableBlockEntity entity
                 ? entity.getDisplayName()
                 : Text.translatable("container.enchant");

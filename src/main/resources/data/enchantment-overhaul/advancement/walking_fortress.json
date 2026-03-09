@@ -1,0 +1,16 @@
+{
+  "display": {
+    "icon": {
+      "id": "minecraft:diamond_chestplate"
+    },
+    "title": { "translate": "advancements.enchantment-overhaul.walking_fortress.title" },
+    "description": { "translate": "advancements.enchantment-overhaul.walking_fortress.description" },
+    "frame": "challenge"
+  },
+  "parent": "enchantment-overhaul:jack_of_all_trades",
+  "criteria": {
+    "requirement": {
+      "trigger": "minecraft:impossible"
+    }
+  }
+}
