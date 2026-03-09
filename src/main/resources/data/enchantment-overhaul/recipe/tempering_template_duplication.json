@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "CMC",
+    "CTC",
+    "CCC"
+  ],
+  "key": {
+    "C": "minecraft:copper_ingot",
+    "M": "minecraft:coal",
+    "T": "enchantment-overhaul:tempering_template"
+  },
+  "result": {
+    "id": "enchantment-overhaul:tempering_template",
+    "count": 2
+  }
+}
