@@ -19,7 +19,11 @@
         "PlayerExhaustionMixin",
         "BuoyancyMixin",
         "VeilDetectionMixin",
-        "HomingProjectileMixin"
+        "HomingProjectileMixin",
+        "StepUpMixin",
+        "ArmorEquipMixin",
+        "SellEnchantedToolMixin",
+        "LootTableEnchantMixin"
     ],
     "client": [
         "client.VeilNametagMixin"
