@@ -11,5 +11,19 @@
   "enchantment.enchantment-overhaul.veil": "Veil",
   "enchantment.enchantment-overhaul.buoyancy": "Buoyancy",
   "enchantment.enchantment-overhaul.magnetic": "Magnetic",
-  "enchantment.enchantment-overhaul.homing": "Homing"
+  "enchantment.enchantment-overhaul.homing": "Homing",
+  "advancements.enchantment-overhaul.root.title": "Enchantment Overhaul",
+  "advancements.enchantment-overhaul.root.description": "A whole new way to enchant",
+  "advancements.enchantment-overhaul.page_turner.title": "Page Turner",
+  "advancements.enchantment-overhaul.page_turner.description": "Find an enchanted book in the wild",
+  "advancements.enchantment-overhaul.hammer_time.title": "Hammer Time",
+  "advancements.enchantment-overhaul.hammer_time.description": "Upgrade an item at a Smithing Table",
+  "advancements.enchantment-overhaul.deal_with_the_devil.title": "Deal with the Devil",
+  "advancements.enchantment-overhaul.deal_with_the_devil.description": "Apply a curse to gain an extra slot",
+  "advancements.enchantment-overhaul.forbidden_knowledge.title": "Forbidden Knowledge",
+  "advancements.enchantment-overhaul.forbidden_knowledge.description": "Unlock an endgame enchantment",
+  "advancements.enchantment-overhaul.jack_of_all_trades.title": "Jack of All Trades",
+  "advancements.enchantment-overhaul.jack_of_all_trades.description": "Apply Honing, Warding, Tempering, and Grinding",
+  "advancements.enchantment-overhaul.walking_fortress.title": "Walking Fortress",
+  "advancements.enchantment-overhaul.walking_fortress.description": "Wear a full set of Warding V armor"
 }

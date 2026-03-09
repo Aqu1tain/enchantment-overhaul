@@ -1,5 +1,6 @@
 package com.akitain.enchantmentoverhaul.mixin;
 
+import com.akitain.enchantmentoverhaul.component.ModComponents;
 import com.akitain.enchantmentoverhaul.enchant.InnateMaterialProperties;
 import com.akitain.enchantmentoverhaul.enchant.ModEnchantments;
 import net.minecraft.component.DataComponentTypes;
@@ -22,8 +23,23 @@ public class LivingEntityDamageMixin {
     private float applyCustomResistances(float amount, ServerWorld world, DamageSource source, float original) {
         LivingEntity self = (LivingEntity) (Object) this;
         float result = amount * InnateMaterialProperties.getDamageMultiplier(self, source);
+        result *= getWardingMultiplier(self);
         result *= getLastStandMultiplier(self);
         return result;
+    }
+
+    private static final EquipmentSlot[] ARMOR_SLOTS = {
+            EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET
+    };
+
+    private static float getWardingMultiplier(LivingEntity entity) {
+        int totalEpf = 0;
+        for (EquipmentSlot slot : ARMOR_SLOTS) {
+            totalEpf += entity.getEquippedStack(slot).getOrDefault(ModComponents.WARDING_LEVEL, 0);
+        }
+        if (totalEpf <= 0) return 1.0f;
+        int capped = Math.min(totalEpf, 20);
+        return 1.0f - (capped / 25.0f);
     }
 
     private static float getLastStandMultiplier(LivingEntity entity) {

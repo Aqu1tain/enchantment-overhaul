@@ -1,5 +1,6 @@
 package com.akitain.enchantmentoverhaul.enchant;
 
+import net.minecraft.advancement.criterion.Criteria;
 import net.minecraft.block.Blocks;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.ItemEnchantmentsComponent;
@@ -13,10 +14,14 @@ import net.minecraft.item.Items;
 import net.minecraft.registry.DynamicRegistryManager;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
+import net.minecraft.registry.tag.EnchantmentTags;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.ScreenHandlerContext;
 import net.minecraft.screen.slot.Slot;
+import net.minecraft.sound.SoundCategory;
+import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.Identifier;
 
 import java.util.ArrayList;
@@ -36,6 +41,7 @@ public class CatalogueScreenHandler extends ScreenHandler {
     private final Inventory outputInventory = new SimpleInventory(1);
 
     private final ScreenHandlerContext context;
+    private final PlayerEntity player;
     private final DynamicRegistryManager registryManager;
     private final Set<Identifier> unlockedIds;
     private final int normalBookshelves;
@@ -52,6 +58,7 @@ public class CatalogueScreenHandler extends ScreenHandler {
                                    List<Identifier> unlocked, int normalBookshelves) {
         super(ModScreenHandlers.CATALOGUE, syncId);
         this.context = context;
+        this.player = playerInventory.player;
         this.registryManager = playerInventory.player.getRegistryManager();
         this.unlockedIds = Set.copyOf(unlocked);
         this.normalBookshelves = normalBookshelves;
@@ -163,9 +170,26 @@ public class CatalogueScreenHandler extends ScreenHandler {
             return;
         }
 
+        if (!canAfford(entry, level)) {
+            outputInventory.setStack(0, ItemStack.EMPTY);
+            return;
+        }
+
         ItemStack result = item.copy();
         result.addEnchantment(entry.entry(), level);
         outputInventory.setStack(0, result);
+    }
+
+    private boolean canAfford(CatalogueEntry entry, int level) {
+        if (this.player.isCreative()) return true;
+
+        ItemStack lapis = inputInventory.getStack(1);
+        ItemStack reagent = inputInventory.getStack(2);
+        RegistryKey<Enchantment> key = entry.key();
+        return lapis.getCount() >= EnchantmentCosts.lapisCost(level)
+                && reagent.isOf(EnchantmentCosts.reagent(key))
+                && reagent.getCount() >= EnchantmentCosts.reagentCost(level, normalBookshelves)
+                && this.player.experienceLevel >= EnchantmentCosts.xpCost(key, level);
     }
 
     private boolean canTakeOutput(PlayerEntity player) {
@@ -175,15 +199,7 @@ public class CatalogueScreenHandler extends ScreenHandler {
 
         ItemStack item = inputInventory.getStack(0);
         if (SlotSystem.getAvailableSlots(item) < EnchantmentCosts.slotCost(entry.entry(), level)) return false;
-        if (player.isCreative()) return true;
-
-        ItemStack lapis = inputInventory.getStack(1);
-        ItemStack reagent = inputInventory.getStack(2);
-        RegistryKey<Enchantment> key = entry.key();
-        return lapis.getCount() >= EnchantmentCosts.lapisCost(level)
-                && reagent.isOf(EnchantmentCosts.reagent(key))
-                && reagent.getCount() >= EnchantmentCosts.reagentCost(level, normalBookshelves)
-                && player.experienceLevel >= EnchantmentCosts.xpCost(key, level);
+        return canAfford(entry, level);
     }
 
     private void onOutputTaken(PlayerEntity player) {
@@ -200,6 +216,16 @@ public class CatalogueScreenHandler extends ScreenHandler {
         }
 
         inputInventory.setStack(0, ItemStack.EMPTY);
+
+        this.context.run((world, pos) ->
+                world.playSound(null, pos, SoundEvents.BLOCK_ENCHANTMENT_TABLE_USE, SoundCategory.BLOCKS, 1.0f, 1.0f));
+
+        if (player instanceof ServerPlayerEntity serverPlayer) {
+            Criteria.ENCHANTED_ITEM.trigger(serverPlayer, outputInventory.getStack(0), level);
+            if (entry.entry().isIn(EnchantmentTags.CURSE)) {
+                ModAdvancements.grantCurseAdvancement(serverPlayer);
+            }
+        }
     }
 
     @Override

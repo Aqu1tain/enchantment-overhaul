@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "CMC",
+    "CTC",
+    "CCC"
+  ],
+  "key": {
+    "C": "minecraft:copper_ingot",
+    "M": "minecraft:iron_nugget",
+    "T": "enchantment-overhaul:warding_template"
+  },
+  "result": {
+    "id": "enchantment-overhaul:warding_template",
+    "count": 2
+  }
+}

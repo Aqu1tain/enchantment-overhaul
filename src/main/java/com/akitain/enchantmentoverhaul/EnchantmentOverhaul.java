@@ -1,6 +1,7 @@
 package com.akitain.enchantmentoverhaul;
 
 import com.akitain.enchantmentoverhaul.component.ModComponents;
+import com.akitain.enchantmentoverhaul.enchant.VillagerTrades;
 import com.akitain.enchantmentoverhaul.enchant.MagneticHandler;
 import com.akitain.enchantmentoverhaul.enchant.ModScreenHandlers;
 import com.akitain.enchantmentoverhaul.loot.LootTableModifier;
@@ -33,6 +34,7 @@ public class EnchantmentOverhaul implements ModInitializer {
 
         ServerTickEvents.END_WORLD_TICK.register(MagneticHandler::tick);
         LootTableModifier.register();
+        VillagerTrades.register();
 
         LOGGER.info("Enchantment Overhaul loaded");
     }

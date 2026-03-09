@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "CMC",
+    "CTC",
+    "CCC"
+  ],
+  "key": {
+    "C": "minecraft:copper_ingot",
+    "M": "minecraft:stone",
+    "T": "enchantment-overhaul:grinding_template"
+  },
+  "result": {
+    "id": "enchantment-overhaul:grinding_template",
+    "count": 2
+  }
+}

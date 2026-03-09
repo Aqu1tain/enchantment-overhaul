@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "CMC",
+    "CTC",
+    "CCC"
+  ],
+  "key": {
+    "C": "minecraft:copper_ingot",
+    "M": "minecraft:flint",
+    "T": "enchantment-overhaul:honing_template"
+  },
+  "result": {
+    "id": "enchantment-overhaul:honing_template",
+    "count": 2
+  }
+}

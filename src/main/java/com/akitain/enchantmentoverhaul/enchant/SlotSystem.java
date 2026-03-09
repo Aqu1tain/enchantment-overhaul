@@ -19,6 +19,8 @@ import java.util.Set;
 public class SlotSystem {
 
     public static int getBaseMaxSlots(ItemStack stack) {
+        if (!stack.isDamageable()) return 0;
+
         Item item = stack.getItem();
         String id = Registries.ITEM.getId(item).getPath();
 

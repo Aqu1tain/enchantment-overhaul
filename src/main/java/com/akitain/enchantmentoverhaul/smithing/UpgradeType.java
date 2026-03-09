@@ -51,8 +51,8 @@ public enum UpgradeType {
 
         switch (this) {
             case HONING -> boostBaseModifier(stack, EntityAttributes.ATTACK_DAMAGE, Item.BASE_ATTACK_DAMAGE_MODIFIER_ID, level - oldLevel, AttributeModifierSlot.MAINHAND);
-            case WARDING -> replaceModifier(stack, EntityAttributes.ARMOR, level, AttributeModifierSlot.ARMOR);
-            case GRINDING -> replaceModifier(stack, EntityAttributes.MINING_EFFICIENCY, level * 5, AttributeModifierSlot.MAINHAND);
+            case WARDING -> {}
+            case GRINDING -> replaceModifier(stack, EntityAttributes.MINING_EFFICIENCY, level * 5, AttributeModifierSlot.MAINHAND, "grinding");
             case TEMPERING -> {}
         }
     }
@@ -80,8 +80,8 @@ public enum UpgradeType {
         stack.set(DataComponentTypes.ATTRIBUTE_MODIFIERS, builder.build());
     }
 
-    private void replaceModifier(ItemStack stack, RegistryEntry<EntityAttribute> attribute, double value, AttributeModifierSlot slot) {
-        Identifier modId = Identifier.ofVanilla(name().toLowerCase());
+    private void replaceModifier(ItemStack stack, RegistryEntry<EntityAttribute> attribute, double value, AttributeModifierSlot slot, String modName) {
+        Identifier modId = Identifier.ofVanilla(modName);
         AttributeModifiersComponent existing = stack.getOrDefault(DataComponentTypes.ATTRIBUTE_MODIFIERS, AttributeModifiersComponent.DEFAULT);
         AttributeModifiersComponent.Builder builder = AttributeModifiersComponent.builder();
         for (AttributeModifiersComponent.Entry entry : existing.modifiers()) {

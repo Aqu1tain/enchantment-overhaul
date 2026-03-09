@@ -1,9 +1,11 @@
 package com.akitain.enchantmentoverhaul.mixin;
 
+import com.akitain.enchantmentoverhaul.enchant.ModAdvancements;
 import com.akitain.enchantmentoverhaul.smithing.SmithingTemplates;
 import com.akitain.enchantmentoverhaul.smithing.UpgradeType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.screen.ForgingScreenHandler;
 import net.minecraft.screen.ScreenHandlerContext;
 import net.minecraft.screen.ScreenHandlerType;
@@ -23,6 +25,9 @@ public abstract class SmithingScreenHandlerMixin extends ForgingScreenHandler {
     @Unique
     private int pendingXpCost = 0;
 
+    @Unique
+    private UpgradeType pendingType = null;
+
     private SmithingScreenHandlerMixin(@Nullable ScreenHandlerType<?> type, int syncId, PlayerInventory playerInventory, ScreenHandlerContext context, ForgingSlotsManager forgingSlotsManager) {
         super(type, syncId, playerInventory, context, forgingSlotsManager);
     }
@@ -30,6 +35,7 @@ public abstract class SmithingScreenHandlerMixin extends ForgingScreenHandler {
     @Inject(method = "updateResult", at = @At("TAIL"))
     private void applyCustomUpgrade(CallbackInfo ci) {
         pendingXpCost = 0;
+        pendingType = null;
 
         ItemStack template = this.input.getStack(0);
         ItemStack base = this.input.getStack(1);
@@ -61,6 +67,7 @@ public abstract class SmithingScreenHandlerMixin extends ForgingScreenHandler {
         type.applyTo(result, level);
         this.output.setStack(0, result);
         pendingXpCost = xpCost;
+        pendingType = type;
     }
 
     @Inject(method = "onTakeOutput", at = @At("HEAD"))
@@ -68,6 +75,10 @@ public abstract class SmithingScreenHandlerMixin extends ForgingScreenHandler {
         if (pendingXpCost > 0 && !player.isCreative()) {
             player.addExperienceLevels(-pendingXpCost);
         }
+        if (pendingType != null && player instanceof ServerPlayerEntity serverPlayer) {
+            ModAdvancements.grantSmithingAdvancement(serverPlayer, pendingType);
+        }
         pendingXpCost = 0;
+        pendingType = null;
     }
 }
