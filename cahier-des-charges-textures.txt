@@ -1,0 +1,227 @@
+========================================================================
+  CAHIER DES CHARGES — TEXTURES
+  Enchantment Overhaul (Mod Fabric pour Minecraft 1.21.11)
+  v1 — Mars 2026
+========================================================================
+
+CONTEXTE
+--------
+Ce mod refond le systeme d'enchantements de Minecraft. Les enchantements
+purement statistiques (Sharpness, Protection, Unbreaking, Efficiency)
+sont remplaces par 4 templates de smithing. Le reste (enchantements
+magiques) passe par une nouvelle UI de table d'enchantement.
+
+Wiki du projet : https://github.com/Aqu1tain/enchantment-overhaul/wiki
+
+Etat actuel : tout le code est fonctionnel, mais aucune texture custom
+n'existe encore. Les templates utilisent des textures placeholder
+manquantes (carres roses/noirs en jeu).
+
+
+========================================================================
+  PARTIE 1 — TEXTURES DES TEMPLATES (PRIORITE HAUTE)
+========================================================================
+
+Il y a 4 items "smithing template" a creer. Ils fonctionnent exactement
+comme les smithing templates vanilla (Netherite Upgrade, armor trims).
+
+STYLE OBLIGATOIRE : reproduire le style visuel des templates vanilla
+de Minecraft 1.21. Meme format, meme structure : un losange/diamant
+central avec un motif, sur fond de couleur. Voir les templates vanilla
+comme reference directe (netherite_upgrade, coast_armor_trim, etc.).
+
+Format : 16x16 pixels, PNG, palette Minecraft (pas d'anti-aliasing).
+
+Fichiers a produire :
+  1. honing_template.png
+  2. warding_template.png
+  3. tempering_template.png
+  4. grinding_template.png
+
+Chemin de destination :
+  src/main/resources/assets/enchantment-overhaul/textures/item/
+
+Description de chaque template :
+
+  HONING (Affutage)
+  - Remplace : Sharpness, Power, Density
+  - Applique sur : epees, arcs, arbaletes, lances, masses
+  - Theme : tranchant, agressif, lames
+  - Motif suggere : une lame ou un tranchant dans le losange
+  - Couleur dominante : rouge/orange (chaleur de la forge, aiguisage)
+
+  WARDING (Renfort)
+  - Remplace : Protection
+  - Applique sur : toutes les armures
+  - Theme : protection, bouclier, solidite
+  - Motif suggere : un bouclier ou des rivets dans le losange
+  - Couleur dominante : bleu/acier (defense, metal)
+
+  TEMPERING (Trempe)
+  - Remplace : Unbreaking
+  - Applique sur : tous les items avec durabilite
+  - Theme : resistance, chaleur, forge
+  - Motif suggere : une enclume ou un marteau dans le losange
+  - Couleur dominante : or/ambre (metal chauffe, trempe)
+
+  GRINDING (Meulage)
+  - Remplace : Efficiency
+  - Applique sur : pioches, pelles, houes, haches
+  - Theme : vitesse, precision, etincelles
+  - Motif suggere : une pioche ou des etincelles dans le losange
+  - Couleur dominante : vert/cyan (efficacite, vitesse)
+
+
+========================================================================
+  PARTIE 2 — OVERLAYS D'UPGRADE SUR ARMURES (PRIORITE HAUTE)
+========================================================================
+
+Quand un joueur applique un template sur une armure, un overlay visuel
+doit apparaitre par-dessus la texture de base de l'armure, en plus
+des armor trims cosmetiques vanilla.
+
+Le systeme est identique aux armor trims : un calque transparent
+superpose a la texture d'armure. Seuls les pixels du motif sont
+opaques, le reste est transparent.
+
+Il faut un motif par type de template. Le motif est le meme quelle
+que soit la matiere d'armure — c'est le systeme de rendu qui teinte
+le motif avec la couleur du materiau utilise (cuivre, fer, or,
+diamant, netherite).
+
+Format : meme resolution que les textures d'armure vanilla (64x32),
+PNG avec transparence.
+
+Fichiers a produire (4 motifs x 2 couches = 8 fichiers) :
+
+  Couche 1 (casque + plastron + bottes) :
+    honing_armor_layer_1.png     (peu probable sur armure, a confirmer)
+    warding_armor_layer_1.png
+    tempering_armor_layer_1.png
+    grinding_armor_layer_1.png   (peu probable sur armure, a confirmer)
+
+  Couche 2 (jambieres) :
+    honing_armor_layer_2.png     (peu probable sur armure, a confirmer)
+    warding_armor_layer_2.png
+    tempering_armor_layer_2.png
+    grinding_armor_layer_2.png   (peu probable sur armure, a confirmer)
+
+NOTE : En pratique, seul Warding s'applique sur les armures, et
+Tempering s'applique sur tout. Honing et Grinding ne s'appliquent
+normalement pas sur les armures. A confirmer avec le dev — si seuls
+Warding et Tempering sont sur armures, ca reduit a 4 fichiers.
+
+Description des motifs :
+
+  WARDING : rivets metalliques, bandes de renfort aux epaules, au
+  torse et aux genoux. L'armure doit avoir l'air plus massive,
+  renforcee. Subtil mais visible.
+
+  TEMPERING : reflets dores/ambres le long des bords de l'armure.
+  L'armure doit avoir l'air "traitee thermiquement", comme si le
+  metal avait ete chauffe et refroidi. Eventuellement des marques
+  de forge discretes.
+
+
+========================================================================
+  PARTIE 3 — OVERLAYS D'UPGRADE SUR OUTILS/ARMES (PRIORITE MOYENNE)
+========================================================================
+
+Meme principe que les armures : un calque transparent superpose a la
+texture de l'item dans l'inventaire (16x16).
+
+Chaque template laisse une marque visible sur l'item. Le motif doit
+etre lisible meme a 16x16 pixels et ne pas cacher le sprite de base.
+
+Fichiers a produire :
+
+  Pour chaque type d'outil affecte, un overlay par template applicable.
+  Les overlays peuvent etre generiques par categorie (ex: un overlay
+  "arme" pour toutes les epees, un overlay "outil" pour les pioches).
+
+  HONING (sur armes) :
+    overlay_honing_sword.png     — reflet/brillance sur la lame
+    overlay_honing_bow.png       — reflet sur les branches de l'arc
+    overlay_honing_crossbow.png  — reflet sur le mecanisme
+    overlay_honing_spear.png     — reflet sur la pointe
+    overlay_honing_mace.png      — reflet sur la tete
+
+  TEMPERING (sur tout) :
+    overlay_tempering_handle.png — bande doree/metallique sur le manche
+    (un seul overlay generique applicable a tous les outils/armes,
+     positionne sur la zone du manche)
+
+  GRINDING (sur outils) :
+    overlay_grinding_pickaxe.png — brillance/etincelles sur la tete
+    overlay_grinding_shovel.png  — brillance sur la pelle
+    overlay_grinding_hoe.png     — brillance sur la lame
+    overlay_grinding_axe.png     — brillance sur la tete de hache
+
+NOTE : Le nombre exact et le nommage des fichiers sera ajuste selon
+l'implementation technique. Ce qui compte c'est d'avoir les motifs
+prets — le dev adaptera le chemin de fichier.
+
+
+========================================================================
+  PARTIE 4 — MODELES 3D (PRIORITE BASSE)
+========================================================================
+
+A terme, les upgrades devraient aussi affecter le modele 3D porte
+par le joueur (armes en main, armure sur le corps). Ceci est moins
+urgent car le systeme de textures 2D (overlay inventaire + armor
+trim) suffit pour une premiere version jouable.
+
+Besoins eventuels :
+  - Modeles d'armes avec variantes visuelles (lame plus large pour
+    Honing, garde renforcee pour Tempering, etc.)
+  - Coordination avec Matthieu pour la modelisation
+
+Pas de deadline pour cette partie. A discuter plus tard.
+
+
+========================================================================
+  REFERENCES VISUELLES
+========================================================================
+
+  - Templates vanilla a utiliser comme reference directe :
+    Netherite Upgrade Smithing Template, Coast Armor Trim,
+    Sentry Armor Trim, Wild Armor Trim, etc.
+
+  - Palette : utiliser les couleurs du jeu, eviter les couleurs
+    trop saturees ou hors palette Minecraft.
+
+  - Toutes les textures doivent etre en pixel art Minecraft standard :
+    pas d'anti-aliasing, pas de dithering excessif, pas de
+    gradients lisses.
+
+  - L'identite visuelle de chaque template doit etre distincte et
+    reconnaissable d'un coup d'oeil, meme a petite echelle.
+
+
+========================================================================
+  RECAP — LIVRABLES
+========================================================================
+
+  PRIORITE HAUTE (necessaire pour jouer) :
+    [ ] 4 textures d'items template (16x16)
+    [ ] 2-4 overlays d'armure Warding + Tempering (64x32)
+
+  PRIORITE MOYENNE (ameliore le visuel) :
+    [ ] ~10 overlays d'items inventaire pour Honing/Grinding/Tempering
+        (16x16)
+
+  PRIORITE BASSE (plus tard) :
+    [ ] Modeles 3D (a discuter)
+
+  Total minimum : 6-8 fichiers PNG
+  Total complet : ~22 fichiers PNG + modeles 3D
+
+========================================================================
+  CONTACT
+========================================================================
+
+  Dev : Akitain (Discord / GitHub)
+  Repo : github.com/Aqu1tain/enchantment-overhaul
+  Wiki : github.com/Aqu1tain/enchantment-overhaul/wiki
+
+========================================================================
