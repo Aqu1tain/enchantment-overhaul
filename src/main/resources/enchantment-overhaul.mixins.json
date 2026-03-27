@@ -23,7 +23,9 @@
         "StepUpMixin",
         "ArmorEquipMixin",
         "SellEnchantedToolMixin",
-        "LootTableEnchantMixin"
+        "LootTableEnchantMixin",
+        "RepairItemRecipeMixin",
+        "RaidEnchantmentMixin"
     ],
     "client": [
         "client.VeilNametagMixin"
