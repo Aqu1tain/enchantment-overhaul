@@ -26,7 +26,8 @@
         "RaidEnchantmentMixin"
     ],
     "client": [
-        "client.VeilNametagMixin"
+        "client.VeilNametagMixin",
+        "client.EnchantingTableParticleMixin"
     ],
     "injectors": {
         "defaultRequire": 1
