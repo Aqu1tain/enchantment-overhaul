@@ -31,7 +31,7 @@ import java.util.Set;
 
 public class CatalogueScreenHandler extends ScreenHandler {
 
-    private final Inventory inputInventory = new SimpleInventory(3) {
+    private final Inventory inputInventory = new SimpleInventory(2) {
         @Override
         public void markDirty() {
             super.markDirty();
@@ -71,14 +71,10 @@ public class CatalogueScreenHandler extends ScreenHandler {
         });
         this.addSlot(new Slot(this.inputInventory, 1, 31, 60) {
             @Override
-            public boolean canInsert(ItemStack stack) { return stack.isOf(Items.LAPIS_LAZULI); }
-        });
-        this.addSlot(new Slot(this.inputInventory, 2, 20, 80) {
-            @Override
             public boolean canInsert(ItemStack stack) { return EnchantmentCosts.isReagent(stack.getItem()); }
         });
 
-        this.addSlot(new Slot(this.outputInventory, 0, 20, 106) {
+        this.addSlot(new Slot(this.outputInventory, 0, 20, 86) {
             @Override
             public boolean canInsert(ItemStack stack) { return false; }
 
@@ -94,7 +90,7 @@ public class CatalogueScreenHandler extends ScreenHandler {
             }
         });
 
-        this.addPlayerSlots(playerInventory, 7, 140);
+        this.addPlayerSlots(playerInventory, 7, 120);
     }
 
     @Override
@@ -183,11 +179,9 @@ public class CatalogueScreenHandler extends ScreenHandler {
     private boolean canAfford(CatalogueEntry entry, int level) {
         if (this.player.isCreative()) return true;
 
-        ItemStack lapis = inputInventory.getStack(1);
-        ItemStack reagent = inputInventory.getStack(2);
+        ItemStack reagent = inputInventory.getStack(1);
         RegistryKey<Enchantment> key = entry.key();
-        return lapis.getCount() >= EnchantmentCosts.lapisCost(level)
-                && reagent.isOf(EnchantmentCosts.reagent(key))
+        return reagent.isOf(EnchantmentCosts.reagent(key))
                 && reagent.getCount() >= EnchantmentCosts.reagentCost(level, normalBookshelves)
                 && this.player.experienceLevel >= EnchantmentCosts.xpCost(key, level);
     }
@@ -210,8 +204,7 @@ public class CatalogueScreenHandler extends ScreenHandler {
         RegistryKey<Enchantment> key = entry.key();
 
         if (!player.isCreative()) {
-            inputInventory.getStack(1).decrement(EnchantmentCosts.lapisCost(level));
-            inputInventory.getStack(2).decrement(EnchantmentCosts.reagentCost(level, normalBookshelves));
+            inputInventory.getStack(1).decrement(EnchantmentCosts.reagentCost(level, normalBookshelves));
             player.addExperienceLevels(-EnchantmentCosts.xpCost(key, level));
         }
 
@@ -236,17 +229,15 @@ public class CatalogueScreenHandler extends ScreenHandler {
         ItemStack stack = slot.getStack();
         ItemStack copy = stack.copy();
 
-        if (slotIndex == 3) {
+        if (slotIndex == 2) {
             if (!canTakeOutput(player)) return ItemStack.EMPTY;
-            if (!this.insertItem(stack, 4, 40, true)) return ItemStack.EMPTY;
+            if (!this.insertItem(stack, 3, 39, true)) return ItemStack.EMPTY;
             onOutputTaken(player);
-        } else if (slotIndex < 3) {
-            if (!this.insertItem(stack, 4, 40, true)) return ItemStack.EMPTY;
-        } else if (stack.isOf(Items.LAPIS_LAZULI)) {
-            if (!this.insertItem(stack, 1, 2, false)) return ItemStack.EMPTY;
+        } else if (slotIndex < 2) {
+            if (!this.insertItem(stack, 3, 39, true)) return ItemStack.EMPTY;
         } else {
             if (!this.insertItem(stack, 0, 1, false))
-                if (!this.insertItem(stack, 2, 3, false))
+                if (!this.insertItem(stack, 1, 2, false))
                     return ItemStack.EMPTY;
         }
 

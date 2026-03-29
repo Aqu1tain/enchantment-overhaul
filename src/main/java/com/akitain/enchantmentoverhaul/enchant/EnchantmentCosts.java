@@ -42,7 +42,7 @@ public class EnchantmentCosts {
             entry(Enchantments.FEATHER_FALLING, Items.FEATHER),
             entry(Enchantments.QUICK_CHARGE, Items.STRING),
             entry(Enchantments.LURE, Items.TROPICAL_FISH),
-            entry(Enchantments.MENDING, Items.AMETHYST_SHARD),
+            entry(Enchantments.MENDING, Items.LAPIS_LAZULI),
             entry(Enchantments.BINDING_CURSE, Items.IRON_CHAIN),
             entry(Enchantments.VANISHING_CURSE, Items.PHANTOM_MEMBRANE),
             entry(ModEnchantments.STEP_UP, Items.RABBIT_FOOT),
@@ -50,20 +50,13 @@ public class EnchantmentCosts {
             entry(ModEnchantments.LAST_STAND, Items.GOLDEN_APPLE),
             entry(ModEnchantments.CURSE_OF_FRAGILITY, Items.GLASS_PANE),
             entry(ModEnchantments.CURSE_OF_HUNGER, Items.ROTTEN_FLESH),
-            entry(ModEnchantments.VEIL, Items.FERMENTED_SPIDER_EYE),
-            entry(ModEnchantments.BUOYANCY, Items.LILY_PAD),
-            entry(ModEnchantments.MAGNETIC, Items.COMPASS),
-            entry(ModEnchantments.HOMING, Items.ENDER_EYE)
+            entry(ModEnchantments.VEIL, Items.FERMENTED_SPIDER_EYE)
     );
 
     private static final int[] XP_BY_LEVEL = {0, 2, 4, 7, 10};
 
     public static Item reagent(RegistryKey<Enchantment> key) {
         return REAGENTS.getOrDefault(key, Items.LAPIS_LAZULI);
-    }
-
-    public static int lapisCost(int level) {
-        return level;
     }
 
     public static int baseReagentCost(int level) {
@@ -82,7 +75,7 @@ public class EnchantmentCosts {
     }
 
     public static boolean isReagent(Item item) {
-        return item == Items.LAPIS_LAZULI || REAGENTS.containsValue(item);
+        return REAGENTS.containsValue(item);
     }
 
     public static int slotCost(RegistryEntry<Enchantment> entry, int level) {

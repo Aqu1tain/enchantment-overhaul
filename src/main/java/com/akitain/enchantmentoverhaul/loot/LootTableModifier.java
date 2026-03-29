@@ -51,9 +51,9 @@ public class LootTableModifier {
             new StructureLoot("chests/igloo_chest", 85, 15, List.of(
                     Enchantments.FROST_WALKER)),
             new StructureLoot("chests/shipwreck_treasure", 85, 5, List.of(
-                    Enchantments.LUCK_OF_THE_SEA, ModEnchantments.BUOYANCY, Enchantments.LURE)),
+                    Enchantments.LUCK_OF_THE_SEA, Enchantments.LURE)),
             new StructureLoot("chests/shipwreck_supply", 90, 5, List.of(
-                    ModEnchantments.BUOYANCY)),
+                    Enchantments.LUCK_OF_THE_SEA)),
 
             // Medium (25% chance)
             new StructureLoot("chests/simple_dungeon", 75, 12, List.of(
@@ -69,9 +69,9 @@ public class LootTableModifier {
             new StructureLoot("chests/underwater_ruin_big", 75, 8, List.of(
                     Enchantments.DEPTH_STRIDER, Enchantments.AQUA_AFFINITY, Enchantments.RESPIRATION, Enchantments.RIPTIDE, Enchantments.LOYALTY)),
             new StructureLoot("chests/abandoned_mineshaft", 75, 12, List.of(
-                    Enchantments.SILK_TOUCH, ModEnchantments.MAGNETIC, Enchantments.FORTUNE)),
+                    Enchantments.SILK_TOUCH, Enchantments.FORTUNE)),
             new StructureLoot("chests/pillager_outpost", 75, 6, List.of(
-                    Enchantments.MULTISHOT, Enchantments.PIERCING, Enchantments.QUICK_CHARGE, ModEnchantments.HOMING, Enchantments.SWEEPING_EDGE)),
+                    Enchantments.MULTISHOT, Enchantments.PIERCING, Enchantments.QUICK_CHARGE, Enchantments.SWEEPING_EDGE)),
 
             // Hard (35% chance)
             new StructureLoot("chests/buried_treasure", 65, 17, List.of(
