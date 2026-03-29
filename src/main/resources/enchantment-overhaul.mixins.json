@@ -23,7 +23,8 @@
         "SellEnchantedToolMixin",
         "LootTableEnchantMixin",
         "RepairItemRecipeMixin",
-        "RaidEnchantmentMixin"
+        "RaidEnchantmentMixin",
+        "FarmlandTrampleMixin"
     ],
     "client": [
         "client.VeilNametagMixin",
