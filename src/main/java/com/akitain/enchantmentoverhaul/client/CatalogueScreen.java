@@ -356,11 +356,15 @@ public class CatalogueScreen extends HandledScreen<CatalogueScreenHandler> {
         }
 
         int barY = y + SLOT_BAR_Y;
-        int pw = 11, ph = 6, gap = 2;
+        int ph = 6;
         String countText = used + "/" + max;
         int countW = textRenderer.getWidth(countText);
-        int rightEdge = x + BG_W - 4;
-        int barX = rightEdge - countW - 4 - max * (pw + gap);
+        int barLeft = x + CAT_X;
+        int barRight = x + CAT_X + CAT_W - countW - 4;
+        int availableW = barRight - barLeft;
+        int gap = max > 1 ? Math.max(1, Math.min(2, (availableW - max * 4) / (max - 1))) : 2;
+        int pw = Math.max(4, (availableW - gap * (max - 1)) / max);
+        int barX = barLeft;
 
         for (int i = 0; i < max; i++) {
             int px = barX + i * (pw + gap);
@@ -381,7 +385,7 @@ public class CatalogueScreen extends HandledScreen<CatalogueScreenHandler> {
             context.fill(px + 1, barY + ph - 1, px + pw, barY + ph, pipBorderD);
         }
 
-        int textX = barX + max * (pw + gap) + 2;
+        int textX = barRight + 4;
         context.drawTextWithShadow(textRenderer, countText, textX, barY - 1, TEXT_LIGHT);
     }
 

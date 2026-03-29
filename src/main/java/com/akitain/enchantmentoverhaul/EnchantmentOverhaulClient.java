@@ -3,7 +3,6 @@ package com.akitain.enchantmentoverhaul;
 import com.akitain.enchantmentoverhaul.client.CatalogueScreen;
 import com.akitain.enchantmentoverhaul.enchant.InnateMaterialProperties;
 import com.akitain.enchantmentoverhaul.enchant.ModScreenHandlers;
-import com.akitain.enchantmentoverhaul.enchant.SlotSystem;
 import com.akitain.enchantmentoverhaul.smithing.UpgradeType;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback;
@@ -21,8 +20,6 @@ public class EnchantmentOverhaulClient implements ClientModInitializer {
         ItemTooltipCallback.EVENT.register((stack, context, type, lines) -> {
             addUpgradeLines(stack, lines);
             addInnatePropertyLine(stack, lines);
-            if (SlotSystem.getBaseMaxSlots(stack) <= 0) return;
-            lines.add(Text.literal(slotText(stack)).formatted(slotColor(stack)));
         });
     }
 
@@ -47,23 +44,4 @@ public class EnchantmentOverhaulClient implements ClientModInitializer {
         lines.add(Text.literal(name + " (5% per piece)").formatted(Formatting.DARK_AQUA));
     }
 
-    private static String slotText(ItemStack stack) {
-        int used = SlotSystem.getUsedSlots(stack);
-        int max = SlotSystem.getMaxSlots(stack);
-        int penalty = SlotSystem.getGrindstonePenalty(stack);
-        int curseBonus = SlotSystem.getCurseBonus(stack);
-
-        String text = "Slots: " + used + "/" + max;
-        if (penalty > 0) text += " (-" + penalty + " grindstone)";
-        if (curseBonus > 0) text += " (+" + curseBonus + " curse)";
-        return text;
-    }
-
-    private static Formatting slotColor(ItemStack stack) {
-        int used = SlotSystem.getUsedSlots(stack);
-        int max = SlotSystem.getMaxSlots(stack);
-        if (used >= max) return Formatting.RED;
-        if (used > 0) return Formatting.YELLOW;
-        return Formatting.GRAY;
-    }
 }
