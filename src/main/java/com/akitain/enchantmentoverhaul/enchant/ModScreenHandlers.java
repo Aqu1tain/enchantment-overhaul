@@ -8,10 +8,10 @@ import net.minecraft.util.Identifier;
 
 public class ModScreenHandlers {
 
-    public static final ExtendedScreenHandlerType<CatalogueScreenHandler, CatalogueData> CATALOGUE =
-            new ExtendedScreenHandlerType<>(CatalogueScreenHandler::fromData, CatalogueData.PACKET_CODEC);
+    public static final ExtendedScreenHandlerType<CatalogueScreenHandler> CATALOGUE =
+            new ExtendedScreenHandlerType<>(CatalogueScreenHandler::fromBuf);
 
     public static void register() {
-        Registry.register(Registries.SCREEN_HANDLER, Identifier.of(EnchantmentOverhaul.MOD_ID, "catalogue"), CATALOGUE);
+        Registry.register(Registries.SCREEN_HANDLER, new Identifier(EnchantmentOverhaul.MOD_ID, "catalogue"), CATALOGUE);
     }
 }

@@ -1,33 +1,25 @@
 package com.akitain.enchantmentoverhaul.enchant;
 
-import net.minecraft.advancement.criterion.Criteria;
 import net.minecraft.block.Blocks;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.ItemEnchantmentsComponent;
 import net.minecraft.enchantment.Enchantment;
+import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.registry.DynamicRegistryManager;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.tag.EnchantmentTags;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.network.PacketByteBuf;
+import net.minecraft.registry.Registries;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.ScreenHandlerContext;
 import net.minecraft.screen.slot.Slot;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.Identifier;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 public class CatalogueScreenHandler extends ScreenHandler {
 
@@ -42,7 +34,6 @@ public class CatalogueScreenHandler extends ScreenHandler {
 
     private final ScreenHandlerContext context;
     private final PlayerEntity player;
-    private final DynamicRegistryManager registryManager;
     private final Set<Identifier> unlockedIds;
     private final int normalBookshelves;
 
@@ -50,7 +41,8 @@ public class CatalogueScreenHandler extends ScreenHandler {
     private int selectedIndex = -1;
     private int selectedLevel = 1;
 
-    public static CatalogueScreenHandler fromData(int syncId, PlayerInventory playerInventory, CatalogueData data) {
+    public static CatalogueScreenHandler fromBuf(int syncId, PlayerInventory playerInventory, PacketByteBuf buf) {
+        CatalogueData data = CatalogueData.read(buf);
         return new CatalogueScreenHandler(syncId, playerInventory, ScreenHandlerContext.EMPTY, data.unlocked(), data.normalBookshelves());
     }
 
@@ -59,7 +51,6 @@ public class CatalogueScreenHandler extends ScreenHandler {
         super(ModScreenHandlers.CATALOGUE, syncId);
         this.context = context;
         this.player = playerInventory.player;
-        this.registryManager = playerInventory.player.getRegistryManager();
         this.unlockedIds = Set.copyOf(unlocked);
         this.normalBookshelves = normalBookshelves;
 
@@ -109,22 +100,18 @@ public class CatalogueScreenHandler extends ScreenHandler {
             return;
         }
 
+        Map<Enchantment, Integer> existing = EnchantmentHelper.get(item);
         List<CatalogueEntry> result = new ArrayList<>();
-        var registry = registryManager.getOrThrow(RegistryKeys.ENCHANTMENT);
-        ItemEnchantmentsComponent existing = item.getOrDefault(DataComponentTypes.ENCHANTMENTS, ItemEnchantmentsComponent.DEFAULT);
 
-        for (RegistryEntry<Enchantment> entry : registry.getIndexedEntries()) {
-            Optional<RegistryKey<Enchantment>> keyOpt = entry.getKey();
-            if (keyOpt.isEmpty()) continue;
+        for (Enchantment enchantment : Registries.ENCHANTMENT) {
+            if (DisabledEnchantments.isDisabled(enchantment)) continue;
+            if (!enchantment.isAcceptableItem(item)) continue;
+            if (existing.containsKey(enchantment)) continue;
 
-            RegistryKey<Enchantment> key = keyOpt.get();
-            if (DisabledEnchantments.isDisabled(entry)) continue;
-            if (!entry.value().isAcceptableItem(item)) continue;
-            if (existing.getEnchantments().contains(entry)) continue;
-            if (!unlockedIds.contains(key.getValue())) continue;
+            Identifier id = Registries.ENCHANTMENT.getId(enchantment);
+            if (id == null || !unlockedIds.contains(id)) continue;
 
-            int maxLevel = entry.value().getMaxLevel();
-            result.add(new CatalogueEntry(entry, key, maxLevel));
+            result.add(new CatalogueEntry(enchantment, id, enchantment.getMaxLevel()));
         }
 
         this.entries = result;
@@ -160,7 +147,7 @@ public class CatalogueScreenHandler extends ScreenHandler {
         CatalogueEntry entry = entries.get(selectedIndex);
         int level = Math.min(selectedLevel, entry.maxLevel());
 
-        int slotsNeeded = EnchantmentCosts.slotCost(entry.entry(), level);
+        int slotsNeeded = EnchantmentCosts.slotCost(entry.enchantment(), level);
         if (SlotSystem.getAvailableSlots(item) < slotsNeeded) {
             outputInventory.setStack(0, ItemStack.EMPTY);
             return;
@@ -172,7 +159,7 @@ public class CatalogueScreenHandler extends ScreenHandler {
         }
 
         ItemStack result = item.copy();
-        result.addEnchantment(entry.entry(), level);
+        result.addEnchantment(entry.enchantment(), level);
         outputInventory.setStack(0, result);
     }
 
@@ -180,10 +167,10 @@ public class CatalogueScreenHandler extends ScreenHandler {
         if (this.player.isCreative()) return true;
 
         ItemStack reagent = inputInventory.getStack(1);
-        RegistryKey<Enchantment> key = entry.key();
-        return reagent.isOf(EnchantmentCosts.reagent(key))
+        Enchantment enchantment = entry.enchantment();
+        return reagent.isOf(EnchantmentCosts.reagent(enchantment))
                 && reagent.getCount() >= EnchantmentCosts.reagentCost(level, normalBookshelves)
-                && this.player.experienceLevel >= EnchantmentCosts.xpCost(key, level);
+                && this.player.experienceLevel >= EnchantmentCosts.xpCost(enchantment, level);
     }
 
     private boolean canTakeOutput(PlayerEntity player) {
@@ -192,7 +179,7 @@ public class CatalogueScreenHandler extends ScreenHandler {
         int level = Math.min(selectedLevel, entry.maxLevel());
 
         ItemStack item = inputInventory.getStack(0);
-        if (SlotSystem.getAvailableSlots(item) < EnchantmentCosts.slotCost(entry.entry(), level)) return false;
+        if (SlotSystem.getAvailableSlots(item) < EnchantmentCosts.slotCost(entry.enchantment(), level)) return false;
         return canAfford(entry, level);
     }
 
@@ -201,11 +188,11 @@ public class CatalogueScreenHandler extends ScreenHandler {
 
         CatalogueEntry entry = entries.get(selectedIndex);
         int level = Math.min(selectedLevel, entry.maxLevel());
-        RegistryKey<Enchantment> key = entry.key();
+        Enchantment enchantment = entry.enchantment();
 
         if (!player.isCreative()) {
             inputInventory.getStack(1).decrement(EnchantmentCosts.reagentCost(level, normalBookshelves));
-            player.addExperienceLevels(-EnchantmentCosts.xpCost(key, level));
+            player.addExperienceLevels(-EnchantmentCosts.xpCost(enchantment, level));
         }
 
         inputInventory.setStack(0, ItemStack.EMPTY);
@@ -214,8 +201,7 @@ public class CatalogueScreenHandler extends ScreenHandler {
                 world.playSound(null, pos, SoundEvents.BLOCK_ENCHANTMENT_TABLE_USE, SoundCategory.BLOCKS, 1.0f, 1.0f));
 
         if (player instanceof ServerPlayerEntity serverPlayer) {
-            Criteria.ENCHANTED_ITEM.trigger(serverPlayer, outputInventory.getStack(0), level);
-            if (entry.entry().isIn(EnchantmentTags.CURSE)) {
+            if (enchantment.isCursed()) {
                 ModAdvancements.grantCurseAdvancement(serverPlayer);
             }
         }
@@ -270,5 +256,5 @@ public class CatalogueScreenHandler extends ScreenHandler {
         updateResult();
     }
 
-    public record CatalogueEntry(RegistryEntry<Enchantment> entry, RegistryKey<Enchantment> key, int maxLevel) {}
+    public record CatalogueEntry(Enchantment enchantment, Identifier id, int maxLevel) {}
 }
