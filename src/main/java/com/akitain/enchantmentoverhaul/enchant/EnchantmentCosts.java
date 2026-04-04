@@ -4,59 +4,54 @@ import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.registry.tag.EnchantmentTags;
 
+import java.util.HashMap;
 import java.util.Map;
-
-import static java.util.Map.entry;
 
 public class EnchantmentCosts {
 
-    private static final Map<RegistryKey<Enchantment>, Item> REAGENTS = Map.ofEntries(
-            entry(Enchantments.FIRE_ASPECT, Items.BLAZE_POWDER),
-            entry(Enchantments.FLAME, Items.BLAZE_POWDER),
-            entry(Enchantments.CHANNELING, Items.LIGHTNING_ROD),
-            entry(Enchantments.FROST_WALKER, Items.PACKED_ICE),
-            entry(Enchantments.THORNS, Items.CACTUS),
-            entry(Enchantments.FORTUNE, Items.EMERALD),
-            entry(Enchantments.LOOTING, Items.RABBIT_FOOT),
-            entry(Enchantments.SILK_TOUCH, Items.COBWEB),
-            entry(Enchantments.LUCK_OF_THE_SEA, Items.NAUTILUS_SHELL),
-            entry(Enchantments.INFINITY, Items.SPECTRAL_ARROW),
-            entry(Enchantments.DEPTH_STRIDER, Items.PRISMARINE_SHARD),
-            entry(Enchantments.SOUL_SPEED, Items.SOUL_SAND),
-            entry(Enchantments.SWIFT_SNEAK, Items.ECHO_SHARD),
-            entry(Enchantments.RIPTIDE, Items.HEART_OF_THE_SEA),
-            entry(Enchantments.LOYALTY, Items.IRON_CHAIN),
-            entry(Enchantments.MULTISHOT, Items.FIREWORK_ROCKET),
-            entry(Enchantments.PIERCING, Items.ARROW),
-            entry(Enchantments.WIND_BURST, Items.BREEZE_ROD),
-            entry(Enchantments.RESPIRATION, Items.PUFFERFISH),
-            entry(Enchantments.AQUA_AFFINITY, Items.PRISMARINE_CRYSTALS),
-            entry(Enchantments.SWEEPING_EDGE, Items.IRON_NUGGET),
-            entry(Enchantments.BREACH, Items.BREEZE_ROD),
-            entry(Enchantments.KNOCKBACK, Items.PISTON),
-            entry(Enchantments.LUNGE, Items.SLIME_BALL),
-            entry(Enchantments.FEATHER_FALLING, Items.FEATHER),
-            entry(Enchantments.QUICK_CHARGE, Items.STRING),
-            entry(Enchantments.LURE, Items.TROPICAL_FISH),
-            entry(Enchantments.MENDING, Items.LAPIS_LAZULI),
-            entry(Enchantments.BINDING_CURSE, Items.IRON_CHAIN),
-            entry(Enchantments.VANISHING_CURSE, Items.PHANTOM_MEMBRANE),
-            entry(ModEnchantments.STEP_UP, Items.RABBIT_FOOT),
-            entry(ModEnchantments.VENOM, Items.SPIDER_EYE),
-            entry(ModEnchantments.LAST_STAND, Items.GOLDEN_APPLE),
-            entry(ModEnchantments.CURSE_OF_FRAGILITY, Items.GLASS_PANE),
-            entry(ModEnchantments.CURSE_OF_HUNGER, Items.ROTTEN_FLESH),
-            entry(ModEnchantments.VEIL, Items.FERMENTED_SPIDER_EYE)
-    );
+    private static final Map<Enchantment, Item> REAGENTS = new HashMap<>();
+
+    static {
+        REAGENTS.put(Enchantments.FIRE_ASPECT, Items.BLAZE_POWDER);
+        REAGENTS.put(Enchantments.FLAME, Items.BLAZE_POWDER);
+        REAGENTS.put(Enchantments.CHANNELING, Items.LIGHTNING_ROD);
+        REAGENTS.put(Enchantments.FROST_WALKER, Items.PACKED_ICE);
+        REAGENTS.put(Enchantments.THORNS, Items.CACTUS);
+        REAGENTS.put(Enchantments.FORTUNE, Items.EMERALD);
+        REAGENTS.put(Enchantments.LOOTING, Items.RABBIT_FOOT);
+        REAGENTS.put(Enchantments.SILK_TOUCH, Items.COBWEB);
+        REAGENTS.put(Enchantments.LUCK_OF_THE_SEA, Items.NAUTILUS_SHELL);
+        REAGENTS.put(Enchantments.INFINITY, Items.SPECTRAL_ARROW);
+        REAGENTS.put(Enchantments.DEPTH_STRIDER, Items.PRISMARINE_SHARD);
+        REAGENTS.put(Enchantments.SOUL_SPEED, Items.SOUL_SAND);
+        REAGENTS.put(Enchantments.SWIFT_SNEAK, Items.ECHO_SHARD);
+        REAGENTS.put(Enchantments.RIPTIDE, Items.HEART_OF_THE_SEA);
+        REAGENTS.put(Enchantments.LOYALTY, Items.CHAIN);
+        REAGENTS.put(Enchantments.MULTISHOT, Items.FIREWORK_ROCKET);
+        REAGENTS.put(Enchantments.PIERCING, Items.ARROW);
+        REAGENTS.put(Enchantments.RESPIRATION, Items.PUFFERFISH);
+        REAGENTS.put(Enchantments.AQUA_AFFINITY, Items.PRISMARINE_CRYSTALS);
+        REAGENTS.put(Enchantments.SWEEPING, Items.IRON_NUGGET);
+        REAGENTS.put(Enchantments.KNOCKBACK, Items.PISTON);
+        REAGENTS.put(Enchantments.FEATHER_FALLING, Items.FEATHER);
+        REAGENTS.put(Enchantments.QUICK_CHARGE, Items.STRING);
+        REAGENTS.put(Enchantments.LURE, Items.TROPICAL_FISH);
+        REAGENTS.put(Enchantments.MENDING, Items.LAPIS_LAZULI);
+        REAGENTS.put(Enchantments.BINDING_CURSE, Items.CHAIN);
+        REAGENTS.put(Enchantments.VANISHING_CURSE, Items.PHANTOM_MEMBRANE);
+        REAGENTS.put(ModEnchantments.STEP_UP, Items.RABBIT_FOOT);
+        REAGENTS.put(ModEnchantments.VENOM, Items.SPIDER_EYE);
+        REAGENTS.put(ModEnchantments.LAST_STAND, Items.GOLDEN_APPLE);
+        REAGENTS.put(ModEnchantments.CURSE_OF_FRAGILITY, Items.GLASS_PANE);
+        REAGENTS.put(ModEnchantments.CURSE_OF_HUNGER, Items.ROTTEN_FLESH);
+        REAGENTS.put(ModEnchantments.VEIL, Items.FERMENTED_SPIDER_EYE);
+    }
 
     private static final int[] XP_BY_LEVEL = {0, 2, 4, 7, 10};
 
-    public static Item reagent(RegistryKey<Enchantment> key) {
-        return REAGENTS.getOrDefault(key, Items.LAPIS_LAZULI);
+    public static Item reagent(Enchantment enchantment) {
+        return REAGENTS.getOrDefault(enchantment, Items.LAPIS_LAZULI);
     }
 
     public static int baseReagentCost(int level) {
@@ -68,8 +63,8 @@ public class EnchantmentCosts {
         return Math.max(1, (int) Math.ceil(baseReagentCost(level) * (1.0 - discount)));
     }
 
-    public static int xpCost(RegistryKey<Enchantment> key, int level) {
-        if (key.equals(Enchantments.MENDING)) return 8;
+    public static int xpCost(Enchantment enchantment, int level) {
+        if (enchantment == Enchantments.MENDING) return 8;
         if (level >= XP_BY_LEVEL.length) return XP_BY_LEVEL[XP_BY_LEVEL.length - 1];
         return XP_BY_LEVEL[level];
     }
@@ -78,9 +73,9 @@ public class EnchantmentCosts {
         return REAGENTS.containsValue(item);
     }
 
-    public static int slotCost(RegistryEntry<Enchantment> entry, int level) {
-        if (entry.isIn(EnchantmentTags.CURSE)) return 0;
-        if (entry.matchesKey(Enchantments.MENDING)) return 3;
+    public static int slotCost(Enchantment enchantment, int level) {
+        if (enchantment.isCursed()) return 0;
+        if (enchantment == Enchantments.MENDING) return 3;
         return level;
     }
 }

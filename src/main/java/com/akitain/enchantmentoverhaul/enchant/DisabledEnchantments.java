@@ -2,14 +2,12 @@ package com.akitain.enchantmentoverhaul.enchant;
 
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.Enchantments;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.entry.RegistryEntry;
 
 import java.util.Set;
 
 public class DisabledEnchantments {
 
-    private static final Set<RegistryKey<Enchantment>> DISABLED = Set.of(
+    private static final Set<Enchantment> DISABLED = Set.of(
             Enchantments.PROTECTION,
             Enchantments.FIRE_PROTECTION,
             Enchantments.BLAST_PROTECTION,
@@ -17,7 +15,6 @@ public class DisabledEnchantments {
             Enchantments.SHARPNESS,
             Enchantments.SMITE,
             Enchantments.POWER,
-            Enchantments.DENSITY,
             Enchantments.IMPALING,
             Enchantments.UNBREAKING,
             Enchantments.EFFICIENCY,
@@ -25,7 +22,7 @@ public class DisabledEnchantments {
             Enchantments.PUNCH
     );
 
-    public static boolean isDisabled(RegistryEntry<Enchantment> entry) {
-        return entry.getKey().map(DISABLED::contains).orElse(false);
+    public static boolean isDisabled(Enchantment enchantment) {
+        return DISABLED.contains(enchantment);
     }
 }

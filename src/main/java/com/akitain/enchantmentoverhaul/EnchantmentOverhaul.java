@@ -1,6 +1,7 @@
 package com.akitain.enchantmentoverhaul;
 
 import com.akitain.enchantmentoverhaul.component.ModComponents;
+import com.akitain.enchantmentoverhaul.enchant.ModEnchantments;
 import com.akitain.enchantmentoverhaul.enchant.VillagerTrades;
 import com.akitain.enchantmentoverhaul.enchant.ModScreenHandlers;
 import com.akitain.enchantmentoverhaul.loot.LootTableModifier;
@@ -22,6 +23,7 @@ public class EnchantmentOverhaul implements ModInitializer {
     @Override
     public void onInitialize() {
         ModComponents.register();
+        ModEnchantments.register();
         ModScreenHandlers.register();
         SmithingTemplates.register();
 
