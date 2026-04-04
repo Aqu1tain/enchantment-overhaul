@@ -1,18 +1,15 @@
 package com.akitain.enchantmentoverhaul.smithing;
 
 import com.akitain.enchantmentoverhaul.component.ModComponents;
-import net.minecraft.component.ComponentType;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.AttributeModifierSlot;
-import net.minecraft.component.type.AttributeModifiersComponent;
-import net.minecraft.entity.attribute.EntityAttribute;
+import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.attribute.EntityAttributes;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.registry.tag.ItemTags;
-import net.minecraft.util.Identifier;
+import net.minecraft.item.*;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
+import net.minecraft.nbt.NbtList;
+
+import java.util.UUID;
 
 public enum UpgradeType {
     HONING(ModComponents.HONING_LEVEL),
@@ -20,76 +17,83 @@ public enum UpgradeType {
     TEMPERING(ModComponents.TEMPERING_LEVEL),
     GRINDING(ModComponents.GRINDING_LEVEL);
 
-    private final ComponentType<Integer> component;
+    private static final UUID HONING_UUID = UUID.fromString("a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d");
+    private static final UUID GRINDING_UUID = UUID.fromString("b2c3d4e5-f6a7-4b8c-9d0e-1f2a3b4c5d6e");
 
-    UpgradeType(ComponentType<Integer> component) {
-        this.component = component;
+    private final String nbtKey;
+
+    UpgradeType(String nbtKey) {
+        this.nbtKey = nbtKey;
     }
 
-    public ComponentType<Integer> component() {
-        return component;
+    public String nbtKey() {
+        return nbtKey;
     }
 
     public boolean appliesTo(ItemStack stack) {
+        Item item = stack.getItem();
         return switch (this) {
-            case HONING -> stack.isIn(ItemTags.WEAPON_ENCHANTABLE)
-                    || stack.isIn(ItemTags.BOW_ENCHANTABLE)
-                    || stack.isIn(ItemTags.CROSSBOW_ENCHANTABLE);
-            case WARDING -> stack.isIn(ItemTags.ARMOR_ENCHANTABLE);
-            case TEMPERING -> stack.isIn(ItemTags.DURABILITY_ENCHANTABLE);
-            case GRINDING -> stack.isIn(ItemTags.MINING_ENCHANTABLE);
+            case HONING -> item instanceof SwordItem || item instanceof BowItem
+                    || item instanceof CrossbowItem || item instanceof TridentItem;
+            case WARDING -> item instanceof ArmorItem;
+            case TEMPERING -> stack.isDamageable();
+            case GRINDING -> item instanceof MiningToolItem;
         };
     }
 
     public int currentLevel(ItemStack stack) {
-        return stack.getOrDefault(component, 0);
+        return ModComponents.getInt(stack, nbtKey, 0);
     }
 
     public void applyTo(ItemStack stack, int level) {
         int oldLevel = currentLevel(stack);
-        stack.set(component, level);
+        ModComponents.setInt(stack, nbtKey, level);
 
         switch (this) {
-            case HONING -> boostBaseModifier(stack, EntityAttributes.ATTACK_DAMAGE, Item.BASE_ATTACK_DAMAGE_MODIFIER_ID, level - oldLevel, AttributeModifierSlot.MAINHAND);
-            case WARDING -> {}
-            case GRINDING -> replaceModifier(stack, EntityAttributes.MINING_EFFICIENCY, level * 5, AttributeModifierSlot.MAINHAND, "grinding");
-            case TEMPERING -> {}
+            case HONING -> boostAttackDamage(stack, level - oldLevel);
+            case GRINDING -> {} // applied via mixin on getBlockBreakingSpeed
+            case WARDING, TEMPERING -> {}
         }
     }
 
-    private void boostBaseModifier(ItemStack stack, RegistryEntry<EntityAttribute> attribute, Identifier baseId, double bonus, AttributeModifierSlot slot) {
-        AttributeModifiersComponent existing = stack.getOrDefault(DataComponentTypes.ATTRIBUTE_MODIFIERS, AttributeModifiersComponent.DEFAULT);
-        AttributeModifiersComponent.Builder builder = AttributeModifiersComponent.builder();
+    private void boostAttackDamage(ItemStack stack, double bonus) {
+        NbtCompound nbt = stack.getOrCreateNbt();
+        NbtList modifiers = nbt.contains("AttributeModifiers", NbtElement.LIST_TYPE)
+                ? nbt.getList("AttributeModifiers", NbtElement.COMPOUND_TYPE)
+                : new NbtList();
 
         boolean found = false;
-        for (AttributeModifiersComponent.Entry entry : existing.modifiers()) {
-            if (entry.modifier().idMatches(baseId)) {
-                double newValue = entry.modifier().value() + bonus;
-                EntityAttributeModifier boosted = new EntityAttributeModifier(baseId, newValue, entry.modifier().operation());
-                builder.add(entry.attribute(), boosted, entry.slot(), entry.display());
+        for (int i = 0; i < modifiers.size(); i++) {
+            NbtCompound mod = modifiers.getCompound(i);
+            if (isUuid(mod, HONING_UUID)) {
+                mod.putDouble("Amount", mod.getDouble("Amount") + bonus);
                 found = true;
-            } else {
-                builder.add(entry.attribute(), entry.modifier(), entry.slot(), entry.display());
+                break;
             }
         }
 
         if (!found) {
-            builder.add(attribute, new EntityAttributeModifier(baseId, bonus, EntityAttributeModifier.Operation.ADD_VALUE), slot);
+            NbtCompound mod = new NbtCompound();
+            mod.putString("AttributeName", "generic.attack_damage");
+            mod.putString("Name", "Honing bonus");
+            mod.putDouble("Amount", bonus);
+            mod.putInt("Operation", 0);
+            mod.putIntArray("UUID", uuidToIntArray(HONING_UUID));
+            mod.putString("Slot", "mainhand");
+            modifiers.add(mod);
         }
 
-        stack.set(DataComponentTypes.ATTRIBUTE_MODIFIERS, builder.build());
+        nbt.put("AttributeModifiers", modifiers);
     }
 
-    private void replaceModifier(ItemStack stack, RegistryEntry<EntityAttribute> attribute, double value, AttributeModifierSlot slot, String modName) {
-        Identifier modId = Identifier.ofVanilla(modName);
-        AttributeModifiersComponent existing = stack.getOrDefault(DataComponentTypes.ATTRIBUTE_MODIFIERS, AttributeModifiersComponent.DEFAULT);
-        AttributeModifiersComponent.Builder builder = AttributeModifiersComponent.builder();
-        for (AttributeModifiersComponent.Entry entry : existing.modifiers()) {
-            if (!entry.modifier().idMatches(modId)) {
-                builder.add(entry.attribute(), entry.modifier(), entry.slot(), entry.display());
-            }
-        }
-        builder.add(attribute, new EntityAttributeModifier(modId, value, EntityAttributeModifier.Operation.ADD_VALUE), slot);
-        stack.set(DataComponentTypes.ATTRIBUTE_MODIFIERS, builder.build());
+    private static boolean isUuid(NbtCompound mod, UUID target) {
+        if (!mod.containsUuid("UUID")) return false;
+        return mod.getUuid("UUID").equals(target);
+    }
+
+    private static int[] uuidToIntArray(UUID uuid) {
+        long most = uuid.getMostSignificantBits();
+        long least = uuid.getLeastSignificantBits();
+        return new int[]{(int) (most >> 32), (int) most, (int) (least >> 32), (int) least};
     }
 }

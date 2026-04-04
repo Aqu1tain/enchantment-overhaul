@@ -2,47 +2,34 @@ package com.akitain.enchantmentoverhaul.mixin;
 
 import com.akitain.enchantmentoverhaul.component.ModComponents;
 import com.akitain.enchantmentoverhaul.enchant.ModEnchantments;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.ItemEnchantmentsComponent;
-import net.minecraft.enchantment.Enchantment;
+import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.item.ItemStack;
-import net.minecraft.registry.RegistryKey;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
+import net.minecraft.util.math.random.Random;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.asm.mixin.injection.ModifyVariable;
 
 @Mixin(ItemStack.class)
 public class ItemStackDamageMixin {
 
-    @Inject(method = "calculateDamage", at = @At("RETURN"), cancellable = true)
-    private void applyDurabilityModifiers(int damage, ServerWorld world, ServerPlayerEntity player, CallbackInfoReturnable<Integer> cir) {
+    @ModifyVariable(method = "damage(ILnet/minecraft/util/math/random/Random;Lnet/minecraft/server/network/ServerPlayerEntity;)Z", at = @At("HEAD"), ordinal = 0, argsOnly = true)
+    private int applyDurabilityModifiers(int amount, int amountArg, Random random, ServerPlayerEntity player) {
         ItemStack self = (ItemStack) (Object) this;
-        int result = cir.getReturnValue();
 
-        int temperingLevel = self.getOrDefault(ModComponents.TEMPERING_LEVEL, 0);
+        int temperingLevel = ModComponents.getInt(self, ModComponents.TEMPERING_LEVEL, 0);
         if (temperingLevel > 0) {
             int reduced = 0;
-            for (int i = 0; i < result; i++) {
-                if (world.getRandom().nextInt(temperingLevel + 1) == 0) reduced++;
+            for (int i = 0; i < amount; i++) {
+                if (random.nextInt(temperingLevel + 1) == 0) reduced++;
             }
-            result = reduced;
+            amount = reduced;
         }
 
-        if (hasEnchantment(self, ModEnchantments.CURSE_OF_FRAGILITY)) {
-            result *= 2;
+        if (EnchantmentHelper.getLevel(ModEnchantments.CURSE_OF_FRAGILITY, self) > 0) {
+            amount *= 2;
         }
 
-        cir.setReturnValue(result);
-    }
-
-    private static boolean hasEnchantment(ItemStack stack, RegistryKey<Enchantment> key) {
-        ItemEnchantmentsComponent enchantments = stack.getOrDefault(DataComponentTypes.ENCHANTMENTS, ItemEnchantmentsComponent.DEFAULT);
-        for (var entry : enchantments.getEnchantmentEntries()) {
-            if (entry.getKey().matchesKey(key)) return true;
-        }
-        return false;
+        return amount;
     }
 }

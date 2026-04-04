@@ -1,20 +1,15 @@
 package com.akitain.enchantmentoverhaul.enchant;
 
 import com.akitain.enchantmentoverhaul.component.ModComponents;
-import it.unimi.dsi.fastutil.objects.Object2IntMap;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.ItemEnchantmentsComponent;
 import net.minecraft.enchantment.Enchantment;
-import net.minecraft.registry.tag.EnchantmentTags;
+import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.registry.Registries;
-import net.minecraft.registry.entry.RegistryEntry;
 
 import java.util.Map;
-import java.util.Set;
 
 public class SlotSystem {
 
@@ -31,36 +26,36 @@ public class SlotSystem {
         if (id.startsWith("copper_")) return 3;
         if (id.startsWith("leather_") || id.startsWith("wooden_") || id.startsWith("stone_")) return 3;
 
-        if (item == Items.TRIDENT || item == Items.MACE || item == Items.ELYTRA) return 5;
+        if (item == Items.TRIDENT || item == Items.ELYTRA) return 5;
         if (item == Items.TURTLE_HELMET) return 5;
         if (item == Items.CROSSBOW) return 4;
         if (item == Items.BOW || item == Items.FISHING_ROD) return 3;
 
-        if (stack.isEnchantable() || hasEnchantments(stack)) return 3;
+        if (stack.isEnchantable() || !EnchantmentHelper.get(stack).isEmpty()) return 3;
 
         return 0;
     }
 
     public static int getGrindstonePenalty(ItemStack stack) {
-        return stack.getOrDefault(ModComponents.GRINDSTONE_PENALTY, 0);
+        return ModComponents.getInt(stack, ModComponents.GRINDSTONE_PENALTY, 0);
     }
 
     public static int getCurseBonus(ItemStack stack) {
         int bonus = 0;
-        for (Object2IntMap.Entry<RegistryEntry<Enchantment>> entry : getEnchantments(stack).getEnchantmentEntries()) {
-            if (entry.getKey().isIn(EnchantmentTags.CURSE)) bonus++;
+        for (Enchantment enchantment : EnchantmentHelper.get(stack).keySet()) {
+            if (enchantment.isCursed()) bonus++;
         }
         return bonus;
     }
 
     public static int getUsedSlots(ItemStack stack) {
         int used = 0;
-        for (Object2IntMap.Entry<RegistryEntry<Enchantment>> entry : getEnchantments(stack).getEnchantmentEntries()) {
-            RegistryEntry<Enchantment> enchantment = entry.getKey();
-            int level = entry.getIntValue();
+        for (Map.Entry<Enchantment, Integer> entry : EnchantmentHelper.get(stack).entrySet()) {
+            Enchantment enchantment = entry.getKey();
+            int level = entry.getValue();
 
-            if (enchantment.isIn(EnchantmentTags.CURSE)) continue;
-            if (enchantment.matchesKey(Enchantments.MENDING)) { used += 3; continue; }
+            if (enchantment.isCursed()) continue;
+            if (enchantment == Enchantments.MENDING) { used += 3; continue; }
 
             used += level;
         }
@@ -75,17 +70,9 @@ public class SlotSystem {
         return getMaxSlots(stack) - getUsedSlots(stack);
     }
 
-    public static boolean canApplyEnchantment(ItemStack stack, RegistryEntry<Enchantment> enchantment, int level) {
-        int cost = enchantment.matchesKey(Enchantments.MENDING) ? 3 : level;
-        if (enchantment.isIn(EnchantmentTags.CURSE)) cost = 0;
+    public static boolean canApplyEnchantment(ItemStack stack, Enchantment enchantment, int level) {
+        int cost = enchantment == Enchantments.MENDING ? 3 : level;
+        if (enchantment.isCursed()) cost = 0;
         return cost <= getAvailableSlots(stack);
-    }
-
-    private static ItemEnchantmentsComponent getEnchantments(ItemStack stack) {
-        return stack.getOrDefault(DataComponentTypes.ENCHANTMENTS, ItemEnchantmentsComponent.DEFAULT);
-    }
-
-    private static boolean hasEnchantments(ItemStack stack) {
-        return !getEnchantments(stack).isEmpty();
     }
 }

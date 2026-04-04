@@ -9,6 +9,8 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import java.util.Map;
+
 @Mixin(GrindstoneScreenHandler.class)
 public class GrindstoneScreenHandlerMixin {
 
@@ -17,9 +19,9 @@ public class GrindstoneScreenHandlerMixin {
         ItemStack result = cir.getReturnValue();
         if (result.isEmpty()) return;
 
-        EnchantmentHelper.apply(result, components -> components.remove(enchantment -> true));
+        EnchantmentHelper.set(Map.of(), result);
 
-        int penalty = result.getOrDefault(ModComponents.GRINDSTONE_PENALTY, 0);
-        result.set(ModComponents.GRINDSTONE_PENALTY, penalty + 1);
+        int penalty = ModComponents.getInt(result, ModComponents.GRINDSTONE_PENALTY, 0);
+        ModComponents.setInt(result, ModComponents.GRINDSTONE_PENALTY, penalty + 1);
     }
 }

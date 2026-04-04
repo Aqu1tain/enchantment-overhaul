@@ -2,7 +2,6 @@ package com.akitain.enchantmentoverhaul.mixin;
 
 import com.akitain.enchantmentoverhaul.component.ModComponents;
 import com.akitain.enchantmentoverhaul.enchant.SlotSystem;
-import net.minecraft.component.DataComponentTypes;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -13,7 +12,6 @@ import net.minecraft.screen.ForgingScreenHandler;
 import net.minecraft.screen.Property;
 import net.minecraft.screen.ScreenHandlerContext;
 import net.minecraft.screen.ScreenHandlerType;
-import net.minecraft.screen.slot.ForgingSlotsManager;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
@@ -29,8 +27,8 @@ public abstract class AnvilScreenHandlerMixin extends ForgingScreenHandler {
     @Shadow @Nullable private String newItemName;
     @Shadow @Final private Property levelCost;
 
-    private AnvilScreenHandlerMixin(@Nullable ScreenHandlerType<?> type, int syncId, PlayerInventory playerInventory, ScreenHandlerContext context, ForgingSlotsManager forgingSlotsManager) {
-        super(type, syncId, playerInventory, context, forgingSlotsManager);
+    private AnvilScreenHandlerMixin(@Nullable ScreenHandlerType<?> type, int syncId, PlayerInventory playerInventory, ScreenHandlerContext context) {
+        super(type, syncId, playerInventory, context);
     }
 
     @Inject(method = "updateResult", at = @At("HEAD"), cancellable = true)
@@ -57,7 +55,7 @@ public abstract class AnvilScreenHandlerMixin extends ForgingScreenHandler {
             return;
         }
 
-        result.remove(DataComponentTypes.REPAIR_COST);
+        if (result.hasNbt()) result.getNbt().remove("RepairCost");
         this.levelCost.set(Math.max(1, restoreCost));
         this.output.setStack(0, result);
         ci.cancel();
@@ -70,7 +68,7 @@ public abstract class AnvilScreenHandlerMixin extends ForgingScreenHandler {
         Item repairIngot = getRepairIngot(first);
         if (repairIngot == null || !second.isOf(repairIngot)) return 0;
 
-        result.set(ModComponents.GRINDSTONE_PENALTY, penalty - 1);
+        ModComponents.setInt(result, ModComponents.GRINDSTONE_PENALTY, penalty - 1);
         return getRestoreCost(first);
     }
 
@@ -116,12 +114,12 @@ public abstract class AnvilScreenHandlerMixin extends ForgingScreenHandler {
     private boolean tryRename(ItemStack first, ItemStack result) {
         if (this.newItemName != null && !this.newItemName.isBlank()) {
             if (this.newItemName.equals(first.getName().getString())) return false;
-            result.set(DataComponentTypes.CUSTOM_NAME, Text.literal(this.newItemName));
+            result.setCustomName(Text.literal(this.newItemName));
             return true;
         }
 
-        if (!first.contains(DataComponentTypes.CUSTOM_NAME)) return false;
-        result.remove(DataComponentTypes.CUSTOM_NAME);
+        if (!first.hasCustomName()) return false;
+        result.removeCustomName();
         return true;
     }
 

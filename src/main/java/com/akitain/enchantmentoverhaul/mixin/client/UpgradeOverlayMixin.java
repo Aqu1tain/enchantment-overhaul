@@ -51,11 +51,11 @@ public class UpgradeOverlayMixin {
 
         int order = initialOrder;
 
-        if (stack.getOrDefault(ModComponents.WARDING_LEVEL, 0) > 0) {
+        if (ModComponents.getInt(stack, ModComponents.WARDING_LEVEL, 0) > 0) {
             renderOverlay(dir + "/warding_" + material, model, state, matrices, queue, light, outlineColor, order++);
         }
 
-        if (stack.getOrDefault(ModComponents.TEMPERING_LEVEL, 0) > 0) {
+        if (ModComponents.getInt(stack, ModComponents.TEMPERING_LEVEL, 0) > 0) {
             renderOverlay(dir + "/tempering_" + material, model, state, matrices, queue, light, outlineColor, order);
         }
     }
