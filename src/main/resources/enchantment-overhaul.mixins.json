@@ -24,12 +24,12 @@
         "LootTableEnchantMixin",
         "RepairItemRecipeMixin",
         "RaidEnchantmentMixin",
-        "FarmlandTrampleMixin"
+        "FarmlandTrampleMixin",
+        "accessor.EntityAccessor"
     ],
     "client": [
         "client.VeilNametagMixin",
         "client.EnchantingTableParticleMixin",
-        "client.UpgradeOverlayMixin"
     ],
     "injectors": {
         "defaultRequire": 1

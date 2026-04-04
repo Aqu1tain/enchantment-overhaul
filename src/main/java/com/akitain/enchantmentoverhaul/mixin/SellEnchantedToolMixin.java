@@ -18,7 +18,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import java.util.HashMap;
 import java.util.Map;
 
-@Mixin(TradeOffers.EnchantedItemForEmeralds.class)
+@Mixin(TradeOffers.SellEnchantedToolFactory.class)
 public class SellEnchantedToolMixin {
 
     @Inject(method = "create", at = @At("RETURN"))
