@@ -2,7 +2,7 @@ package com.akitain.enchantmentoverhaul.loot;
 
 import com.akitain.enchantmentoverhaul.enchant.ModEnchantments;
 import com.akitain.enchantmentoverhaul.smithing.SmithingTemplates;
-import net.fabricmc.fabric.api.loot.v3.LootTableEvents;
+import net.fabricmc.fabric.api.loot.v2.LootTableEvents;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.item.Item;
@@ -11,23 +11,20 @@ import net.minecraft.loot.LootPool;
 import net.minecraft.loot.LootTable;
 import net.minecraft.loot.entry.EmptyEntry;
 import net.minecraft.loot.entry.ItemEntry;
-import net.minecraft.loot.function.SetEnchantmentsLootFunction;
+import net.minecraft.loot.function.SetNbtLootFunction;
 import net.minecraft.loot.provider.number.ConstantLootNumberProvider;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.RegistryWrapper;
-import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtList;
+import net.minecraft.registry.Registries;
 import net.minecraft.util.Identifier;
 
 import java.util.List;
-import java.util.Map;
 
 public class LootTableModifier {
 
-    private record StructureLoot(String lootTable, int emptyWeight, int bookWeight, List<RegistryKey<Enchantment>> enchantments) {}
+    private record StructureLoot(String lootTable, int emptyWeight, int bookWeight, List<Enchantment> enchantments) {}
 
     private static final List<StructureLoot> STRUCTURE_LOOT = List.of(
-            // Easy (15% chance)
             new StructureLoot("chests/village/village_temple", 85, 5, List.of(
                     Enchantments.FEATHER_FALLING, ModEnchantments.STEP_UP, Enchantments.KNOCKBACK)),
             new StructureLoot("chests/village/village_weaponsmith", 85, 5, List.of(
@@ -55,7 +52,6 @@ public class LootTableModifier {
             new StructureLoot("chests/shipwreck_supply", 90, 5, List.of(
                     Enchantments.LUCK_OF_THE_SEA)),
 
-            // Medium (25% chance)
             new StructureLoot("chests/simple_dungeon", 75, 12, List.of(
                     Enchantments.KNOCKBACK, Enchantments.THORNS)),
             new StructureLoot("chests/ruined_portal", 75, 12, List.of(
@@ -71,15 +67,14 @@ public class LootTableModifier {
             new StructureLoot("chests/abandoned_mineshaft", 75, 12, List.of(
                     Enchantments.SILK_TOUCH, Enchantments.FORTUNE)),
             new StructureLoot("chests/pillager_outpost", 75, 6, List.of(
-                    Enchantments.MULTISHOT, Enchantments.PIERCING, Enchantments.QUICK_CHARGE, Enchantments.SWEEPING_EDGE)),
+                    Enchantments.MULTISHOT, Enchantments.PIERCING, Enchantments.QUICK_CHARGE, Enchantments.SWEEPING)),
 
-            // Hard (35% chance)
             new StructureLoot("chests/buried_treasure", 65, 17, List.of(
                     Enchantments.RIPTIDE, Enchantments.LOYALTY, Enchantments.DEPTH_STRIDER)),
             new StructureLoot("chests/nether_bridge", 65, 12, List.of(
                     Enchantments.FIRE_ASPECT, Enchantments.FLAME, ModEnchantments.VENOM, Enchantments.LOOTING)),
             new StructureLoot("chests/woodland_mansion", 65, 12, List.of(
-                    Enchantments.SWEEPING_EDGE, Enchantments.LOOTING, ModEnchantments.CURSE_OF_HUNGER, Enchantments.SILK_TOUCH, Enchantments.THORNS)),
+                    Enchantments.SWEEPING, Enchantments.LOOTING, ModEnchantments.CURSE_OF_HUNGER, Enchantments.SILK_TOUCH, Enchantments.THORNS)),
             new StructureLoot("chests/bastion_treasure", 65, 35, List.of(
                     Enchantments.SOUL_SPEED)),
             new StructureLoot("chests/bastion_bridge", 75, 12, List.of(
@@ -95,13 +90,8 @@ public class LootTableModifier {
             new StructureLoot("chests/stronghold_crossing", 75, 12, List.of(
                     Enchantments.INFINITY)),
 
-            // Endgame (50% chance)
             new StructureLoot("chests/ancient_city", 50, 17, List.of(
                     ModEnchantments.VEIL, Enchantments.SWIFT_SNEAK, Enchantments.BINDING_CURSE)),
-            new StructureLoot("chests/trial_chambers/reward_rare", 50, 12, List.of(
-                    Enchantments.WIND_BURST, Enchantments.BREACH, Enchantments.LUNGE, ModEnchantments.LAST_STAND)),
-            new StructureLoot("chests/trial_chambers/reward_ominous_rare", 50, 12, List.of(
-                    Enchantments.WIND_BURST, Enchantments.BREACH, Enchantments.LUNGE, ModEnchantments.LAST_STAND)),
             new StructureLoot("chests/end_city_treasure", 50, 50, List.of(
                     Enchantments.MENDING))
     );
@@ -123,20 +113,18 @@ public class LootTableModifier {
             new TemplateLoot("chests/abandoned_mineshaft", 75, 12, List.of(SmithingTemplates.TEMPERING_TEMPLATE, SmithingTemplates.GRINDING_TEMPLATE)),
             new TemplateLoot("chests/simple_dungeon", 80, 20, List.of(SmithingTemplates.GRINDING_TEMPLATE)),
             new TemplateLoot("chests/desert_pyramid", 75, 25, List.of(SmithingTemplates.GRINDING_TEMPLATE)),
-            new TemplateLoot("chests/ruined_portal", 75, 25, List.of(SmithingTemplates.GRINDING_TEMPLATE)),
-            new TemplateLoot("chests/trial_chambers/reward_rare", 70, 15, List.of(SmithingTemplates.GRINDING_TEMPLATE))
+            new TemplateLoot("chests/ruined_portal", 75, 25, List.of(SmithingTemplates.GRINDING_TEMPLATE))
     );
 
     public static void register() {
-        LootTableEvents.MODIFY.register((key, tableBuilder, source, registries) -> {
+        LootTableEvents.MODIFY.register((resourceManager, lootManager, id, tableBuilder, source) -> {
             if (!source.isBuiltin()) return;
 
-            String path = key.getValue().getPath();
-            RegistryWrapper<Enchantment> enchantmentRegistry = registries.getOrThrow(RegistryKeys.ENCHANTMENT);
+            String path = id.getPath();
 
             for (StructureLoot loot : STRUCTURE_LOOT) {
                 if (!path.equals(loot.lootTable)) continue;
-                addBookPool(tableBuilder, enchantmentRegistry, loot);
+                addBookPool(tableBuilder, loot);
                 break;
             }
 
@@ -148,17 +136,26 @@ public class LootTableModifier {
         });
     }
 
-    private static void addBookPool(LootTable.Builder tableBuilder, RegistryWrapper<Enchantment> registry, StructureLoot loot) {
+    private static void addBookPool(LootTable.Builder tableBuilder, StructureLoot loot) {
         LootPool.Builder pool = LootPool.builder()
                 .rolls(ConstantLootNumberProvider.create(1));
 
         pool.with(EmptyEntry.builder().weight(loot.emptyWeight));
 
-        for (RegistryKey<Enchantment> key : loot.enchantments) {
-            RegistryEntry<Enchantment> entry = registry.getOrThrow(key);
+        for (Enchantment enchantment : loot.enchantments) {
+            Identifier enchId = Registries.ENCHANTMENT.getId(enchantment);
+            if (enchId == null) continue;
+
+            NbtCompound bookNbt = new NbtCompound();
+            NbtList storedEnchantments = new NbtList();
+            NbtCompound enchNbt = new NbtCompound();
+            enchNbt.putString("id", enchId.toString());
+            enchNbt.putShort("lvl", (short) 1);
+            storedEnchantments.add(enchNbt);
+            bookNbt.put("StoredEnchantments", storedEnchantments);
+
             pool.with(ItemEntry.builder(Items.ENCHANTED_BOOK)
-                    .apply(new SetEnchantmentsLootFunction.Builder()
-                            .enchantment(entry, ConstantLootNumberProvider.create(1)))
+                    .apply(SetNbtLootFunction.builder(bookNbt))
                     .weight(loot.bookWeight));
         }
 
