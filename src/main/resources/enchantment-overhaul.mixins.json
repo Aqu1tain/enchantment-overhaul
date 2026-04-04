@@ -1,7 +1,7 @@
 {
     "required": true,
     "package": "com.akitain.enchantmentoverhaul.mixin",
-    "compatibilityLevel": "JAVA_21",
+    "compatibilityLevel": "JAVA_17",
     "mixins": [
         "EnchantmentScreenHandlerMixin",
         "AnvilScreenHandlerMixin",
