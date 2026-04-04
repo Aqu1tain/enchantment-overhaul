@@ -1,8 +1,7 @@
 package com.akitain.enchantmentoverhaul.mixin;
 
 import com.akitain.enchantmentoverhaul.enchant.ModEnchantments;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.ItemEnchantmentsComponent;
+import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
@@ -23,12 +22,8 @@ public class PlayerExhaustionMixin {
         int cursedPieces = 0;
         for (EquipmentSlot slot : ARMOR_SLOTS) {
             ItemStack stack = self.getEquippedStack(slot);
-            ItemEnchantmentsComponent enchantments = stack.getOrDefault(DataComponentTypes.ENCHANTMENTS, ItemEnchantmentsComponent.DEFAULT);
-            for (var entry : enchantments.getEnchantmentEntries()) {
-                if (entry.getKey().matchesKey(ModEnchantments.CURSE_OF_HUNGER)) {
-                    cursedPieces++;
-                    break;
-                }
+            if (EnchantmentHelper.getLevel(ModEnchantments.CURSE_OF_HUNGER, stack) > 0) {
+                cursedPieces++;
             }
         }
         if (cursedPieces == 0) return exhaustion;

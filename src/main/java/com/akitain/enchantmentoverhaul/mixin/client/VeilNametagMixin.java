@@ -2,12 +2,11 @@ package com.akitain.enchantmentoverhaul.mixin.client;
 
 import com.akitain.enchantmentoverhaul.enchant.ModEnchantments;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.render.entity.PlayerEntityRenderer;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.ItemEnchantmentsComponent;
+import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EquipmentSlot;
-import net.minecraft.entity.PlayerLikeEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
@@ -21,17 +20,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(PlayerEntityRenderer.class)
 public class VeilNametagMixin {
 
-    @Inject(method = "hasLabel(Lnet/minecraft/entity/PlayerLikeEntity;D)Z", at = @At("RETURN"), cancellable = true)
-    private void hideVeilNametag(PlayerLikeEntity entity, double squaredDistance, CallbackInfoReturnable<Boolean> cir) {
+    @Inject(method = "hasLabel(Lnet/minecraft/client/network/AbstractClientPlayerEntity;D)Z", at = @At("RETURN"), cancellable = true)
+    private void hideVeilNametag(AbstractClientPlayerEntity entity, double squaredDistance, CallbackInfoReturnable<Boolean> cir) {
         if (!cir.getReturnValue()) return;
 
         ItemStack helmet = entity.getEquippedStack(EquipmentSlot.HEAD);
-        ItemEnchantmentsComponent enchantments = helmet.getOrDefault(DataComponentTypes.ENCHANTMENTS, ItemEnchantmentsComponent.DEFAULT);
-        boolean hasVeil = false;
-        for (var entry : enchantments.getEnchantmentEntries()) {
-            if (entry.getKey().matchesKey(ModEnchantments.VEIL)) { hasVeil = true; break; }
-        }
-        if (!hasVeil) return;
+        if (EnchantmentHelper.getLevel(ModEnchantments.VEIL, helmet) <= 0) return;
 
         MinecraftClient client = MinecraftClient.getInstance();
         Entity camera = client.getCameraEntity();
@@ -39,7 +33,7 @@ public class VeilNametagMixin {
 
         Vec3d start = camera.getEyePos();
         Vec3d end = entity.getEyePos();
-        BlockHitResult hit = entity.getEntityWorld().raycast(new RaycastContext(
+        BlockHitResult hit = entity.getWorld().raycast(new RaycastContext(
                 start, end, RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, camera));
         if (hit.getType() == HitResult.Type.BLOCK) {
             cir.setReturnValue(false);
