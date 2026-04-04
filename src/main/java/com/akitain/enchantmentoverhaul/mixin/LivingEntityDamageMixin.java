@@ -39,7 +39,7 @@ public class LivingEntityDamageMixin {
         }
         if (totalEpf <= 0) return 1.0f;
         int capped = Math.min(totalEpf, 20);
-        return 1.0f - (capped / 25.0f);
+        return 1.0f - (capped * 0.032f);
     }
 
     private static float getLastStandMultiplier(LivingEntity entity) {
