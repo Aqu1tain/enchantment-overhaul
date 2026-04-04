@@ -1,0 +1,7 @@
+{
+  "replace": true,
+  "values": [
+    "minecraft:librarian/3/ink_sac_emerald",
+    "minecraft:librarian/3/emerald_glass"
+  ]
+}

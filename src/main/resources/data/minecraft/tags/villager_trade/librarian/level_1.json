@@ -1,0 +1,9 @@
+{
+  "replace": true,
+  "values": [
+    "minecraft:librarian/1/paper_emerald",
+    "enchantment-overhaul:librarian/1/emerald_feather_falling_book",
+    "enchantment-overhaul:librarian/1/emerald_knockback_book",
+    "minecraft:librarian/1/emerald_bookshelf"
+  ]
+}

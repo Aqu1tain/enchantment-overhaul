@@ -1,0 +1,24 @@
+{
+  "given_item_modifiers": [
+    {
+      "function": "minecraft:set_enchantments",
+      "enchantments": {
+        "enchantment-overhaul:step_up": 1
+      }
+    }
+  ],
+  "gives": {
+    "id": "minecraft:enchanted_book"
+  },
+  "max_uses": 3,
+  "reputation_discount": 0.05,
+  "wants": {
+    "count": {
+      "type": "minecraft:uniform",
+      "min": 10.0,
+      "max": 30.0
+    },
+    "id": "minecraft:emerald"
+  },
+  "xp": 10
+}
