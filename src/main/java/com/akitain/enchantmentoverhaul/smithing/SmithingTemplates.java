@@ -6,12 +6,9 @@ import net.minecraft.item.Items;
 import net.minecraft.item.SmithingTemplateItem;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.Rarity;
 
 import java.util.List;
 import java.util.Map;
@@ -20,24 +17,23 @@ public class SmithingTemplates {
 
     private static final Formatting DESC = Formatting.BLUE;
 
-    private static final Identifier SLOT_HELMET = Identifier.ofVanilla("container/slot/helmet");
-    private static final Identifier SLOT_CHESTPLATE = Identifier.ofVanilla("container/slot/chestplate");
-    private static final Identifier SLOT_LEGGINGS = Identifier.ofVanilla("container/slot/leggings");
-    private static final Identifier SLOT_BOOTS = Identifier.ofVanilla("container/slot/boots");
-    private static final Identifier SLOT_SWORD = Identifier.ofVanilla("container/slot/sword");
-    private static final Identifier SLOT_PICKAXE = Identifier.ofVanilla("container/slot/pickaxe");
-    private static final Identifier SLOT_AXE = Identifier.ofVanilla("container/slot/axe");
-    private static final Identifier SLOT_SHOVEL = Identifier.ofVanilla("container/slot/shovel");
-    private static final Identifier SLOT_HOE = Identifier.ofVanilla("container/slot/hoe");
-    private static final Identifier SLOT_SPEAR = Identifier.ofVanilla("container/slot/spear");
-    private static final Identifier SLOT_INGOT = Identifier.ofVanilla("container/slot/ingot");
+    private static final Identifier SLOT_HELMET = new Identifier("item/empty_armor_slot_helmet");
+    private static final Identifier SLOT_CHESTPLATE = new Identifier("item/empty_armor_slot_chestplate");
+    private static final Identifier SLOT_LEGGINGS = new Identifier("item/empty_armor_slot_leggings");
+    private static final Identifier SLOT_BOOTS = new Identifier("item/empty_armor_slot_boots");
+    private static final Identifier SLOT_SWORD = new Identifier("item/empty_slot_sword");
+    private static final Identifier SLOT_PICKAXE = new Identifier("item/empty_slot_pickaxe");
+    private static final Identifier SLOT_AXE = new Identifier("item/empty_slot_axe");
+    private static final Identifier SLOT_SHOVEL = new Identifier("item/empty_slot_shovel");
+    private static final Identifier SLOT_HOE = new Identifier("item/empty_slot_hoe");
+    private static final Identifier SLOT_INGOT = new Identifier("item/empty_slot_ingot");
 
     private static final List<Identifier> ARMOR_SLOTS = List.of(SLOT_HELMET, SLOT_CHESTPLATE, SLOT_LEGGINGS, SLOT_BOOTS);
-    private static final List<Identifier> WEAPON_SLOTS = List.of(SLOT_SWORD, SLOT_AXE, SLOT_SPEAR);
+    private static final List<Identifier> WEAPON_SLOTS = List.of(SLOT_SWORD, SLOT_AXE);
     private static final List<Identifier> TOOL_SLOTS = List.of(SLOT_PICKAXE, SLOT_AXE, SLOT_SHOVEL, SLOT_HOE);
     private static final List<Identifier> ALL_EQUIPMENT_SLOTS = List.of(
             SLOT_HELMET, SLOT_CHESTPLATE, SLOT_LEGGINGS, SLOT_BOOTS,
-            SLOT_SWORD, SLOT_PICKAXE, SLOT_AXE, SLOT_SHOVEL, SLOT_HOE, SLOT_SPEAR);
+            SLOT_SWORD, SLOT_PICKAXE, SLOT_AXE, SLOT_SHOVEL, SLOT_HOE);
     private static final List<Identifier> MATERIAL_SLOTS = List.of(SLOT_INGOT);
 
     private static Text appliesTo(String key) {
@@ -54,6 +50,10 @@ public class SmithingTemplates {
 
     private static Text additionsSlot(String key) {
         return Text.translatable("item." + EnchantmentOverhaul.MOD_ID + ".smithing_template." + key + ".additions_slot_description");
+    }
+
+    private static Text title(String key) {
+        return Text.translatable("item." + EnchantmentOverhaul.MOD_ID + "." + key);
     }
 
     public static final Item HONING_TEMPLATE = register("honing_template",
@@ -109,11 +109,10 @@ public class SmithingTemplates {
     private static Item register(String name, Text appliesTo, Text ingredients,
                                   Text baseSlotDesc, Text additionsSlotDesc,
                                   List<Identifier> baseSlotTextures, List<Identifier> additionsSlotTextures) {
-        Identifier id = Identifier.of(EnchantmentOverhaul.MOD_ID, name);
-        RegistryKey<Item> key = RegistryKey.of(RegistryKeys.ITEM, id);
-        return Registry.register(Registries.ITEM, key,
-                new SmithingTemplateItem(appliesTo, ingredients, baseSlotDesc, additionsSlotDesc,
-                        baseSlotTextures, additionsSlotTextures, new Item.Settings().registryKey(key).rarity(Rarity.UNCOMMON)));
+        Identifier id = new Identifier(EnchantmentOverhaul.MOD_ID, name);
+        return Registry.register(Registries.ITEM, id,
+                new SmithingTemplateItem(appliesTo, ingredients, title(name), baseSlotDesc, additionsSlotDesc,
+                        baseSlotTextures, additionsSlotTextures));
     }
 
     public static void register() {}
