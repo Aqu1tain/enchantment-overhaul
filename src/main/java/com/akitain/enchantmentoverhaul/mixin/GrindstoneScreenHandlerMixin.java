@@ -15,7 +15,7 @@ import java.util.Map;
 public class GrindstoneScreenHandlerMixin {
 
     @Inject(method = "grind", at = @At("RETURN"))
-    private void applySlotPenalty(ItemStack item, CallbackInfoReturnable<ItemStack> cir) {
+    private void applySlotPenalty(ItemStack item, int damage, int seed, CallbackInfoReturnable<ItemStack> cir) {
         ItemStack result = cir.getReturnValue();
         if (result.isEmpty()) return;
 
