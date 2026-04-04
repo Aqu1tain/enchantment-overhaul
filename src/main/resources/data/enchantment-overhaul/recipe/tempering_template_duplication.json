@@ -6,9 +6,9 @@
     "CCC"
   ],
   "key": {
-    "C": "minecraft:copper_ingot",
-    "M": "minecraft:coal",
-    "T": "enchantment-overhaul:tempering_template"
+    "C": {"item": "minecraft:copper_ingot"},
+    "M": {"item": "minecraft:coal"},
+    "T": {"item": "enchantment-overhaul:tempering_template"}
   },
   "result": {
     "id": "enchantment-overhaul:tempering_template",

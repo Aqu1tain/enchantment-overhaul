@@ -1,9 +1,15 @@
 {
   "type": "minecraft:smithing_transform",
-  "template": "#enchantment-overhaul:smithing_templates",
-  "base": "#minecraft:enchantable/durability",
-  "addition": "#enchantment-overhaul:smithing_materials",
+  "template": {
+    "tag": "enchantment-overhaul:smithing_templates"
+  },
+  "base": {
+    "tag": "enchantment-overhaul:smithing_materials"
+  },
+  "addition": {
+    "tag": "enchantment-overhaul:smithing_materials"
+  },
   "result": {
-    "id": "minecraft:iron_sword"
+    "item": "minecraft:iron_sword"
   }
 }

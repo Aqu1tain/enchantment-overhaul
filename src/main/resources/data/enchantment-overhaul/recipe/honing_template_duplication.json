@@ -6,9 +6,9 @@
     "CCC"
   ],
   "key": {
-    "C": "minecraft:copper_ingot",
-    "M": "minecraft:flint",
-    "T": "enchantment-overhaul:honing_template"
+    "C": {"item": "minecraft:copper_ingot"},
+    "M": {"item": "minecraft:flint"},
+    "T": {"item": "enchantment-overhaul:honing_template"}
   },
   "result": {
     "id": "enchantment-overhaul:honing_template",

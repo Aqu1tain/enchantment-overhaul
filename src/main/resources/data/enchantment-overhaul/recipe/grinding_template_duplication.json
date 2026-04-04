@@ -6,9 +6,9 @@
     "CCC"
   ],
   "key": {
-    "C": "minecraft:copper_ingot",
-    "M": "minecraft:stone",
-    "T": "enchantment-overhaul:grinding_template"
+    "C": {"item": "minecraft:copper_ingot"},
+    "M": {"item": "minecraft:stone"},
+    "T": {"item": "enchantment-overhaul:grinding_template"}
   },
   "result": {
     "id": "enchantment-overhaul:grinding_template",

@@ -96,7 +96,7 @@
               "function": "minecraft:set_count"
             }
           ],
-          "name": "minecraft:dried_ghast",
+          "name": "minecraft:magma_cream",
           "weight": 10
         },
         {
@@ -256,6 +256,5 @@
       ],
       "rolls": 1.0
     }
-  ],
-  "random_sequence": "minecraft:gameplay/piglin_bartering"
+  ]
 }

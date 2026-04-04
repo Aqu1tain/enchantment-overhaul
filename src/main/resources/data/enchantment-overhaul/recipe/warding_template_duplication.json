@@ -6,9 +6,9 @@
     "CCC"
   ],
   "key": {
-    "C": "minecraft:copper_ingot",
-    "M": "minecraft:iron_nugget",
-    "T": "enchantment-overhaul:warding_template"
+    "C": {"item": "minecraft:copper_ingot"},
+    "M": {"item": "minecraft:iron_nugget"},
+    "T": {"item": "enchantment-overhaul:warding_template"}
   },
   "result": {
     "id": "enchantment-overhaul:warding_template",
