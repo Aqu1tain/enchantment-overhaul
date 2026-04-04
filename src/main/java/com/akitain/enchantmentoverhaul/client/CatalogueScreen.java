@@ -131,6 +131,8 @@ public class CatalogueScreen extends AbstractContainerScreen<CatalogueScreenHand
         drawCatalogue(gfx, x, y, mouseX, mouseY);
         drawSlotBar(gfx, x, y);
         drawPlayerSlotBorders(gfx, x, y);
+
+        super.extractContents(gfx, mouseX, mouseY, deltaTicks);
     }
 
     @Override
