@@ -37,7 +37,7 @@ public class EnchantingTableParticleMixin {
             }
             if (!hasBook) continue;
 
-            world.addParticleClient(
+            world.addParticle(
                     ParticleTypes.ENCHANT,
                     pos.getX() + 0.5,
                     pos.getY() + 2.0,

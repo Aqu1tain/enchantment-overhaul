@@ -7,6 +7,7 @@ import com.akitain.enchantmentoverhaul.smithing.UpgradeType;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback;
 import net.minecraft.client.gui.screen.ingame.HandledScreens;
+import net.minecraft.item.ArmorItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
@@ -17,7 +18,7 @@ public class EnchantmentOverhaulClient implements ClientModInitializer {
     public void onInitializeClient() {
         HandledScreens.register(ModScreenHandlers.CATALOGUE, CatalogueScreen::new);
 
-        ItemTooltipCallback.EVENT.register((stack, context, type, lines) -> {
+        ItemTooltipCallback.EVENT.register((stack, context, lines) -> {
             addUpgradeLines(stack, lines);
             addInnatePropertyLine(stack, lines);
         });
@@ -36,12 +37,11 @@ public class EnchantmentOverhaulClient implements ClientModInitializer {
     }
 
     private static void addInnatePropertyLine(ItemStack stack, java.util.List<Text> lines) {
-        if (!stack.isIn(net.minecraft.registry.tag.ItemTags.ARMOR_ENCHANTABLE)) return;
+        if (!(stack.getItem() instanceof ArmorItem)) return;
         String material = InnateMaterialProperties.getMaterial(stack);
         if (material == null) return;
         String name = InnateMaterialProperties.getResistanceName(material);
         if (name == null) return;
         lines.add(Text.literal(name + " (5% per piece)").formatted(Formatting.DARK_AQUA));
     }
-
 }

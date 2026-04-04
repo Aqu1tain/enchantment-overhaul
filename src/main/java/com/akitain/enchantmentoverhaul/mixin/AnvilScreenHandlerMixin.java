@@ -96,7 +96,7 @@ public abstract class AnvilScreenHandlerMixin extends ForgingScreenHandler {
     }
 
     private boolean tryRepair(ItemStack first, ItemStack second, ItemStack result) {
-        if (second.isEmpty() || !first.isDamageable() || !first.canRepairWith(second)) return false;
+        if (second.isEmpty() || !first.isDamageable() || !first.getItem().canRepair(first, second)) return false;
 
         int damage = first.getDamage();
         int repairPerUnit = first.getMaxDamage() / 4;
