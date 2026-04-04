@@ -76,7 +76,7 @@ public class CatalogueScreen extends AbstractContainerScreen<CatalogueScreenHand
 
     private final String[] sgaRows = new String[20];
 
-    private static final Identifier BOOK_TEXTURE = Identifier.withDefaultNamespace("textures/entity/enchanting_table_book.png");
+    private static final Identifier BOOK_TEXTURE = Identifier.withDefaultNamespace("textures/entity/enchantment/enchanting_table_book.png");
 
     private net.minecraft.client.model.object.book.BookModel bookModel;
     private float scrollAmount;
