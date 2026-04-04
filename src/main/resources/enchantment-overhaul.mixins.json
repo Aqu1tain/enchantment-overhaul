@@ -25,6 +25,8 @@
         "RepairItemRecipeMixin",
         "RaidEnchantmentMixin",
         "FarmlandTrampleMixin",
+        "VenomAttackMixin",
+        "GrindingSpeedMixin",
         "accessor.EntityAccessor"
     ],
     "client": [
