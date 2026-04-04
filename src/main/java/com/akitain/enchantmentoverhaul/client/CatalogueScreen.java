@@ -76,6 +76,9 @@ public class CatalogueScreen extends AbstractContainerScreen<CatalogueScreenHand
 
     private final String[] sgaRows = new String[20];
 
+    private static final Identifier BOOK_TEXTURE = Identifier.withDefaultNamespace("textures/entity/enchanting_table_book.png");
+
+    private net.minecraft.client.model.object.book.BookModel bookModel;
     private float scrollAmount;
     private int scrollOffset;
     private boolean scrolling;
@@ -94,6 +97,8 @@ public class CatalogueScreen extends AbstractContainerScreen<CatalogueScreenHand
     protected void init() {
         super.init();
         menu.rebuildEntries();
+        bookModel = new net.minecraft.client.model.object.book.BookModel(
+                net.minecraft.client.model.object.book.BookModel.createBodyLayer().bakeRoot());
     }
 
     @Override
@@ -119,6 +124,7 @@ public class CatalogueScreen extends AbstractContainerScreen<CatalogueScreenHand
         int x = this.leftPos, y = this.topPos;
 
         drawRoundedFrame(gfx, x, y, BG_W, BG_H);
+        drawBook(gfx, x, y);
         drawInputSlots(gfx, x, y);
         drawArrow(gfx, x, y);
         drawOutputSlot(gfx, x, y);
@@ -154,6 +160,13 @@ public class CatalogueScreen extends AbstractContainerScreen<CatalogueScreenHand
                         x + slot.x, y + slot.y, 16, 16);
             }
         }
+    }
+
+    private void drawBook(GuiGraphicsExtractor gfx, int x, int y) {
+        if (bookModel == null) return;
+        int bx = x + BOOK_X;
+        int by = y + BOOK_Y;
+        gfx.book(bookModel, BOOK_TEXTURE, 40.0f, 0.9f, 0.1f, bx, by, bx + 50, by + 40);
     }
 
     private void drawArrow(GuiGraphicsExtractor gfx, int x, int y) {
