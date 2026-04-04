@@ -5,6 +5,7 @@
     "name": "Enchantment Overhaul",
     "description": "Separates enchanting into three distinct systems: Smithing Table for stats, innate material properties, and a reworked Enchanting Table for magic only.",
     "authors": ["Aqu1tain"],
+    "contributors": ["LolloNapo"],
     "contact": {
         "sources": "https://github.com/Aqu1tain/enchantment-overhaul"
     },

@@ -14,6 +14,11 @@ The mod adds 6 new enchantments, reworks the anvil into a maintenance station, a
 
 See the [Wiki](https://github.com/Aqu1tain/enchantment-overhaul/wiki) for detailed system documentation.
 
+## Credits
+
+- **Aqu1tain** — design and development
+- **LolloNapo** — textures and art
+
 ## Requirements
 
 - Minecraft 1.21.11
