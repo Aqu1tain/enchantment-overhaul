@@ -2,27 +2,26 @@ package com.akitain.enchantmentoverhaul.enchant;
 
 import com.akitain.enchantmentoverhaul.component.ModComponents;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.ItemEnchantmentsComponent;
-import net.minecraft.enchantment.Enchantment;
-import net.minecraft.registry.tag.EnchantmentTags;
-import net.minecraft.enchantment.Enchantments;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.entry.RegistryEntry;
-
 import java.util.Map;
 import java.util.Set;
+import net.minecraft.core.Holder;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.tags.EnchantmentTags;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.item.enchantment.Enchantments;
+import net.minecraft.world.item.enchantment.ItemEnchantments;
 
 public class SlotSystem {
 
     public static int getBaseMaxSlots(ItemStack stack) {
-        if (!stack.isDamageable()) return 0;
+        if (!stack.isDamageableItem()) return 0;
 
         Item item = stack.getItem();
-        String id = Registries.ITEM.getId(item).getPath();
+        String id = BuiltInRegistries.ITEM.getKey(item).getPath();
 
         if (id.startsWith("netherite_")) return 5;
         if (id.startsWith("diamond_")) return 5;
@@ -47,20 +46,20 @@ public class SlotSystem {
 
     public static int getCurseBonus(ItemStack stack) {
         int bonus = 0;
-        for (Object2IntMap.Entry<RegistryEntry<Enchantment>> entry : getEnchantments(stack).getEnchantmentEntries()) {
-            if (entry.getKey().isIn(EnchantmentTags.CURSE)) bonus++;
+        for (Object2IntMap.Entry<Holder<Enchantment>> entry : getEnchantments(stack).entrySet()) {
+            if (entry.getKey().is(EnchantmentTags.CURSE)) bonus++;
         }
         return bonus;
     }
 
     public static int getUsedSlots(ItemStack stack) {
         int used = 0;
-        for (Object2IntMap.Entry<RegistryEntry<Enchantment>> entry : getEnchantments(stack).getEnchantmentEntries()) {
-            RegistryEntry<Enchantment> enchantment = entry.getKey();
+        for (Object2IntMap.Entry<Holder<Enchantment>> entry : getEnchantments(stack).entrySet()) {
+            Holder<Enchantment> enchantment = entry.getKey();
             int level = entry.getIntValue();
 
-            if (enchantment.isIn(EnchantmentTags.CURSE)) continue;
-            if (enchantment.matchesKey(Enchantments.MENDING)) { used += 3; continue; }
+            if (enchantment.is(EnchantmentTags.CURSE)) continue;
+            if (enchantment.is(Enchantments.MENDING)) { used += 3; continue; }
 
             used += level;
         }
@@ -75,14 +74,14 @@ public class SlotSystem {
         return getMaxSlots(stack) - getUsedSlots(stack);
     }
 
-    public static boolean canApplyEnchantment(ItemStack stack, RegistryEntry<Enchantment> enchantment, int level) {
-        int cost = enchantment.matchesKey(Enchantments.MENDING) ? 3 : level;
-        if (enchantment.isIn(EnchantmentTags.CURSE)) cost = 0;
+    public static boolean canApplyEnchantment(ItemStack stack, Holder<Enchantment> enchantment, int level) {
+        int cost = enchantment.is(Enchantments.MENDING) ? 3 : level;
+        if (enchantment.is(EnchantmentTags.CURSE)) cost = 0;
         return cost <= getAvailableSlots(stack);
     }
 
-    private static ItemEnchantmentsComponent getEnchantments(ItemStack stack) {
-        return stack.getOrDefault(DataComponentTypes.ENCHANTMENTS, ItemEnchantmentsComponent.DEFAULT);
+    private static ItemEnchantments getEnchantments(ItemStack stack) {
+        return stack.getOrDefault(DataComponents.ENCHANTMENTS, ItemEnchantments.EMPTY);
     }
 
     private static boolean hasEnchantments(ItemStack stack) {

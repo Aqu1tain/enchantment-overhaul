@@ -2,19 +2,19 @@ package com.akitain.enchantmentoverhaul.mixin;
 
 import com.akitain.enchantmentoverhaul.component.ModComponents;
 import com.akitain.enchantmentoverhaul.enchant.SlotSystem;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.registry.Registries;
-import net.minecraft.screen.AnvilScreenHandler;
-import net.minecraft.screen.ForgingScreenHandler;
-import net.minecraft.screen.Property;
-import net.minecraft.screen.ScreenHandlerContext;
-import net.minecraft.screen.ScreenHandlerType;
-import net.minecraft.screen.slot.ForgingSlotsManager;
-import net.minecraft.text.Text;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.inventory.AnvilMenu;
+import net.minecraft.world.inventory.ContainerLevelAccess;
+import net.minecraft.world.inventory.DataSlot;
+import net.minecraft.world.inventory.ItemCombinerMenu;
+import net.minecraft.world.inventory.ItemCombinerMenuSlotDefinition;
+import net.minecraft.world.inventory.MenuType;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -23,20 +23,20 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(AnvilScreenHandler.class)
-public abstract class AnvilScreenHandlerMixin extends ForgingScreenHandler {
+@Mixin(AnvilMenu.class)
+public abstract class AnvilScreenHandlerMixin extends ItemCombinerMenu {
 
-    @Shadow @Nullable private String newItemName;
-    @Shadow @Final private Property levelCost;
+    @Shadow @Nullable private String itemName;
+    @Shadow @Final private DataSlot cost;
 
-    private AnvilScreenHandlerMixin(@Nullable ScreenHandlerType<?> type, int syncId, PlayerInventory playerInventory, ScreenHandlerContext context, ForgingSlotsManager forgingSlotsManager) {
+    private AnvilScreenHandlerMixin(@Nullable MenuType<?> type, int syncId, Inventory playerInventory, ContainerLevelAccess context, ItemCombinerMenuSlotDefinition forgingSlotsManager) {
         super(type, syncId, playerInventory, context, forgingSlotsManager);
     }
 
-    @Inject(method = "updateResult", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "createResult", at = @At("HEAD"), cancellable = true)
     private void replaceAnvilLogic(CallbackInfo ci) {
-        ItemStack first = this.input.getStack(0);
-        ItemStack second = this.input.getStack(1);
+        ItemStack first = this.inputSlots.getItem(0);
+        ItemStack second = this.inputSlots.getItem(1);
 
         if (first.isEmpty()) {
             clearOutput(ci);
@@ -57,9 +57,9 @@ public abstract class AnvilScreenHandlerMixin extends ForgingScreenHandler {
             return;
         }
 
-        result.remove(DataComponentTypes.REPAIR_COST);
-        this.levelCost.set(Math.max(1, restoreCost));
-        this.output.setStack(0, result);
+        result.remove(DataComponents.REPAIR_COST);
+        this.cost.set(Math.max(1, restoreCost));
+        this.resultSlots.setItem(0, result);
         ci.cancel();
     }
 
@@ -68,14 +68,14 @@ public abstract class AnvilScreenHandlerMixin extends ForgingScreenHandler {
         if (penalty <= 0 || second.isEmpty()) return 0;
 
         Item repairIngot = getRepairIngot(first);
-        if (repairIngot == null || !second.isOf(repairIngot)) return 0;
+        if (repairIngot == null || !second.is(repairIngot)) return 0;
 
         result.set(ModComponents.GRINDSTONE_PENALTY, penalty - 1);
         return getRestoreCost(first);
     }
 
     private static Item getRepairIngot(ItemStack stack) {
-        String id = Registries.ITEM.getId(stack.getItem()).getPath();
+        String id = BuiltInRegistries.ITEM.getKey(stack.getItem()).getPath();
         if (id.startsWith("netherite_")) return Items.NETHERITE_INGOT;
         if (id.startsWith("diamond_")) return Items.DIAMOND;
         if (id.startsWith("golden_")) return Items.GOLD_INGOT;
@@ -88,7 +88,7 @@ public abstract class AnvilScreenHandlerMixin extends ForgingScreenHandler {
     }
 
     private static int getRestoreCost(ItemStack stack) {
-        String id = Registries.ITEM.getId(stack.getItem()).getPath();
+        String id = BuiltInRegistries.ITEM.getKey(stack.getItem()).getPath();
         if (id.startsWith("netherite_")) return 10;
         if (id.startsWith("diamond_")) return 8;
         if (id.startsWith("golden_")) return 5;
@@ -98,36 +98,36 @@ public abstract class AnvilScreenHandlerMixin extends ForgingScreenHandler {
     }
 
     private boolean tryRepair(ItemStack first, ItemStack second, ItemStack result) {
-        if (second.isEmpty() || !first.isDamageable() || !first.canRepairWith(second)) return false;
+        if (second.isEmpty() || !first.isDamageableItem() || !first.isValidRepairItem(second)) return false;
 
-        int damage = first.getDamage();
+        int damage = first.getDamageValue();
         int repairPerUnit = first.getMaxDamage() / 4;
 
         for (int i = 0; i < second.getCount() && damage > 0; i++) {
             damage = Math.max(0, damage - repairPerUnit);
         }
 
-        if (damage >= first.getDamage()) return false;
+        if (damage >= first.getDamageValue()) return false;
 
-        result.setDamage(damage);
+        result.setDamageValue(damage);
         return true;
     }
 
     private boolean tryRename(ItemStack first, ItemStack result) {
-        if (this.newItemName != null && !this.newItemName.isBlank()) {
-            if (this.newItemName.equals(first.getName().getString())) return false;
-            result.set(DataComponentTypes.CUSTOM_NAME, Text.literal(this.newItemName));
+        if (this.itemName != null && !this.itemName.isBlank()) {
+            if (this.itemName.equals(first.getHoverName().getString())) return false;
+            result.set(DataComponents.CUSTOM_NAME, Component.literal(this.itemName));
             return true;
         }
 
-        if (!first.contains(DataComponentTypes.CUSTOM_NAME)) return false;
-        result.remove(DataComponentTypes.CUSTOM_NAME);
+        if (!first.has(DataComponents.CUSTOM_NAME)) return false;
+        result.remove(DataComponents.CUSTOM_NAME);
         return true;
     }
 
     private void clearOutput(CallbackInfo ci) {
-        this.output.setStack(0, ItemStack.EMPTY);
-        this.levelCost.set(0);
+        this.resultSlots.setItem(0, ItemStack.EMPTY);
+        this.cost.set(0);
         ci.cancel();
     }
 }

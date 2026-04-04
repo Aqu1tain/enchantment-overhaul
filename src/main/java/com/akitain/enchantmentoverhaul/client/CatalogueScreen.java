@@ -6,34 +6,33 @@ import com.akitain.enchantmentoverhaul.enchant.EnchantmentCosts;
 import com.akitain.enchantmentoverhaul.enchant.SlotSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.Click;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.ingame.HandledScreen;
-import net.minecraft.client.gl.RenderPipelines;
-import net.minecraft.client.render.entity.model.BookModel;
-import net.minecraft.client.sound.PositionedSoundInstance;
-import net.minecraft.enchantment.Enchantment;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.tag.EnchantmentTags;
-import net.minecraft.screen.slot.Slot;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.text.Style;
-import net.minecraft.text.StyleSpriteSource;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.MathHelper;
-
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.model.object.book.BookModel;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.FontDescription;
+import net.minecraft.network.chat.Style;
+import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.tags.EnchantmentTags;
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.enchantment.Enchantment;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
 @Environment(EnvType.CLIENT)
-public class CatalogueScreen extends HandledScreen<CatalogueScreenHandler> {
+public class CatalogueScreen extends AbstractContainerScreen<CatalogueScreenHandler> {
 
     private static final int BG_W = 176;
     private static final int BG_H = 200;
@@ -69,14 +68,14 @@ public class CatalogueScreen extends HandledScreen<CatalogueScreenHandler> {
     private static final int BORDER_D = 0xFF373737;
     private static final int ARROW_COLOR = 0xFF9E9E9E;
 
-    private static final Identifier SLOT_SWORD = Identifier.ofVanilla("container/slot/sword");
-    private static final Identifier SLOT_AMETHYST = Identifier.ofVanilla("container/slot/amethyst_shard");
-    private static final Identifier BOOK_TEXTURE = Identifier.ofVanilla("textures/entity/enchanting_table_book.png");
+    private static final Identifier SLOT_SWORD = Identifier.withDefaultNamespace("container/slot/sword");
+    private static final Identifier SLOT_AMETHYST = Identifier.withDefaultNamespace("container/slot/amethyst_shard");
+    private static final Identifier BOOK_TEXTURE = Identifier.withDefaultNamespace("textures/entity/enchanting_table_book.png");
 
     private static final Identifier[] SLOT_PLACEHOLDERS = { SLOT_SWORD, SLOT_AMETHYST };
 
     private static final Style SGA_STYLE = Style.EMPTY
-            .withFont(new StyleSpriteSource.Font(Identifier.of("minecraft", "alt")));
+            .withFont(new FontDescription.Resource(Identifier.fromNamespaceAndPath("minecraft", "alt")));
     private static final String SGA_CHARS = "abcdefghijklmnopqrstuvwxyz";
 
     private final String[] sgaRows = new String[20];
@@ -87,38 +86,38 @@ public class CatalogueScreen extends HandledScreen<CatalogueScreenHandler> {
     private boolean scrolling;
     private ItemStack lastItem = ItemStack.EMPTY;
 
-    public CatalogueScreen(CatalogueScreenHandler handler, PlayerInventory inventory, Text title) {
+    public CatalogueScreen(CatalogueScreenHandler handler, Inventory inventory, Component title) {
         super(handler, inventory, title);
-        this.backgroundWidth = BG_W;
-        this.backgroundHeight = BG_H;
-        this.titleX = 8;
-        this.titleY = 6;
-        this.playerInventoryTitleX = 7;
-        this.playerInventoryTitleY = 110;
+        this.imageWidth = BG_W;
+        this.imageHeight = BG_H;
+        this.titleLabelX = 8;
+        this.titleLabelY = 6;
+        this.inventoryLabelX = 7;
+        this.inventoryLabelY = 110;
         for (int i = 0; i < sgaRows.length; i++) sgaRows[i] = randomSga(18);
     }
 
     @Override
     protected void init() {
         super.init();
-        handler.rebuildEntries();
-        bookModel = new BookModel(BookModel.getTexturedModelData().createModel());
+        menu.rebuildEntries();
+        bookModel = new BookModel(BookModel.createBodyLayer().bakeRoot());
     }
 
     @Override
-    public void render(DrawContext context, int mouseX, int mouseY, float deltaTicks) {
+    public void render(GuiGraphics context, int mouseX, int mouseY, float deltaTicks) {
         checkItemChanged();
         super.render(context, mouseX, mouseY, deltaTicks);
-        context.drawText(textRenderer, this.title, this.x + titleX, this.y + titleY, 0xFF404040, false);
+        context.drawString(font, this.title, this.leftPos + titleLabelX, this.topPos + titleLabelY, 0xFF404040, false);
         drawCatalogueTooltip(context, mouseX, mouseY);
-        drawMouseoverTooltip(context, mouseX, mouseY);
+        renderTooltip(context, mouseX, mouseY);
     }
 
     private void checkItemChanged() {
-        ItemStack current = handler.getSlot(0).getStack();
-        if (!ItemStack.areEqual(current, lastItem)) {
+        ItemStack current = menu.getSlot(0).getItem();
+        if (!ItemStack.matches(current, lastItem)) {
             lastItem = current.copy();
-            handler.rebuildEntries();
+            menu.rebuildEntries();
             scrollAmount = 0;
             scrollOffset = 0;
         }
@@ -127,8 +126,8 @@ public class CatalogueScreen extends HandledScreen<CatalogueScreenHandler> {
     // --- Drawing ---
 
     @Override
-    protected void drawBackground(DrawContext context, float deltaTicks, int mouseX, int mouseY) {
-        int x = this.x, y = this.y;
+    protected void renderBg(GuiGraphics context, float deltaTicks, int mouseX, int mouseY) {
+        int x = this.leftPos, y = this.topPos;
 
         drawRoundedFrame(context, x, y, BG_W, BG_H);
         drawBook(context, x, y);
@@ -141,11 +140,11 @@ public class CatalogueScreen extends HandledScreen<CatalogueScreenHandler> {
     }
 
     @Override
-    protected void drawForeground(DrawContext context, int mouseX, int mouseY) {
-        context.drawText(textRenderer, this.playerInventoryTitle, playerInventoryTitleX, playerInventoryTitleY, 0x404040, false);
+    protected void renderLabels(GuiGraphics context, int mouseX, int mouseY) {
+        context.drawString(font, this.playerInventoryTitle, inventoryLabelX, inventoryLabelY, 0x404040, false);
     }
 
-    private void drawRoundedFrame(DrawContext ctx, int x, int y, int w, int h) {
+    private void drawRoundedFrame(GuiGraphics ctx, int x, int y, int w, int h) {
         int L = BORDER_L, D = BORDER_D;
 
         ctx.fill(x + 2, y + 2, x + w - 2, y + h - 2, BG);
@@ -163,26 +162,26 @@ public class CatalogueScreen extends HandledScreen<CatalogueScreenHandler> {
         ctx.fill(x + w - 1, y + 1, x + w, y + h - 1, D);
     }
 
-    private void drawBook(DrawContext context, int x, int y) {
+    private void drawBook(GuiGraphics context, int x, int y) {
         if (bookModel == null) return;
         int bx = x + BOOK_X;
         int by = y + BOOK_Y;
-        context.addBookModel(bookModel, BOOK_TEXTURE, 40.0f, 0.9f, 0.1f,
+        context.submitBookModelRenderState(bookModel, BOOK_TEXTURE, 40.0f, 0.9f, 0.1f,
                 bx, by, bx + 50, by + 40);
     }
 
-    private void drawInputSlots(DrawContext context, int x, int y) {
+    private void drawInputSlots(GuiGraphics context, int x, int y) {
         for (int i = 0; i < 2; i++) {
-            Slot slot = handler.slots.get(i);
+            Slot slot = menu.slots.get(i);
             slotBorder(context, x + slot.x - 1, y + slot.y - 1);
-            if (slot.getStack().isEmpty()) {
-                context.drawGuiTexture(RenderPipelines.GUI_TEXTURED, SLOT_PLACEHOLDERS[i],
+            if (slot.getItem().isEmpty()) {
+                context.blitSprite(RenderPipelines.GUI_TEXTURED, SLOT_PLACEHOLDERS[i],
                         x + slot.x, y + slot.y, 16, 16);
             }
         }
     }
 
-    private void drawArrow(DrawContext context, int x, int y) {
+    private void drawArrow(GuiGraphics context, int x, int y) {
         int cx = x + 28;
         int ay = y + 78;
         context.fill(cx - 1, ay, cx + 1, ay + 3, ARROW_COLOR);
@@ -191,30 +190,30 @@ public class CatalogueScreen extends HandledScreen<CatalogueScreenHandler> {
         context.fill(cx - 1, ay + 5, cx + 1, ay + 6, ARROW_COLOR);
     }
 
-    private void drawOutputSlot(DrawContext context, int x, int y) {
-        Slot slot = handler.slots.get(2);
+    private void drawOutputSlot(GuiGraphics context, int x, int y) {
+        Slot slot = menu.slots.get(2);
         slotBorder(context, x + slot.x - 1, y + slot.y - 1);
     }
 
-    private void drawCatalogue(DrawContext context, int x, int y, int mouseX, int mouseY) {
+    private void drawCatalogue(GuiGraphics context, int x, int y, int mouseX, int mouseY) {
         int cx = x + CAT_X, cy = y + CAT_Y;
 
         context.fill(cx, cy, cx + CAT_W, cy + CAT_H, PANEL_BG);
         borderInset(context, cx, cy, CAT_W, CAT_H);
 
-        List<CatalogueEntry> entries = handler.getEntries();
+        List<CatalogueEntry> entries = menu.getEntries();
         if (entries.isEmpty()) {
-            String hint = handler.getSlot(0).getStack().isEmpty()
+            String hint = menu.getSlot(0).getItem().isEmpty()
                     ? "Insert item"
                     : "Unlock enchantments with bookshelves";
-            List<net.minecraft.text.OrderedText> lines = textRenderer.wrapLines(Text.literal(hint), CAT_W - 8);
-            int totalH = lines.size() * (textRenderer.fontHeight + 2);
+            List<net.minecraft.util.FormattedCharSequence> lines = font.split(Component.literal(hint), CAT_W - 8);
+            int totalH = lines.size() * (font.lineHeight + 2);
             int startY = cy + (CAT_H - totalH) / 2;
             for (int i = 0; i < lines.size(); i++) {
-                int lw = textRenderer.getWidth(lines.get(i));
-                context.drawText(textRenderer, lines.get(i),
+                int lw = font.width(lines.get(i));
+                context.drawString(font, lines.get(i),
                         cx + (CAT_W - lw) / 2,
-                        startY + i * (textRenderer.fontHeight + 2), 0xFF808080, false);
+                        startY + i * (font.lineHeight + 2), 0xFF808080, false);
             }
             return;
         }
@@ -230,8 +229,8 @@ public class CatalogueScreen extends HandledScreen<CatalogueScreenHandler> {
         drawScrollbar(context, cx + CAT_W - SCROLLBAR_W - 2, cy + 2, CAT_H - 4);
     }
 
-    private void drawRow(DrawContext context, CatalogueEntry entry, int idx, int rx, int ry, int rw, int mx, int my) {
-        boolean selected = idx == handler.getSelectedIndex();
+    private void drawRow(GuiGraphics context, CatalogueEntry entry, int idx, int rx, int ry, int rw, int mx, int my) {
+        boolean selected = idx == menu.getSelectedIndex();
         boolean hovered = mx >= rx && mx < rx + rw && my >= ry && my < ry + ROW_H;
 
         int bg = selected ? ROW_SELECTED : (hovered ? ROW_HOVER : ROW_BG);
@@ -250,9 +249,9 @@ public class CatalogueScreen extends HandledScreen<CatalogueScreenHandler> {
         int sgaColor = selected ? 0xFFE0C0E0 : (hovered ? 0xFFB0A080 : 0xFF988870);
         String sga = sgaRows[idx % sgaRows.length];
         int sgaY = ry + (ROW_H - 8) / 2;
-        Text sgaText = Text.literal(trimToWidth(sga, sgaMaxX - rx - 3)).setStyle(SGA_STYLE);
-        context.drawTextWithShadow(textRenderer, sgaText, rx + 3, sgaY, sgaColor);
-        int selLv = selected ? handler.getSelectedLevel() : 0;
+        Component sgaText = Component.literal(trimToWidth(sga, sgaMaxX - rx - 3)).setStyle(SGA_STYLE);
+        context.drawString(font, sgaText, rx + 3, sgaY, sgaColor);
+        int selLv = selected ? menu.getSelectedLevel() : 0;
 
         for (int lv = 1; lv <= entry.maxLevel(); lv++) {
             boolean lvSel = selected && lv == selLv;
@@ -267,82 +266,82 @@ public class CatalogueScreen extends HandledScreen<CatalogueScreenHandler> {
             context.fill(lvX + 1, lvY + LV_BTN - 1, lvX + LV_BTN, lvY + LV_BTN, lvBorderD);
 
             String r = toRoman(lv);
-            int tw = textRenderer.getWidth(r);
+            int tw = font.width(r);
             int lvColor = lvSel ? 0xFFC0FF80 : (selected ? 0xFFB890B8 : 0xFF7A6A5A);
-            context.drawTextWithShadow(textRenderer, r, lvX + (LV_BTN - tw) / 2, lvY + 3, lvColor);
+            context.drawString(font, r, lvX + (LV_BTN - tw) / 2, lvY + 3, lvColor);
             lvX += LV_BTN + LV_GAP;
         }
     }
 
-    private void drawCatalogueTooltip(DrawContext context, int mx, int my) {
-        int cx = this.x + CAT_X, cy = this.y + CAT_Y;
+    private void drawCatalogueTooltip(GuiGraphics context, int mx, int my) {
+        int cx = this.leftPos + CAT_X, cy = this.topPos + CAT_Y;
         if (mx < cx || mx >= cx + CAT_W || my < cy || my >= cy + CAT_H) return;
 
-        List<CatalogueEntry> entries = handler.getEntries();
+        List<CatalogueEntry> entries = menu.getEntries();
         int idx = scrollOffset + (my - cy - 2) / (ROW_H + 1);
         if (idx < 0 || idx >= entries.size()) return;
 
         CatalogueEntry entry = entries.get(idx);
-        RegistryKey<Enchantment> key = entry.key();
-        boolean selected = idx == handler.getSelectedIndex();
-        int level = selected ? handler.getSelectedLevel() : 1;
+        ResourceKey<Enchantment> key = entry.key();
+        boolean selected = idx == menu.getSelectedIndex();
+        int level = selected ? menu.getSelectedLevel() : 1;
 
         Item reagentItem = EnchantmentCosts.reagent(key);
-        int reagentCost = EnchantmentCosts.reagentCost(level, handler.getNormalBookshelves());
+        int reagentCost = EnchantmentCosts.reagentCost(level, menu.getNormalBookshelves());
         int xpCost = EnchantmentCosts.xpCost(key, level);
         int slotCost = EnchantmentCosts.slotCost(entry.entry(), level);
 
-        ItemStack item = handler.getSlot(0).getStack();
-        ItemStack reagent = handler.getSlot(1).getStack();
-        int playerXp = MinecraftClient.getInstance().player.experienceLevel;
+        ItemStack item = menu.getSlot(0).getItem();
+        ItemStack reagent = menu.getSlot(1).getItem();
+        int playerXp = Minecraft.getInstance().player.experienceLevel;
 
-        boolean hasReagent = reagent.isOf(reagentItem) && reagent.getCount() >= reagentCost;
+        boolean hasReagent = reagent.is(reagentItem) && reagent.getCount() >= reagentCost;
         boolean hasXp = playerXp >= xpCost;
         boolean hasSlots = SlotSystem.getAvailableSlots(item) >= slotCost;
 
         String levelLabel = selected ? " " + toRoman(level) : "";
-        List<Text> tooltip = new ArrayList<>();
-        tooltip.add(Text.literal(entry.entry().value().description().getString() + levelLabel)
-                .formatted(entry.entry().isIn(EnchantmentTags.CURSE) ? Formatting.RED : Formatting.LIGHT_PURPLE));
-        tooltip.add(Text.empty());
+        List<Component> tooltip = new ArrayList<>();
+        tooltip.add(Component.literal(entry.entry().value().description().getString() + levelLabel)
+                .withStyle(entry.entry().is(EnchantmentTags.CURSE) ? ChatFormatting.RED : ChatFormatting.LIGHT_PURPLE));
+        tooltip.add(Component.empty());
         tooltip.add(costLine(reagentItem.getName().getString(), reagentCost, hasReagent));
         tooltip.add(costLine("XP Levels", xpCost, hasXp));
         if (slotCost > 0) {
             tooltip.add(costLine("Slots", slotCost, hasSlots));
         } else {
-            tooltip.add(Text.literal("Slots: ").formatted(Formatting.GRAY)
-                    .append(Text.literal("+1").formatted(Formatting.GREEN)));
+            tooltip.add(Component.literal("Slots: ").withStyle(ChatFormatting.GRAY)
+                    .append(Component.literal("+1").withStyle(ChatFormatting.GREEN)));
         }
 
-        if (handler.getNormalBookshelves() > 0) {
+        if (menu.getNormalBookshelves() > 0) {
             int pct = (int) (EnchantmentCosts.baseReagentCost(level) > 0
                     ? (1.0 - (double) reagentCost / EnchantmentCosts.baseReagentCost(level)) * 100 : 0);
-            tooltip.add(Text.empty());
-            tooltip.add(Text.literal("Bookshelves: " + handler.getNormalBookshelves() + " (-" + pct + "% reagent)")
-                    .formatted(Formatting.DARK_GRAY));
+            tooltip.add(Component.empty());
+            tooltip.add(Component.literal("Bookshelves: " + menu.getNormalBookshelves() + " (-" + pct + "% reagent)")
+                    .withStyle(ChatFormatting.DARK_GRAY));
         }
 
-        context.drawTooltip(textRenderer, tooltip, mx, my);
+        context.setComponentTooltipForNextFrame(font, tooltip, mx, my);
     }
 
-    private Text costLine(String label, int amount, boolean has) {
-        Formatting color = has ? Formatting.GREEN : Formatting.RED;
-        return Text.literal(label + ": ").formatted(Formatting.GRAY)
-                .append(Text.literal(String.valueOf(amount)).formatted(color));
+    private Component costLine(String label, int amount, boolean has) {
+        ChatFormatting color = has ? ChatFormatting.GREEN : ChatFormatting.RED;
+        return Component.literal(label + ": ").withStyle(ChatFormatting.GRAY)
+                .append(Component.literal(String.valueOf(amount)).withStyle(color));
     }
 
-    private void drawScrollbar(DrawContext context, int sx, int sy, int sh) {
+    private void drawScrollbar(GuiGraphics context, int sx, int sy, int sh) {
         if (!shouldScroll()) return;
         context.fill(sx, sy, sx + SCROLLBAR_W, sy + sh, 0xFF2A2218);
 
-        int thumbH = Math.max(10, sh * VISIBLE_ROWS / handler.getEntries().size());
+        int thumbH = Math.max(10, sh * VISIBLE_ROWS / menu.getEntries().size());
         int thumbY = sy + (int) ((sh - thumbH) * scrollAmount);
         context.fill(sx, thumbY, sx + SCROLLBAR_W, thumbY + thumbH, SLOT_BG);
         border3D(context, sx, thumbY, SCROLLBAR_W, thumbH, 0xFFC6C6C6, 0xFF555555);
     }
 
-    private void drawSlotBar(DrawContext context, int x, int y) {
-        ItemStack item = handler.getSlot(0).getStack();
+    private void drawSlotBar(GuiGraphics context, int x, int y) {
+        ItemStack item = menu.getSlot(0).getItem();
         if (item.isEmpty()) return;
 
         int max = SlotSystem.getMaxSlots(item);
@@ -350,15 +349,15 @@ public class CatalogueScreen extends HandledScreen<CatalogueScreenHandler> {
         if (max <= 0) return;
 
         int pendingCost = 0;
-        if (handler.getSelectedIndex() >= 0 && handler.getSelectedIndex() < handler.getEntries().size()) {
-            CatalogueEntry e = handler.getEntries().get(handler.getSelectedIndex());
-            pendingCost = EnchantmentCosts.slotCost(e.entry(), handler.getSelectedLevel());
+        if (menu.getSelectedIndex() >= 0 && menu.getSelectedIndex() < menu.getEntries().size()) {
+            CatalogueEntry e = menu.getEntries().get(menu.getSelectedIndex());
+            pendingCost = EnchantmentCosts.slotCost(e.entry(), menu.getSelectedLevel());
         }
 
         int barY = y + SLOT_BAR_Y;
         int ph = 6;
         String countText = used + "/" + max;
-        int countW = textRenderer.getWidth(countText);
+        int countW = font.width(countText);
         int barLeft = x + CAT_X;
         int barRight = x + CAT_X + CAT_W - countW - 4;
         int availableW = barRight - barLeft;
@@ -386,12 +385,12 @@ public class CatalogueScreen extends HandledScreen<CatalogueScreenHandler> {
         }
 
         int textX = barRight + 4;
-        context.drawTextWithShadow(textRenderer, countText, textX, barY - 1, TEXT_LIGHT);
+        context.drawString(font, countText, textX, barY - 1, TEXT_LIGHT);
     }
 
-    private void drawPlayerSlotBorders(DrawContext context, int x, int y) {
-        for (int i = 3; i < handler.slots.size(); i++) {
-            Slot slot = handler.slots.get(i);
+    private void drawPlayerSlotBorders(GuiGraphics context, int x, int y) {
+        for (int i = 3; i < menu.slots.size(); i++) {
+            Slot slot = menu.slots.get(i);
             slotBorder(context, x + slot.x - 1, y + slot.y - 1);
         }
     }
@@ -399,9 +398,9 @@ public class CatalogueScreen extends HandledScreen<CatalogueScreenHandler> {
     // --- Input ---
 
     @Override
-    public boolean mouseClicked(Click click, boolean doubled) {
+    public boolean mouseClicked(MouseButtonEvent click, boolean doubled) {
         double mx = click.x(), my = click.y();
-        int x = this.x, y = this.y;
+        int x = this.leftPos, y = this.topPos;
 
         if (clickRow(mx, my, x, y)) return true;
         if (clickScroll(mx, my, x, y)) return true;
@@ -414,7 +413,7 @@ public class CatalogueScreen extends HandledScreen<CatalogueScreenHandler> {
         int rowW = shouldScroll() ? CAT_W - SCROLLBAR_W - 4 : CAT_W - 4;
         if (mx < cx + 2 || mx >= cx + 2 + rowW || my < cy + 2 || my >= cy + CAT_H - 2) return false;
 
-        List<CatalogueEntry> entries = handler.getEntries();
+        List<CatalogueEntry> entries = menu.getEntries();
         int idx = scrollOffset + (int) (my - cy - 2) / (ROW_H + 1);
         if (idx < 0 || idx >= entries.size()) return false;
 
@@ -427,9 +426,9 @@ public class CatalogueScreen extends HandledScreen<CatalogueScreenHandler> {
             if (lvIdx >= 0 && lvIdx < entry.maxLevel()) level = lvIdx + 1;
         }
 
-        handler.setSelection(idx, level);
-        MinecraftClient.getInstance().getSoundManager().play(PositionedSoundInstance.ui(SoundEvents.UI_BUTTON_CLICK.value(), 1.0F));
-        client.interactionManager.clickButton(handler.syncId, idx * 10 + (level - 1));
+        menu.setSelection(idx, level);
+        Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK.value(), 1.0F));
+        minecraft.gameMode.handleInventoryButtonClick(menu.containerId, idx * 10 + (level - 1));
         return true;
     }
 
@@ -445,11 +444,11 @@ public class CatalogueScreen extends HandledScreen<CatalogueScreenHandler> {
     }
 
     @Override
-    public boolean mouseDragged(Click click, double dx, double dy) {
+    public boolean mouseDragged(MouseButtonEvent click, double dx, double dy) {
         if (scrolling && shouldScroll()) {
-            float top = this.y + CAT_Y + 2;
+            float top = this.topPos + CAT_Y + 2;
             float sh = CAT_H - 4;
-            scrollAmount = MathHelper.clamp((float) (click.y() - top) / sh, 0, 1);
+            scrollAmount = Mth.clamp((float) (click.y() - top) / sh, 0, 1);
             scrollOffset = (int) (scrollAmount * getMaxScroll());
             return true;
         }
@@ -457,7 +456,7 @@ public class CatalogueScreen extends HandledScreen<CatalogueScreenHandler> {
     }
 
     @Override
-    public boolean mouseReleased(Click click) {
+    public boolean mouseReleased(MouseButtonEvent click) {
         scrolling = false;
         return super.mouseReleased(click);
     }
@@ -467,28 +466,28 @@ public class CatalogueScreen extends HandledScreen<CatalogueScreenHandler> {
         if (super.mouseScrolled(mx, my, hAmt, vAmt)) return true;
         if (!shouldScroll()) return false;
         int max = getMaxScroll();
-        scrollOffset = MathHelper.clamp(scrollOffset - (int) vAmt, 0, max);
+        scrollOffset = Mth.clamp(scrollOffset - (int) vAmt, 0, max);
         scrollAmount = max > 0 ? (float) scrollOffset / max : 0;
         return true;
     }
 
-    private boolean shouldScroll() { return handler.getEntries().size() > VISIBLE_ROWS; }
-    private int getMaxScroll() { return Math.max(0, handler.getEntries().size() - VISIBLE_ROWS); }
+    private boolean shouldScroll() { return menu.getEntries().size() > VISIBLE_ROWS; }
+    private int getMaxScroll() { return Math.max(0, menu.getEntries().size() - VISIBLE_ROWS); }
 
     // --- Drawing helpers ---
 
-    private void border3D(DrawContext ctx, int x, int y, int w, int h, int light, int dark) {
+    private void border3D(GuiGraphics ctx, int x, int y, int w, int h, int light, int dark) {
         ctx.fill(x, y, x + w, y + 1, light);
         ctx.fill(x, y, x + 1, y + h, light);
         ctx.fill(x + w - 1, y + 1, x + w, y + h, dark);
         ctx.fill(x + 1, y + h - 1, x + w, y + h, dark);
     }
 
-    private void borderInset(DrawContext ctx, int x, int y, int w, int h) {
+    private void borderInset(GuiGraphics ctx, int x, int y, int w, int h) {
         border3D(ctx, x, y, w, h, BORDER_D, BORDER_L);
     }
 
-    private void slotBorder(DrawContext ctx, int x, int y) {
+    private void slotBorder(GuiGraphics ctx, int x, int y) {
         ctx.fill(x, y, x + 18, y + 1, BORDER_D);
         ctx.fill(x, y, x + 1, y + 18, BORDER_D);
         ctx.fill(x + 17, y + 1, x + 18, y + 18, BORDER_L);
@@ -499,7 +498,7 @@ public class CatalogueScreen extends HandledScreen<CatalogueScreenHandler> {
     private String trimToWidth(String text, int maxWidth) {
         int w = 0;
         for (int i = 0; i < text.length(); i++) {
-            w += textRenderer.getWidth(Text.literal(String.valueOf(text.charAt(i))).setStyle(SGA_STYLE));
+            w += font.width(Component.literal(String.valueOf(text.charAt(i))).setStyle(SGA_STYLE));
             if (w > maxWidth) return text.substring(0, i);
         }
         return text;

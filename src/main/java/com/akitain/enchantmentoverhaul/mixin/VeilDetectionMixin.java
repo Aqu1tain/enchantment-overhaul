@@ -1,41 +1,41 @@
 package com.akitain.enchantmentoverhaul.mixin;
 
 import com.akitain.enchantmentoverhaul.enchant.ModEnchantments;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.ItemEnchantmentsComponent;
-import net.minecraft.entity.EquipmentSlot;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.ai.TargetPredicate;
-import net.minecraft.entity.attribute.EntityAttributes;
-import net.minecraft.item.ItemStack;
-import net.minecraft.server.world.ServerWorld;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.ai.targeting.TargetingConditions;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.enchantment.ItemEnchantments;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-@Mixin(TargetPredicate.class)
+@Mixin(TargetingConditions.class)
 public class VeilDetectionMixin {
 
-    @Shadow private double baseMaxDistance;
-    @Shadow private boolean useDistanceScalingFactor;
+    @Shadow private double range;
+    @Shadow private boolean testInvisible;
 
     @Inject(method = "test", at = @At("HEAD"), cancellable = true)
-    private void applyVeil(ServerWorld world, LivingEntity attacker, LivingEntity target, CallbackInfoReturnable<Boolean> cir) {
+    private void applyVeil(ServerLevel world, LivingEntity attacker, LivingEntity target, CallbackInfoReturnable<Boolean> cir) {
         if (attacker == null || target == null) return;
 
-        ItemStack helmet = target.getEquippedStack(EquipmentSlot.HEAD);
-        ItemEnchantmentsComponent enchantments = helmet.getOrDefault(DataComponentTypes.ENCHANTMENTS, ItemEnchantmentsComponent.DEFAULT);
+        ItemStack helmet = target.getItemBySlot(EquipmentSlot.HEAD);
+        ItemEnchantments enchantments = helmet.getOrDefault(DataComponents.ENCHANTMENTS, ItemEnchantments.EMPTY);
         boolean hasVeil = false;
-        for (var entry : enchantments.getEnchantmentEntries()) {
-            if (entry.getKey().matchesKey(ModEnchantments.VEIL)) { hasVeil = true; break; }
+        for (var entry : enchantments.entrySet()) {
+            if (entry.getKey().is(ModEnchantments.VEIL)) { hasVeil = true; break; }
         }
         if (!hasVeil) return;
 
-        double range = this.baseMaxDistance;
-        if (this.useDistanceScalingFactor) {
-            double followRange = attacker.getAttributeValue(EntityAttributes.FOLLOW_RANGE);
+        double range = this.range;
+        if (this.testInvisible) {
+            double followRange = attacker.getAttributeValue(Attributes.FOLLOW_RANGE);
             range = Math.min(range, followRange);
         }
 

@@ -3,28 +3,26 @@ package com.akitain.enchantmentoverhaul.loot;
 import com.akitain.enchantmentoverhaul.enchant.ModEnchantments;
 import com.akitain.enchantmentoverhaul.smithing.SmithingTemplates;
 import net.fabricmc.fabric.api.loot.v3.LootTableEvents;
-import net.minecraft.enchantment.Enchantment;
-import net.minecraft.enchantment.Enchantments;
-import net.minecraft.item.Item;
-import net.minecraft.item.Items;
-import net.minecraft.loot.LootPool;
-import net.minecraft.loot.LootTable;
-import net.minecraft.loot.entry.EmptyEntry;
-import net.minecraft.loot.entry.ItemEntry;
-import net.minecraft.loot.function.SetEnchantmentsLootFunction;
-import net.minecraft.loot.provider.number.ConstantLootNumberProvider;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.RegistryWrapper;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.util.Identifier;
-
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.item.enchantment.Enchantments;
+import net.minecraft.world.level.storage.loot.LootPool;
+import net.minecraft.world.level.storage.loot.LootTable;
+import net.minecraft.world.level.storage.loot.entries.EmptyLootItem;
+import net.minecraft.world.level.storage.loot.entries.LootItem;
+import net.minecraft.world.level.storage.loot.functions.SetEnchantmentsFunction;
+import net.minecraft.world.level.storage.loot.providers.number.ConstantValue;
 import java.util.List;
 import java.util.Map;
 
 public class LootTableModifier {
 
-    private record StructureLoot(String lootTable, int emptyWeight, int bookWeight, List<RegistryKey<Enchantment>> enchantments) {}
+    private record StructureLoot(String lootTable, int emptyWeight, int bookWeight, List<ResourceKey<Enchantment>> enchantments) {}
 
     private static final List<StructureLoot> STRUCTURE_LOOT = List.of(
             // Easy (15% chance)
@@ -131,8 +129,8 @@ public class LootTableModifier {
         LootTableEvents.MODIFY.register((key, tableBuilder, source, registries) -> {
             if (!source.isBuiltin()) return;
 
-            String path = key.getValue().getPath();
-            RegistryWrapper<Enchantment> enchantmentRegistry = registries.getOrThrow(RegistryKeys.ENCHANTMENT);
+            String path = key.identifier().getPath();
+            HolderLookup<Enchantment> enchantmentRegistry = registries.lookupOrThrow(Registries.ENCHANTMENT);
 
             for (StructureLoot loot : STRUCTURE_LOOT) {
                 if (!path.equals(loot.lootTable)) continue;
@@ -148,33 +146,33 @@ public class LootTableModifier {
         });
     }
 
-    private static void addBookPool(LootTable.Builder tableBuilder, RegistryWrapper<Enchantment> registry, StructureLoot loot) {
-        LootPool.Builder pool = LootPool.builder()
-                .rolls(ConstantLootNumberProvider.create(1));
+    private static void addBookPool(LootTable.Builder tableBuilder, HolderLookup<Enchantment> registry, StructureLoot loot) {
+        LootPool.Builder pool = LootPool.lootPool()
+                .setRolls(ConstantValue.exactly(1));
 
-        pool.with(EmptyEntry.builder().weight(loot.emptyWeight));
+        pool.add(EmptyLootItem.emptyItem().setWeight(loot.emptyWeight));
 
-        for (RegistryKey<Enchantment> key : loot.enchantments) {
-            RegistryEntry<Enchantment> entry = registry.getOrThrow(key);
-            pool.with(ItemEntry.builder(Items.ENCHANTED_BOOK)
-                    .apply(new SetEnchantmentsLootFunction.Builder()
-                            .enchantment(entry, ConstantLootNumberProvider.create(1)))
-                    .weight(loot.bookWeight));
+        for (ResourceKey<Enchantment> key : loot.enchantments) {
+            Holder<Enchantment> entry = registry.getOrThrow(key);
+            pool.add(LootItem.lootTableItem(Items.ENCHANTED_BOOK)
+                    .apply(new SetEnchantmentsFunction.Builder()
+                            .withEnchantment(entry, ConstantValue.exactly(1)))
+                    .setWeight(loot.bookWeight));
         }
 
-        tableBuilder.pool(pool);
+        tableBuilder.withPool(pool);
     }
 
     private static void addTemplatePool(LootTable.Builder tableBuilder, TemplateLoot loot) {
-        LootPool.Builder pool = LootPool.builder()
-                .rolls(ConstantLootNumberProvider.create(1));
+        LootPool.Builder pool = LootPool.lootPool()
+                .setRolls(ConstantValue.exactly(1));
 
-        pool.with(EmptyEntry.builder().weight(loot.emptyWeight));
+        pool.add(EmptyLootItem.emptyItem().setWeight(loot.emptyWeight));
 
         for (Item template : loot.templates) {
-            pool.with(ItemEntry.builder(template).weight(loot.templateWeight));
+            pool.add(LootItem.lootTableItem(template).setWeight(loot.templateWeight));
         }
 
-        tableBuilder.pool(pool);
+        tableBuilder.withPool(pool);
     }
 }

@@ -2,49 +2,48 @@ package com.akitain.enchantmentoverhaul.loot;
 
 import com.akitain.enchantmentoverhaul.enchant.DisabledEnchantments;
 import com.akitain.enchantmentoverhaul.enchant.SlotSystem;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.ItemEnchantmentsComponent;
-import net.minecraft.enchantment.Enchantment;
-import net.minecraft.enchantment.Enchantments;
-import net.minecraft.item.ItemStack;
-import net.minecraft.loot.context.LootContext;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.registry.tag.EnchantmentTags;
-import net.minecraft.util.math.random.Random;
-
 import java.util.ArrayList;
 import java.util.List;
+import net.minecraft.core.Holder;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.tags.EnchantmentTags;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.item.enchantment.Enchantments;
+import net.minecraft.world.item.enchantment.ItemEnchantments;
+import net.minecraft.world.level.storage.loot.LootContext;
 
 public class LootEnchanter {
 
     public static void tryEnchant(ItemStack stack, LootContext context) {
-        if (!stack.isDamageable()) return;
-        if (!stack.getOrDefault(DataComponentTypes.ENCHANTMENTS, ItemEnchantmentsComponent.DEFAULT).isEmpty()) return;
+        if (!stack.isDamageableItem()) return;
+        if (!stack.getOrDefault(DataComponents.ENCHANTMENTS, ItemEnchantments.EMPTY).isEmpty()) return;
 
         int maxSlots = SlotSystem.getBaseMaxSlots(stack);
         if (maxSlots <= 0) return;
 
-        Random random = context.getRandom();
+        RandomSource random = context.getRandom();
         float chance = maxSlots * 0.03f;
         if (random.nextFloat() >= chance) return;
 
-        var registry = context.getWorld().getRegistryManager().getOrThrow(RegistryKeys.ENCHANTMENT);
-        List<RegistryEntry<Enchantment>> valid = new ArrayList<>();
-        for (RegistryEntry<Enchantment> entry : registry.getIndexedEntries()) {
-            if (entry.getKey().isEmpty()) continue;
+        var registry = context.getLevel().registryAccess().lookupOrThrow(Registries.ENCHANTMENT);
+        List<Holder<Enchantment>> valid = new ArrayList<>();
+        for (Holder<Enchantment> entry : registry.asHolderIdMap()) {
+            if (entry.unwrapKey().isEmpty()) continue;
             if (DisabledEnchantments.isDisabled(entry)) continue;
-            if (entry.isIn(EnchantmentTags.CURSE)) continue;
-            if (entry.matchesKey(Enchantments.MENDING)) continue;
-            if (!entry.value().isAcceptableItem(stack)) continue;
+            if (entry.is(EnchantmentTags.CURSE)) continue;
+            if (entry.is(Enchantments.MENDING)) continue;
+            if (!entry.value().canEnchant(stack)) continue;
             valid.add(entry);
         }
 
         if (valid.isEmpty()) return;
 
-        RegistryEntry<Enchantment> chosen = valid.get(random.nextInt(valid.size()));
-        ItemEnchantmentsComponent.Builder builder = new ItemEnchantmentsComponent.Builder(ItemEnchantmentsComponent.DEFAULT);
-        builder.add(chosen, 1);
-        stack.set(DataComponentTypes.ENCHANTMENTS, builder.build());
+        Holder<Enchantment> chosen = valid.get(random.nextInt(valid.size()));
+        ItemEnchantments.Mutable builder = new ItemEnchantments.Mutable(ItemEnchantments.EMPTY);
+        builder.upgrade(chosen, 1);
+        stack.set(DataComponents.ENCHANTMENTS, builder.toImmutable());
     }
 }

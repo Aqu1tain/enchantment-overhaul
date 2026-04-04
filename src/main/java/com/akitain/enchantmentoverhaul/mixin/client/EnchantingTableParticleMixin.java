@@ -1,15 +1,15 @@
 package com.akitain.enchantmentoverhaul.mixin.client;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.ChiseledBookshelfBlock;
-import net.minecraft.block.EnchantingTableBlock;
-import net.minecraft.particle.ParticleTypes;
-import net.minecraft.registry.tag.BlockTags;
-import net.minecraft.state.property.BooleanProperty;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.random.Random;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.ChiseledBookShelfBlock;
+import net.minecraft.world.level.block.EnchantingTableBlock;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -18,26 +18,26 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(EnchantingTableBlock.class)
 public class EnchantingTableParticleMixin {
 
-    @Inject(method = "randomDisplayTick", at = @At("TAIL"))
-    private void addChiseledBookshelfParticles(BlockState state, World world, BlockPos pos, Random random, CallbackInfo ci) {
-        for (BlockPos offset : EnchantingTableBlock.POWER_PROVIDER_OFFSETS) {
+    @Inject(method = "animateTick", at = @At("TAIL"))
+    private void addChiseledBookshelfParticles(BlockState state, Level world, BlockPos pos, RandomSource random, CallbackInfo ci) {
+        for (BlockPos offset : EnchantingTableBlock.BOOKSHELF_OFFSETS) {
             if (random.nextInt(16) != 0) continue;
 
-            BlockPos shelfPos = pos.add(offset);
-            BlockPos betweenPos = pos.add(offset.getX() / 2, offset.getY(), offset.getZ() / 2);
+            BlockPos shelfPos = pos.offset(offset);
+            BlockPos betweenPos = pos.offset(offset.getX() / 2, offset.getY(), offset.getZ() / 2);
 
-            if (!world.getBlockState(betweenPos).isIn(BlockTags.ENCHANTMENT_POWER_TRANSMITTER)) continue;
+            if (!world.getBlockState(betweenPos).is(BlockTags.ENCHANTMENT_POWER_TRANSMITTER)) continue;
 
             BlockState shelfState = world.getBlockState(shelfPos);
-            if (!shelfState.isOf(Blocks.CHISELED_BOOKSHELF)) continue;
+            if (!shelfState.is(Blocks.CHISELED_BOOKSHELF)) continue;
 
             boolean hasBook = false;
-            for (BooleanProperty prop : ChiseledBookshelfBlock.SLOT_OCCUPIED_PROPERTIES) {
-                if (shelfState.get(prop)) { hasBook = true; break; }
+            for (BooleanProperty prop : ChiseledBookShelfBlock.SLOT_OCCUPIED_PROPERTIES) {
+                if (shelfState.getValue(prop)) { hasBook = true; break; }
             }
             if (!hasBook) continue;
 
-            world.addParticleClient(
+            world.addParticle(
                     ParticleTypes.ENCHANT,
                     pos.getX() + 0.5,
                     pos.getY() + 2.0,

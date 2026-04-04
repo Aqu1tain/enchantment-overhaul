@@ -1,18 +1,17 @@
 package com.akitain.enchantmentoverhaul.enchant;
 
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.codec.PacketCodecs;
-import net.minecraft.util.Identifier;
-
 import java.util.List;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.resources.Identifier;
 
 public record CatalogueData(List<Identifier> unlocked, int normalBookshelves) {
 
-    public static final PacketCodec<RegistryByteBuf, CatalogueData> PACKET_CODEC = PacketCodec.tuple(
-            Identifier.PACKET_CODEC.collect(PacketCodecs.toList()),
+    public static final StreamCodec<RegistryFriendlyByteBuf, CatalogueData> PACKET_CODEC = StreamCodec.composite(
+            Identifier.STREAM_CODEC.apply(ByteBufCodecs.list()),
             CatalogueData::unlocked,
-            PacketCodecs.VAR_INT,
+            ByteBufCodecs.VAR_INT,
             CatalogueData::normalBookshelves,
             CatalogueData::new
     );

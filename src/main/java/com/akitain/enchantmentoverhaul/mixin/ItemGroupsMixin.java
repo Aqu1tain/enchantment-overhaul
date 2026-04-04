@@ -1,36 +1,36 @@
 package com.akitain.enchantmentoverhaul.mixin;
 
 import com.akitain.enchantmentoverhaul.enchant.DisabledEnchantments;
-import net.minecraft.enchantment.Enchantment;
-import net.minecraft.enchantment.EnchantmentHelper;
-import net.minecraft.enchantment.EnchantmentLevelEntry;
-import net.minecraft.item.ItemGroup;
-import net.minecraft.item.ItemGroups;
-import net.minecraft.registry.RegistryWrapper;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.CreativeModeTabs;
+import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.item.enchantment.EnchantmentInstance;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(ItemGroups.class)
+@Mixin(CreativeModeTabs.class)
 public class ItemGroupsMixin {
 
-    @Inject(method = "addMaxLevelEnchantedBooks", at = @At("HEAD"), cancellable = true)
-    private static void levelOneBooks(ItemGroup.Entries entries, RegistryWrapper<Enchantment> registryWrapper, ItemGroup.StackVisibility stackVisibility, CallbackInfo ci) {
+    @Inject(method = "generateEnchantmentBookTypesOnlyMaxLevel", at = @At("HEAD"), cancellable = true)
+    private static void levelOneBooks(CreativeModeTab.Output entries, HolderLookup<Enchantment> registryWrapper, CreativeModeTab.TabVisibility stackVisibility, CallbackInfo ci) {
         addFilteredBooks(entries, registryWrapper, stackVisibility);
         ci.cancel();
     }
 
-    @Inject(method = "addAllLevelEnchantedBooks", at = @At("HEAD"), cancellable = true)
-    private static void levelOneBooksSearch(ItemGroup.Entries entries, RegistryWrapper<Enchantment> registryWrapper, ItemGroup.StackVisibility stackVisibility, CallbackInfo ci) {
+    @Inject(method = "generateEnchantmentBookTypesAllLevels", at = @At("HEAD"), cancellable = true)
+    private static void levelOneBooksSearch(CreativeModeTab.Output entries, HolderLookup<Enchantment> registryWrapper, CreativeModeTab.TabVisibility stackVisibility, CallbackInfo ci) {
         addFilteredBooks(entries, registryWrapper, stackVisibility);
         ci.cancel();
     }
 
-    private static void addFilteredBooks(ItemGroup.Entries entries, RegistryWrapper<Enchantment> registryWrapper, ItemGroup.StackVisibility visibility) {
-        registryWrapper.streamEntries()
+    private static void addFilteredBooks(CreativeModeTab.Output entries, HolderLookup<Enchantment> registryWrapper, CreativeModeTab.TabVisibility visibility) {
+        registryWrapper.listElements()
                 .filter(entry -> !DisabledEnchantments.isDisabled(entry))
-                .map(entry -> EnchantmentHelper.getEnchantedBookWith(new EnchantmentLevelEntry(entry, 1)))
-                .forEach(stack -> entries.add(stack, visibility));
+                .map(entry -> EnchantmentHelper.createBook(new EnchantmentInstance(entry, 1)))
+                .forEach(stack -> entries.accept(stack, visibility));
     }
 }

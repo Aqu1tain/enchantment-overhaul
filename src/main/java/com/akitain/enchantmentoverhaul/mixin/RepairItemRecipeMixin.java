@@ -1,8 +1,8 @@
 package com.akitain.enchantmentoverhaul.mixin;
 
-import net.minecraft.recipe.RepairItemRecipe;
-import net.minecraft.recipe.input.CraftingRecipeInput;
-import net.minecraft.world.World;
+import net.minecraft.world.item.crafting.CraftingInput;
+import net.minecraft.world.item.crafting.RepairItemRecipe;
+import net.minecraft.world.level.Level;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -11,8 +11,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(RepairItemRecipe.class)
 public class RepairItemRecipeMixin {
 
-    @Inject(method = "matches(Lnet/minecraft/recipe/input/CraftingRecipeInput;Lnet/minecraft/world/World;)Z", at = @At("HEAD"), cancellable = true)
-    private void disableCraftingRepair(CraftingRecipeInput input, World world, CallbackInfoReturnable<Boolean> cir) {
+    @Inject(method = "matches(Lnet/minecraft/world/item/crafting/CraftingInput;Lnet/minecraft/world/level/Level;)Z", at = @At("HEAD"), cancellable = true)
+    private void disableCraftingRepair(CraftingInput input, Level world, CallbackInfoReturnable<Boolean> cir) {
         cir.setReturnValue(false);
     }
 }

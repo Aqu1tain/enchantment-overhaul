@@ -3,15 +3,15 @@ package com.akitain.enchantmentoverhaul.mixin;
 import com.akitain.enchantmentoverhaul.enchant.ModAdvancements;
 import com.akitain.enchantmentoverhaul.smithing.SmithingTemplates;
 import com.akitain.enchantmentoverhaul.smithing.UpgradeType;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.screen.ForgingScreenHandler;
-import net.minecraft.screen.ScreenHandlerContext;
-import net.minecraft.screen.ScreenHandlerType;
-import net.minecraft.screen.SmithingScreenHandler;
-import net.minecraft.screen.slot.ForgingSlotsManager;
-import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.ContainerLevelAccess;
+import net.minecraft.world.inventory.ItemCombinerMenu;
+import net.minecraft.world.inventory.ItemCombinerMenuSlotDefinition;
+import net.minecraft.world.inventory.MenuType;
+import net.minecraft.world.inventory.SmithingMenu;
+import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -19,8 +19,8 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(SmithingScreenHandler.class)
-public abstract class SmithingScreenHandlerMixin extends ForgingScreenHandler {
+@Mixin(SmithingMenu.class)
+public abstract class SmithingScreenHandlerMixin extends ItemCombinerMenu {
 
     @Unique
     private int pendingXpCost = 0;
@@ -28,18 +28,18 @@ public abstract class SmithingScreenHandlerMixin extends ForgingScreenHandler {
     @Unique
     private UpgradeType pendingType = null;
 
-    private SmithingScreenHandlerMixin(@Nullable ScreenHandlerType<?> type, int syncId, PlayerInventory playerInventory, ScreenHandlerContext context, ForgingSlotsManager forgingSlotsManager) {
+    private SmithingScreenHandlerMixin(@Nullable MenuType<?> type, int syncId, Inventory playerInventory, ContainerLevelAccess context, ItemCombinerMenuSlotDefinition forgingSlotsManager) {
         super(type, syncId, playerInventory, context, forgingSlotsManager);
     }
 
-    @Inject(method = "updateResult", at = @At("TAIL"))
+    @Inject(method = "createResult", at = @At("TAIL"))
     private void applyCustomUpgrade(CallbackInfo ci) {
         pendingXpCost = 0;
         pendingType = null;
 
-        ItemStack template = this.input.getStack(0);
-        ItemStack base = this.input.getStack(1);
-        ItemStack material = this.input.getStack(2);
+        ItemStack template = this.inputSlots.getItem(0);
+        ItemStack base = this.inputSlots.getItem(1);
+        ItemStack material = this.inputSlots.getItem(2);
 
         if (template.isEmpty() || base.isEmpty() || material.isEmpty()) return;
 
@@ -49,33 +49,33 @@ public abstract class SmithingScreenHandlerMixin extends ForgingScreenHandler {
         int level = SmithingTemplates.getMaterialLevel(material.getItem());
         if (level == 0) return;
         if (!type.appliesTo(base)) {
-            this.output.setStack(0, ItemStack.EMPTY);
+            this.resultSlots.setItem(0, ItemStack.EMPTY);
             return;
         }
         if (type.currentLevel(base) >= level) {
-            this.output.setStack(0, ItemStack.EMPTY);
+            this.resultSlots.setItem(0, ItemStack.EMPTY);
             return;
         }
 
         int xpCost = SmithingTemplates.getXpCost(level);
         if (!this.player.isCreative() && this.player.experienceLevel < xpCost) {
-            this.output.setStack(0, ItemStack.EMPTY);
+            this.resultSlots.setItem(0, ItemStack.EMPTY);
             return;
         }
 
         ItemStack result = base.copy();
         type.applyTo(result, level);
-        this.output.setStack(0, result);
+        this.resultSlots.setItem(0, result);
         pendingXpCost = xpCost;
         pendingType = type;
     }
 
-    @Inject(method = "onTakeOutput", at = @At("HEAD"))
-    private void chargeXp(PlayerEntity player, ItemStack stack, CallbackInfo ci) {
+    @Inject(method = "onTake", at = @At("HEAD"))
+    private void chargeXp(Player player, ItemStack stack, CallbackInfo ci) {
         if (pendingXpCost > 0 && !player.isCreative()) {
-            player.addExperienceLevels(-pendingXpCost);
+            player.giveExperienceLevels(-pendingXpCost);
         }
-        if (pendingType != null && player instanceof ServerPlayerEntity serverPlayer) {
+        if (pendingType != null && player instanceof ServerPlayer serverPlayer) {
             ModAdvancements.grantSmithingAdvancement(serverPlayer, pendingType);
         }
         pendingXpCost = 0;

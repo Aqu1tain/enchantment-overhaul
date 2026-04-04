@@ -1,43 +1,42 @@
 package com.akitain.enchantmentoverhaul.enchant;
 
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.EnchantingTableBlock;
-import net.minecraft.block.entity.ChiseledBookshelfBlockEntity;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.ItemEnchantmentsComponent;
-import net.minecraft.enchantment.Enchantment;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.registry.tag.BlockTags;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
-
 import java.util.HashSet;
 import java.util.Set;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.item.enchantment.ItemEnchantments;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.EnchantingTableBlock;
+import net.minecraft.world.level.block.entity.ChiseledBookShelfBlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 
 public class BookshelfScanner {
 
-    public record ScanResult(Set<RegistryKey<Enchantment>> unlocked, int normalBookshelves) {}
+    public record ScanResult(Set<ResourceKey<Enchantment>> unlocked, int normalBookshelves) {}
 
-    public static ScanResult scan(World world, BlockPos tablePos) {
-        Set<RegistryKey<Enchantment>> unlocked = new HashSet<>();
+    public static ScanResult scan(Level world, BlockPos tablePos) {
+        Set<ResourceKey<Enchantment>> unlocked = new HashSet<>();
         int normalCount = 0;
 
-        for (BlockPos offset : EnchantingTableBlock.POWER_PROVIDER_OFFSETS) {
-            BlockPos shelfPos = tablePos.add(offset);
-            BlockPos betweenPos = tablePos.add(offset.getX() / 2, offset.getY(), offset.getZ() / 2);
+        for (BlockPos offset : EnchantingTableBlock.BOOKSHELF_OFFSETS) {
+            BlockPos shelfPos = tablePos.offset(offset);
+            BlockPos betweenPos = tablePos.offset(offset.getX() / 2, offset.getY(), offset.getZ() / 2);
 
-            if (!world.getBlockState(betweenPos).isIn(BlockTags.ENCHANTMENT_POWER_TRANSMITTER)) continue;
+            if (!world.getBlockState(betweenPos).is(BlockTags.ENCHANTMENT_POWER_TRANSMITTER)) continue;
 
             BlockState state = world.getBlockState(shelfPos);
 
-            if (state.isOf(Blocks.CHISELED_BOOKSHELF)) {
+            if (state.is(Blocks.CHISELED_BOOKSHELF)) {
                 collectEnchantments(world, shelfPos, unlocked);
-            } else if (state.isIn(BlockTags.ENCHANTMENT_POWER_PROVIDER)) {
+            } else if (state.is(BlockTags.ENCHANTMENT_POWER_PROVIDER)) {
                 normalCount++;
             }
         }
@@ -45,16 +44,16 @@ public class BookshelfScanner {
         return new ScanResult(unlocked, normalCount);
     }
 
-    private static void collectEnchantments(World world, BlockPos pos, Set<RegistryKey<Enchantment>> unlocked) {
-        if (!(world.getBlockEntity(pos) instanceof ChiseledBookshelfBlockEntity shelf)) return;
+    private static void collectEnchantments(Level world, BlockPos pos, Set<ResourceKey<Enchantment>> unlocked) {
+        if (!(world.getBlockEntity(pos) instanceof ChiseledBookShelfBlockEntity shelf)) return;
 
-        for (int i = 0; i < ChiseledBookshelfBlockEntity.MAX_BOOKS; i++) {
-            ItemStack book = shelf.getStack(i);
-            if (!book.isOf(Items.ENCHANTED_BOOK)) continue;
+        for (int i = 0; i < ChiseledBookShelfBlockEntity.MAX_BOOKS_IN_STORAGE; i++) {
+            ItemStack book = shelf.getItem(i);
+            if (!book.is(Items.ENCHANTED_BOOK)) continue;
 
-            ItemEnchantmentsComponent stored = book.getOrDefault(DataComponentTypes.STORED_ENCHANTMENTS, ItemEnchantmentsComponent.DEFAULT);
-            for (Object2IntMap.Entry<RegistryEntry<Enchantment>> entry : stored.getEnchantmentEntries()) {
-                entry.getKey().getKey().ifPresent(unlocked::add);
+            ItemEnchantments stored = book.getOrDefault(DataComponents.STORED_ENCHANTMENTS, ItemEnchantments.EMPTY);
+            for (Object2IntMap.Entry<Holder<Enchantment>> entry : stored.entrySet()) {
+                entry.getKey().unwrapKey().ifPresent(unlocked::add);
             }
         }
     }

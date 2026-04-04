@@ -1,48 +1,47 @@
 package com.akitain.enchantmentoverhaul.enchant;
 
-import net.minecraft.advancement.criterion.Criteria;
-import net.minecraft.block.Blocks;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.ItemEnchantmentsComponent;
-import net.minecraft.enchantment.Enchantment;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.Inventory;
-import net.minecraft.inventory.SimpleInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.registry.DynamicRegistryManager;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.tag.EnchantmentTags;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.screen.ScreenHandler;
-import net.minecraft.screen.ScreenHandlerContext;
-import net.minecraft.screen.slot.Slot;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.util.Identifier;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import net.minecraft.advancements.CriteriaTriggers;
+import net.minecraft.core.Holder;
+import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.EnchantmentTags;
+import net.minecraft.world.Container;
+import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.ContainerLevelAccess;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.item.enchantment.ItemEnchantments;
+import net.minecraft.world.level.block.Blocks;
 
-public class CatalogueScreenHandler extends ScreenHandler {
+public class CatalogueScreenHandler extends AbstractContainerMenu {
 
-    private final Inventory inputInventory = new SimpleInventory(2) {
+    private final Container inputInventory = new SimpleContainer(2) {
         @Override
-        public void markDirty() {
-            super.markDirty();
-            CatalogueScreenHandler.this.onContentChanged(this);
+        public void setChanged() {
+            super.setChanged();
+            CatalogueScreenHandler.this.slotsChanged(this);
         }
     };
-    private final Inventory outputInventory = new SimpleInventory(1);
+    private final Container outputInventory = new SimpleContainer(1);
 
-    private final ScreenHandlerContext context;
-    private final PlayerEntity player;
-    private final DynamicRegistryManager registryManager;
+    private final ContainerLevelAccess context;
+    private final Player player;
+    private final RegistryAccess registryManager;
     private final Set<Identifier> unlockedIds;
     private final int normalBookshelves;
 
@@ -50,51 +49,51 @@ public class CatalogueScreenHandler extends ScreenHandler {
     private int selectedIndex = -1;
     private int selectedLevel = 1;
 
-    public static CatalogueScreenHandler fromData(int syncId, PlayerInventory playerInventory, CatalogueData data) {
-        return new CatalogueScreenHandler(syncId, playerInventory, ScreenHandlerContext.EMPTY, data.unlocked(), data.normalBookshelves());
+    public static CatalogueScreenHandler fromData(int syncId, Inventory playerInventory, CatalogueData data) {
+        return new CatalogueScreenHandler(syncId, playerInventory, ContainerLevelAccess.NULL, data.unlocked(), data.normalBookshelves());
     }
 
-    public CatalogueScreenHandler(int syncId, PlayerInventory playerInventory, ScreenHandlerContext context,
+    public CatalogueScreenHandler(int syncId, Inventory playerInventory, ContainerLevelAccess context,
                                    List<Identifier> unlocked, int normalBookshelves) {
         super(ModScreenHandlers.CATALOGUE, syncId);
         this.context = context;
         this.player = playerInventory.player;
-        this.registryManager = playerInventory.player.getRegistryManager();
+        this.registryManager = playerInventory.player.registryAccess();
         this.unlockedIds = Set.copyOf(unlocked);
         this.normalBookshelves = normalBookshelves;
 
         this.addSlot(new Slot(this.inputInventory, 0, 9, 60) {
             @Override
-            public int getMaxItemCount() { return 1; }
+            public int getMaxStackSize() { return 1; }
             @Override
-            public boolean canInsert(ItemStack stack) { return !stack.isOf(Items.BOOK); }
+            public boolean mayPlace(ItemStack stack) { return !stack.is(Items.BOOK); }
         });
         this.addSlot(new Slot(this.inputInventory, 1, 31, 60) {
             @Override
-            public boolean canInsert(ItemStack stack) { return EnchantmentCosts.isReagent(stack.getItem()); }
+            public boolean mayPlace(ItemStack stack) { return EnchantmentCosts.isReagent(stack.getItem()); }
         });
 
         this.addSlot(new Slot(this.outputInventory, 0, 20, 86) {
             @Override
-            public boolean canInsert(ItemStack stack) { return false; }
+            public boolean mayPlace(ItemStack stack) { return false; }
 
             @Override
-            public boolean canTakeItems(PlayerEntity player) {
+            public boolean mayPickup(Player player) {
                 return CatalogueScreenHandler.this.canTakeOutput(player);
             }
 
             @Override
-            public void onTakeItem(PlayerEntity player, ItemStack stack) {
+            public void onTake(Player player, ItemStack stack) {
                 CatalogueScreenHandler.this.onOutputTaken(player);
-                super.onTakeItem(player, stack);
+                super.onTake(player, stack);
             }
         });
 
-        this.addPlayerSlots(playerInventory, 7, 120);
+        this.addStandardInventorySlots(playerInventory, 7, 120);
     }
 
     @Override
-    public void onContentChanged(Inventory inv) {
+    public void slotsChanged(Container inv) {
         if (inv != this.inputInventory) return;
         this.selectedIndex = -1;
         this.selectedLevel = 1;
@@ -103,25 +102,25 @@ public class CatalogueScreenHandler extends ScreenHandler {
     }
 
     public void rebuildEntries() {
-        ItemStack item = this.inputInventory.getStack(0);
+        ItemStack item = this.inputInventory.getItem(0);
         if (item.isEmpty()) {
             this.entries = List.of();
             return;
         }
 
         List<CatalogueEntry> result = new ArrayList<>();
-        var registry = registryManager.getOrThrow(RegistryKeys.ENCHANTMENT);
-        ItemEnchantmentsComponent existing = item.getOrDefault(DataComponentTypes.ENCHANTMENTS, ItemEnchantmentsComponent.DEFAULT);
+        var registry = registryManager.lookupOrThrow(Registries.ENCHANTMENT);
+        ItemEnchantments existing = item.getOrDefault(DataComponents.ENCHANTMENTS, ItemEnchantments.EMPTY);
 
-        for (RegistryEntry<Enchantment> entry : registry.getIndexedEntries()) {
-            Optional<RegistryKey<Enchantment>> keyOpt = entry.getKey();
+        for (Holder<Enchantment> entry : registry.asHolderIdMap()) {
+            Optional<ResourceKey<Enchantment>> keyOpt = entry.unwrapKey();
             if (keyOpt.isEmpty()) continue;
 
-            RegistryKey<Enchantment> key = keyOpt.get();
+            ResourceKey<Enchantment> key = keyOpt.get();
             if (DisabledEnchantments.isDisabled(entry)) continue;
-            if (!entry.value().isAcceptableItem(item)) continue;
-            if (existing.getEnchantments().contains(entry)) continue;
-            if (!unlockedIds.contains(key.getValue())) continue;
+            if (!entry.value().canEnchant(item)) continue;
+            if (existing.keySet().contains(entry)) continue;
+            if (!unlockedIds.contains(key.identifier())) continue;
 
             int maxLevel = entry.value().getMaxLevel();
             result.add(new CatalogueEntry(entry, key, maxLevel));
@@ -131,7 +130,7 @@ public class CatalogueScreenHandler extends ScreenHandler {
     }
 
     @Override
-    public boolean onButtonClick(PlayerEntity player, int id) {
+    public boolean clickMenuButton(Player player, int id) {
         if (id >= 0 && id < 1000) {
             int index = id / 10;
             int level = (id % 10) + 1;
@@ -147,13 +146,13 @@ public class CatalogueScreenHandler extends ScreenHandler {
 
     private void updateResult() {
         if (selectedIndex < 0 || selectedIndex >= entries.size()) {
-            outputInventory.setStack(0, ItemStack.EMPTY);
+            outputInventory.setItem(0, ItemStack.EMPTY);
             return;
         }
 
-        ItemStack item = inputInventory.getStack(0);
+        ItemStack item = inputInventory.getItem(0);
         if (item.isEmpty()) {
-            outputInventory.setStack(0, ItemStack.EMPTY);
+            outputInventory.setItem(0, ItemStack.EMPTY);
             return;
         }
 
@@ -162,100 +161,100 @@ public class CatalogueScreenHandler extends ScreenHandler {
 
         int slotsNeeded = EnchantmentCosts.slotCost(entry.entry(), level);
         if (SlotSystem.getAvailableSlots(item) < slotsNeeded) {
-            outputInventory.setStack(0, ItemStack.EMPTY);
+            outputInventory.setItem(0, ItemStack.EMPTY);
             return;
         }
 
         if (!canAfford(entry, level)) {
-            outputInventory.setStack(0, ItemStack.EMPTY);
+            outputInventory.setItem(0, ItemStack.EMPTY);
             return;
         }
 
         ItemStack result = item.copy();
-        result.addEnchantment(entry.entry(), level);
-        outputInventory.setStack(0, result);
+        result.enchant(entry.entry(), level);
+        outputInventory.setItem(0, result);
     }
 
     private boolean canAfford(CatalogueEntry entry, int level) {
         if (this.player.isCreative()) return true;
 
-        ItemStack reagent = inputInventory.getStack(1);
-        RegistryKey<Enchantment> key = entry.key();
-        return reagent.isOf(EnchantmentCosts.reagent(key))
+        ItemStack reagent = inputInventory.getItem(1);
+        ResourceKey<Enchantment> key = entry.key();
+        return reagent.is(EnchantmentCosts.reagent(key))
                 && reagent.getCount() >= EnchantmentCosts.reagentCost(level, normalBookshelves)
                 && this.player.experienceLevel >= EnchantmentCosts.xpCost(key, level);
     }
 
-    private boolean canTakeOutput(PlayerEntity player) {
+    private boolean canTakeOutput(Player player) {
         if (selectedIndex < 0 || selectedIndex >= entries.size()) return false;
         CatalogueEntry entry = entries.get(selectedIndex);
         int level = Math.min(selectedLevel, entry.maxLevel());
 
-        ItemStack item = inputInventory.getStack(0);
+        ItemStack item = inputInventory.getItem(0);
         if (SlotSystem.getAvailableSlots(item) < EnchantmentCosts.slotCost(entry.entry(), level)) return false;
         return canAfford(entry, level);
     }
 
-    private void onOutputTaken(PlayerEntity player) {
+    private void onOutputTaken(Player player) {
         if (selectedIndex < 0 || selectedIndex >= entries.size()) return;
 
         CatalogueEntry entry = entries.get(selectedIndex);
         int level = Math.min(selectedLevel, entry.maxLevel());
-        RegistryKey<Enchantment> key = entry.key();
+        ResourceKey<Enchantment> key = entry.key();
 
         if (!player.isCreative()) {
-            inputInventory.getStack(1).decrement(EnchantmentCosts.reagentCost(level, normalBookshelves));
-            player.addExperienceLevels(-EnchantmentCosts.xpCost(key, level));
+            inputInventory.getItem(1).shrink(EnchantmentCosts.reagentCost(level, normalBookshelves));
+            player.giveExperienceLevels(-EnchantmentCosts.xpCost(key, level));
         }
 
-        inputInventory.setStack(0, ItemStack.EMPTY);
+        inputInventory.setItem(0, ItemStack.EMPTY);
 
-        this.context.run((world, pos) ->
-                world.playSound(null, pos, SoundEvents.BLOCK_ENCHANTMENT_TABLE_USE, SoundCategory.BLOCKS, 1.0f, 1.0f));
+        this.context.execute((world, pos) ->
+                world.playSound(null, pos, SoundEvents.ENCHANTMENT_TABLE_USE, SoundSource.BLOCKS, 1.0f, 1.0f));
 
-        if (player instanceof ServerPlayerEntity serverPlayer) {
-            Criteria.ENCHANTED_ITEM.trigger(serverPlayer, outputInventory.getStack(0), level);
-            if (entry.entry().isIn(EnchantmentTags.CURSE)) {
+        if (player instanceof ServerPlayer serverPlayer) {
+            CriteriaTriggers.ENCHANTED_ITEM.trigger(serverPlayer, outputInventory.getItem(0), level);
+            if (entry.entry().is(EnchantmentTags.CURSE)) {
                 ModAdvancements.grantCurseAdvancement(serverPlayer);
             }
         }
     }
 
     @Override
-    public ItemStack quickMove(PlayerEntity player, int slotIndex) {
+    public ItemStack quickMoveStack(Player player, int slotIndex) {
         Slot slot = this.slots.get(slotIndex);
-        if (!slot.hasStack()) return ItemStack.EMPTY;
+        if (!slot.hasItem()) return ItemStack.EMPTY;
 
-        ItemStack stack = slot.getStack();
+        ItemStack stack = slot.getItem();
         ItemStack copy = stack.copy();
 
         if (slotIndex == 2) {
             if (!canTakeOutput(player)) return ItemStack.EMPTY;
-            if (!this.insertItem(stack, 3, 39, true)) return ItemStack.EMPTY;
+            if (!this.moveItemStackTo(stack, 3, 39, true)) return ItemStack.EMPTY;
             onOutputTaken(player);
         } else if (slotIndex < 2) {
-            if (!this.insertItem(stack, 3, 39, true)) return ItemStack.EMPTY;
+            if (!this.moveItemStackTo(stack, 3, 39, true)) return ItemStack.EMPTY;
         } else {
-            if (!this.insertItem(stack, 0, 1, false))
-                if (!this.insertItem(stack, 1, 2, false))
+            if (!this.moveItemStackTo(stack, 0, 1, false))
+                if (!this.moveItemStackTo(stack, 1, 2, false))
                     return ItemStack.EMPTY;
         }
 
-        if (stack.isEmpty()) slot.setStack(ItemStack.EMPTY);
-        else slot.markDirty();
+        if (stack.isEmpty()) slot.setByPlayer(ItemStack.EMPTY);
+        else slot.setChanged();
 
         return stack.getCount() == copy.getCount() ? ItemStack.EMPTY : copy;
     }
 
     @Override
-    public void onClosed(PlayerEntity player) {
-        super.onClosed(player);
-        this.context.run((world, pos) -> this.dropInventory(player, this.inputInventory));
+    public void removed(Player player) {
+        super.removed(player);
+        this.context.execute((world, pos) -> this.clearContainer(player, this.inputInventory));
     }
 
     @Override
-    public boolean canUse(PlayerEntity player) {
-        return canUse(this.context, player, Blocks.ENCHANTING_TABLE);
+    public boolean stillValid(Player player) {
+        return stillValid(this.context, player, Blocks.ENCHANTING_TABLE);
     }
 
     public List<CatalogueEntry> getEntries() { return entries; }
@@ -270,5 +269,5 @@ public class CatalogueScreenHandler extends ScreenHandler {
         updateResult();
     }
 
-    public record CatalogueEntry(RegistryEntry<Enchantment> entry, RegistryKey<Enchantment> key, int maxLevel) {}
+    public record CatalogueEntry(Holder<Enchantment> entry, ResourceKey<Enchantment> key, int maxLevel) {}
 }

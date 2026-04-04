@@ -1,20 +1,19 @@
 package com.akitain.enchantmentoverhaul.enchant;
 
-import net.minecraft.enchantment.Enchantment;
-import net.minecraft.enchantment.Enchantments;
-import net.minecraft.item.Item;
-import net.minecraft.item.Items;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.registry.tag.EnchantmentTags;
-
 import java.util.Map;
+import net.minecraft.core.Holder;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.tags.EnchantmentTags;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.item.enchantment.Enchantments;
 
 import static java.util.Map.entry;
 
 public class EnchantmentCosts {
 
-    private static final Map<RegistryKey<Enchantment>, Item> REAGENTS = Map.ofEntries(
+    private static final Map<ResourceKey<Enchantment>, Item> REAGENTS = Map.ofEntries(
             entry(Enchantments.FIRE_ASPECT, Items.BLAZE_POWDER),
             entry(Enchantments.FLAME, Items.BLAZE_POWDER),
             entry(Enchantments.CHANNELING, Items.LIGHTNING_ROD),
@@ -55,7 +54,7 @@ public class EnchantmentCosts {
 
     private static final int[] XP_BY_LEVEL = {0, 2, 4, 7, 10};
 
-    public static Item reagent(RegistryKey<Enchantment> key) {
+    public static Item reagent(ResourceKey<Enchantment> key) {
         return REAGENTS.getOrDefault(key, Items.LAPIS_LAZULI);
     }
 
@@ -68,7 +67,7 @@ public class EnchantmentCosts {
         return Math.max(1, (int) Math.ceil(baseReagentCost(level) * (1.0 - discount)));
     }
 
-    public static int xpCost(RegistryKey<Enchantment> key, int level) {
+    public static int xpCost(ResourceKey<Enchantment> key, int level) {
         if (key.equals(Enchantments.MENDING)) return 8;
         if (level >= XP_BY_LEVEL.length) return XP_BY_LEVEL[XP_BY_LEVEL.length - 1];
         return XP_BY_LEVEL[level];
@@ -78,9 +77,9 @@ public class EnchantmentCosts {
         return REAGENTS.containsValue(item);
     }
 
-    public static int slotCost(RegistryEntry<Enchantment> entry, int level) {
-        if (entry.isIn(EnchantmentTags.CURSE)) return 0;
-        if (entry.matchesKey(Enchantments.MENDING)) return 3;
+    public static int slotCost(Holder<Enchantment> entry, int level) {
+        if (entry.is(EnchantmentTags.CURSE)) return 0;
+        if (entry.is(Enchantments.MENDING)) return 3;
         return level;
     }
 }

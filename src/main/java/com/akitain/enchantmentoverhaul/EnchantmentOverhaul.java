@@ -6,11 +6,9 @@ import com.akitain.enchantmentoverhaul.enchant.ModScreenHandlers;
 import com.akitain.enchantmentoverhaul.loot.LootTableModifier;
 import com.akitain.enchantmentoverhaul.smithing.SmithingTemplates;
 import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroupEntries;
-import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
-import net.minecraft.item.ItemGroups;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
+import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
+import net.minecraft.world.item.CreativeModeTabs;
+import net.minecraft.world.item.Items;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,7 +23,7 @@ public class EnchantmentOverhaul implements ModInitializer {
         ModScreenHandlers.register();
         SmithingTemplates.register();
 
-        ItemGroupEvents.modifyEntriesEvent(ItemGroups.INGREDIENTS).register(entries -> {
+        CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.INGREDIENTS).register(entries -> {
             entries.addBefore(Items.NETHERITE_UPGRADE_SMITHING_TEMPLATE,
                     SmithingTemplates.HONING_TEMPLATE,
                     SmithingTemplates.WARDING_TEMPLATE,

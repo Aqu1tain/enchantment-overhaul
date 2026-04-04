@@ -1,24 +1,24 @@
 package com.akitain.enchantmentoverhaul.mixin;
 
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.Inventory;
-import net.minecraft.screen.EnchantmentScreenHandler;
+import net.minecraft.world.Container;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.EnchantmentMenu;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-@Mixin(EnchantmentScreenHandler.class)
+@Mixin(EnchantmentMenu.class)
 public class EnchantmentScreenHandlerMixin {
 
-    @Inject(method = "onButtonClick", at = @At("HEAD"), cancellable = true)
-    private void disableEnchanting(PlayerEntity player, int id, CallbackInfoReturnable<Boolean> cir) {
+    @Inject(method = "clickMenuButton", at = @At("HEAD"), cancellable = true)
+    private void disableEnchanting(Player player, int id, CallbackInfoReturnable<Boolean> cir) {
         cir.setReturnValue(false);
     }
 
-    @Inject(method = "onContentChanged", at = @At("HEAD"), cancellable = true)
-    private void disableEnchantmentGeneration(Inventory inventory, CallbackInfo ci) {
+    @Inject(method = "slotsChanged", at = @At("HEAD"), cancellable = true)
+    private void disableEnchantmentGeneration(Container inventory, CallbackInfo ci) {
         ci.cancel();
     }
 }

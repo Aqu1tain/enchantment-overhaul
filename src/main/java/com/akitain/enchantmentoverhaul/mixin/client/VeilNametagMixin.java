@@ -1,46 +1,46 @@
 package com.akitain.enchantmentoverhaul.mixin.client;
 
 import com.akitain.enchantmentoverhaul.enchant.ModEnchantments;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.render.entity.PlayerEntityRenderer;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.ItemEnchantmentsComponent;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EquipmentSlot;
-import net.minecraft.entity.PlayerLikeEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.hit.HitResult;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.RaycastContext;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.entity.player.AvatarRenderer;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.entity.Avatar;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.enchantment.ItemEnchantments;
+import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-@Mixin(PlayerEntityRenderer.class)
+@Mixin(AvatarRenderer.class)
 public class VeilNametagMixin {
 
-    @Inject(method = "hasLabel(Lnet/minecraft/entity/PlayerLikeEntity;D)Z", at = @At("RETURN"), cancellable = true)
-    private void hideVeilNametag(PlayerLikeEntity entity, double squaredDistance, CallbackInfoReturnable<Boolean> cir) {
+    @Inject(method = "shouldShowName(Lnet/minecraft/world/entity/Avatar;D)Z", at = @At("RETURN"), cancellable = true)
+    private void hideVeilNametag(Avatar entity, double squaredDistance, CallbackInfoReturnable<Boolean> cir) {
         if (!cir.getReturnValue()) return;
 
-        ItemStack helmet = entity.getEquippedStack(EquipmentSlot.HEAD);
-        ItemEnchantmentsComponent enchantments = helmet.getOrDefault(DataComponentTypes.ENCHANTMENTS, ItemEnchantmentsComponent.DEFAULT);
+        ItemStack helmet = entity.getItemBySlot(EquipmentSlot.HEAD);
+        ItemEnchantments enchantments = helmet.getOrDefault(DataComponents.ENCHANTMENTS, ItemEnchantments.EMPTY);
         boolean hasVeil = false;
-        for (var entry : enchantments.getEnchantmentEntries()) {
-            if (entry.getKey().matchesKey(ModEnchantments.VEIL)) { hasVeil = true; break; }
+        for (var entry : enchantments.entrySet()) {
+            if (entry.getKey().is(ModEnchantments.VEIL)) { hasVeil = true; break; }
         }
         if (!hasVeil) return;
 
-        MinecraftClient client = MinecraftClient.getInstance();
+        Minecraft client = Minecraft.getInstance();
         Entity camera = client.getCameraEntity();
         if (camera == null) return;
 
-        Vec3d start = camera.getEyePos();
-        Vec3d end = entity.getEyePos();
-        BlockHitResult hit = entity.getEntityWorld().raycast(new RaycastContext(
-                start, end, RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, camera));
+        Vec3 start = camera.getEyePosition();
+        Vec3 end = entity.getEyePosition();
+        BlockHitResult hit = entity.level().clip(new ClipContext(
+                start, end, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, camera));
         if (hit.getType() == HitResult.Type.BLOCK) {
             cir.setReturnValue(false);
         }

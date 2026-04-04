@@ -2,51 +2,51 @@ package com.akitain.enchantmentoverhaul.mixin.client;
 
 import com.akitain.enchantmentoverhaul.component.ModComponents;
 import com.akitain.enchantmentoverhaul.enchant.InnateMaterialProperties;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.model.Model;
-import net.minecraft.client.render.OverlayTexture;
-import net.minecraft.client.render.TexturedRenderLayers;
-import net.minecraft.client.render.command.OrderedRenderCommandQueue;
-import net.minecraft.client.render.entity.equipment.EquipmentModel;
-import net.minecraft.client.render.entity.equipment.EquipmentModelLoader;
-import net.minecraft.client.render.entity.equipment.EquipmentRenderer;
-import net.minecraft.client.texture.Sprite;
-import net.minecraft.client.texture.SpriteAtlasTexture;
+import net.minecraft.client.renderer.Sheets;
+import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.renderer.entity.layers.EquipmentLayerRenderer;
+import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.client.renderer.texture.TextureAtlas;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.resources.model.EquipmentAssetManager;
+import net.minecraft.client.resources.model.EquipmentClientInfo;
+import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.equipment.EquipmentAsset;
 import org.jetbrains.annotations.Nullable;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.equipment.EquipmentAsset;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.util.Identifier;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(EquipmentRenderer.class)
+@Mixin(EquipmentLayerRenderer.class)
 public class UpgradeOverlayMixin {
 
     private static final String MOD = "enchantment-overhaul";
 
     @Unique
-    private SpriteAtlasTexture upgradeAtlas;
+    private TextureAtlas upgradeAtlas;
 
     @Inject(method = "<init>", at = @At("TAIL"))
-    private void captureAtlas(EquipmentModelLoader loader, SpriteAtlasTexture atlas, CallbackInfo ci) {
+    private void captureAtlas(EquipmentAssetManager loader, TextureAtlas atlas, CallbackInfo ci) {
         this.upgradeAtlas = atlas;
     }
 
-    @Inject(method = "render(Lnet/minecraft/client/render/entity/equipment/EquipmentModel$LayerType;Lnet/minecraft/registry/RegistryKey;Lnet/minecraft/client/model/Model;Ljava/lang/Object;Lnet/minecraft/item/ItemStack;Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/command/OrderedRenderCommandQueue;ILnet/minecraft/util/Identifier;II)V", at = @At("TAIL"))
-    private <S> void renderUpgradeOverlays(EquipmentModel.LayerType layerType, RegistryKey<EquipmentAsset> assetKey,
-                                            Model<? super S> model, S state, ItemStack stack, MatrixStack matrices,
-                                            OrderedRenderCommandQueue queue, int light, Identifier textureId,
+    @Inject(method = "renderLayers(Lnet/minecraft/client/resources/model/EquipmentClientInfo$LayerType;Lnet/minecraft/resources/ResourceKey;Lnet/minecraft/client/model/Model;Ljava/lang/Object;Lnet/minecraft/world/item/ItemStack;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;ILnet/minecraft/resources/Identifier;II)V", at = @At("TAIL"))
+    private <S> void renderUpgradeOverlays(EquipmentClientInfo.LayerType layerType, ResourceKey<EquipmentAsset> assetKey,
+                                            Model<? super S> model, S state, ItemStack stack, PoseStack matrices,
+                                            SubmitNodeCollector queue, int light, Identifier textureId,
                                             int outlineColor, int initialOrder, CallbackInfo ci) {
         if (upgradeAtlas == null) return;
 
         String material = getPaletteName(stack);
         if (material == null) return;
 
-        String dir = layerType == EquipmentModel.LayerType.HUMANOID_LEGGINGS
+        String dir = layerType == EquipmentClientInfo.LayerType.HUMANOID_LEGGINGS
                 ? "trims/entity/humanoid_leggings" : "trims/entity/humanoid";
 
         int order = initialOrder + 10;
@@ -61,15 +61,15 @@ public class UpgradeOverlayMixin {
     }
 
     @Unique
-    private <S> void renderOverlay(String spritePath, Model<? super S> model, S state, MatrixStack matrices,
-                                    OrderedRenderCommandQueue queue, int light, int outlineColor, int order) {
-        Sprite sprite = upgradeAtlas.getSprite(Identifier.of(MOD, spritePath));
+    private <S> void renderOverlay(String spritePath, Model<? super S> model, S state, PoseStack matrices,
+                                    SubmitNodeCollector queue, int light, int outlineColor, int order) {
+        TextureAtlasSprite sprite = upgradeAtlas.getSprite(Identifier.fromNamespaceAndPath(MOD, spritePath));
         if (sprite == null) return;
 
-        queue.getBatchingQueue(order)
+        queue.order(order)
                 .submitModel(model, state, matrices,
-                        TexturedRenderLayers.getArmorTrims(false),
-                        light, OverlayTexture.DEFAULT_UV, -1, sprite, outlineColor, null);
+                        Sheets.armorTrimsSheet(false),
+                        light, OverlayTexture.NO_OVERLAY, -1, sprite, outlineColor, null);
     }
 
     @Unique
