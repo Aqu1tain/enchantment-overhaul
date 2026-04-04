@@ -4,7 +4,7 @@
     "tag": "enchantment-overhaul:smithing_templates"
   },
   "base": {
-    "tag": "enchantment-overhaul:smithing_materials"
+    "tag": "enchantment-overhaul:upgradeable"
   },
   "addition": {
     "tag": "enchantment-overhaul:smithing_materials"
