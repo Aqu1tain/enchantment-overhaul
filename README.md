@@ -17,7 +17,7 @@ See the [Wiki](https://github.com/Aqu1tain/enchantment-overhaul/wiki) for detail
 ## Credits
 
 - **Aqu1tain** — design and development
-- **LolloNapo** — textures and art
+- **[LolloNapo](https://modrinth.com/user/Napino)** — textures and art
 
 ## Requirements
 
