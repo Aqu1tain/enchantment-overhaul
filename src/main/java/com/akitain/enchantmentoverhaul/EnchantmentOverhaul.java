@@ -24,7 +24,7 @@ public class EnchantmentOverhaul implements ModInitializer {
         SmithingTemplates.register();
 
         CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.INGREDIENTS).register(entries -> {
-            entries.addBefore(Items.NETHERITE_UPGRADE_SMITHING_TEMPLATE,
+            entries.insertBefore(Items.NETHERITE_UPGRADE_SMITHING_TEMPLATE,
                     SmithingTemplates.HONING_TEMPLATE,
                     SmithingTemplates.WARDING_TEMPLATE,
                     SmithingTemplates.TEMPERING_TEMPLATE,

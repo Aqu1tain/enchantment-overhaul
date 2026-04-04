@@ -8,14 +8,12 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.input.MouseButtonEvent;
-import net.minecraft.client.model.object.book.BookModel;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.FontDescription;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
@@ -61,7 +59,6 @@ public class CatalogueScreen extends AbstractContainerScreen<CatalogueScreenHand
 
     private static final int PANEL_BG = 0xFF585858;
     private static final int TEXT_LIGHT = 0xFFD8C8F0;
-    private static final int TEXT_DIM = 0xFF9080B0;
     private static final int BG = 0xFFC6C6C6;
     private static final int SLOT_BG = 0xFF8B8B8B;
     private static final int BORDER_L = 0xFFFFFFFF;
@@ -70,26 +67,22 @@ public class CatalogueScreen extends AbstractContainerScreen<CatalogueScreenHand
 
     private static final Identifier SLOT_SWORD = Identifier.withDefaultNamespace("container/slot/sword");
     private static final Identifier SLOT_AMETHYST = Identifier.withDefaultNamespace("container/slot/amethyst_shard");
-    private static final Identifier BOOK_TEXTURE = Identifier.withDefaultNamespace("textures/entity/enchanting_table_book.png");
 
     private static final Identifier[] SLOT_PLACEHOLDERS = { SLOT_SWORD, SLOT_AMETHYST };
 
     private static final Style SGA_STYLE = Style.EMPTY
-            .withFont(new FontDescription.Resource(Identifier.fromNamespaceAndPath("minecraft", "alt")));
+            .withFont(new net.minecraft.network.chat.FontDescription.Resource(Identifier.fromNamespaceAndPath("minecraft", "alt")));
     private static final String SGA_CHARS = "abcdefghijklmnopqrstuvwxyz";
 
     private final String[] sgaRows = new String[20];
 
-    private BookModel bookModel;
     private float scrollAmount;
     private int scrollOffset;
     private boolean scrolling;
     private ItemStack lastItem = ItemStack.EMPTY;
 
     public CatalogueScreen(CatalogueScreenHandler handler, Inventory inventory, Component title) {
-        super(handler, inventory, title);
-        this.imageWidth = BG_W;
-        this.imageHeight = BG_H;
+        super(handler, inventory, title, BG_W, BG_H);
         this.titleLabelX = 8;
         this.titleLabelY = 6;
         this.inventoryLabelX = 7;
@@ -101,16 +94,14 @@ public class CatalogueScreen extends AbstractContainerScreen<CatalogueScreenHand
     protected void init() {
         super.init();
         menu.rebuildEntries();
-        bookModel = new BookModel(BookModel.createBodyLayer().bakeRoot());
     }
 
     @Override
-    public void render(GuiGraphics context, int mouseX, int mouseY, float deltaTicks) {
+    public void extractRenderState(GuiGraphicsExtractor gfx, int mouseX, int mouseY, float deltaTicks) {
         checkItemChanged();
-        super.render(context, mouseX, mouseY, deltaTicks);
-        context.drawString(font, this.title, this.leftPos + titleLabelX, this.topPos + titleLabelY, 0xFF404040, false);
-        drawCatalogueTooltip(context, mouseX, mouseY);
-        renderTooltip(context, mouseX, mouseY);
+        super.extractRenderState(gfx, mouseX, mouseY, deltaTicks);
+        gfx.text(font, this.title, this.leftPos + titleLabelX, this.topPos + titleLabelY, 0xFF404040, false);
+        drawCatalogueTooltip(gfx, mouseX, mouseY);
     }
 
     private void checkItemChanged() {
@@ -123,83 +114,67 @@ public class CatalogueScreen extends AbstractContainerScreen<CatalogueScreenHand
         }
     }
 
-    // --- Drawing ---
-
     @Override
-    protected void renderBg(GuiGraphics context, float deltaTicks, int mouseX, int mouseY) {
+    public void extractContents(GuiGraphicsExtractor gfx, int mouseX, int mouseY, float deltaTicks) {
         int x = this.leftPos, y = this.topPos;
 
-        drawRoundedFrame(context, x, y, BG_W, BG_H);
-        drawBook(context, x, y);
-        drawInputSlots(context, x, y);
-        drawArrow(context, x, y);
-        drawOutputSlot(context, x, y);
-        drawCatalogue(context, x, y, mouseX, mouseY);
-        drawSlotBar(context, x, y);
-        drawPlayerSlotBorders(context, x, y);
+        drawRoundedFrame(gfx, x, y, BG_W, BG_H);
+        drawInputSlots(gfx, x, y);
+        drawArrow(gfx, x, y);
+        drawOutputSlot(gfx, x, y);
+        drawCatalogue(gfx, x, y, mouseX, mouseY);
+        drawSlotBar(gfx, x, y);
+        drawPlayerSlotBorders(gfx, x, y);
     }
 
     @Override
-    protected void renderLabels(GuiGraphics context, int mouseX, int mouseY) {
-        context.drawString(font, this.playerInventoryTitle, inventoryLabelX, inventoryLabelY, 0x404040, false);
+    protected void extractLabels(GuiGraphicsExtractor gfx, int mouseX, int mouseY) {
+        gfx.text(font, this.playerInventoryTitle, inventoryLabelX, inventoryLabelY, 0x404040, false);
     }
 
-    private void drawRoundedFrame(GuiGraphics ctx, int x, int y, int w, int h) {
+    private void drawRoundedFrame(GuiGraphicsExtractor ctx, int x, int y, int w, int h) {
         int L = BORDER_L, D = BORDER_D;
-
         ctx.fill(x + 2, y + 2, x + w - 2, y + h - 2, BG);
-
         ctx.fill(x + 1, y, x + w - 1, y + 1, L);
         ctx.fill(x, y + 1, x + w, y + 2, L);
-
         ctx.fill(x, y + h - 2, x + w, y + h - 1, D);
         ctx.fill(x + 1, y + h - 1, x + w - 1, y + h, D);
-
         ctx.fill(x, y + 1, x + 1, y + h - 1, L);
         ctx.fill(x + 1, y, x + 2, y + h, L);
-
         ctx.fill(x + w - 2, y, x + w - 1, y + h, D);
         ctx.fill(x + w - 1, y + 1, x + w, y + h - 1, D);
     }
 
-    private void drawBook(GuiGraphics context, int x, int y) {
-        if (bookModel == null) return;
-        int bx = x + BOOK_X;
-        int by = y + BOOK_Y;
-        context.submitBookModelRenderState(bookModel, BOOK_TEXTURE, 40.0f, 0.9f, 0.1f,
-                bx, by, bx + 50, by + 40);
-    }
-
-    private void drawInputSlots(GuiGraphics context, int x, int y) {
+    private void drawInputSlots(GuiGraphicsExtractor gfx, int x, int y) {
         for (int i = 0; i < 2; i++) {
             Slot slot = menu.slots.get(i);
-            slotBorder(context, x + slot.x - 1, y + slot.y - 1);
+            slotBorder(gfx, x + slot.x - 1, y + slot.y - 1);
             if (slot.getItem().isEmpty()) {
-                context.blitSprite(RenderPipelines.GUI_TEXTURED, SLOT_PLACEHOLDERS[i],
+                gfx.blitSprite(RenderPipelines.GUI_TEXTURED, SLOT_PLACEHOLDERS[i],
                         x + slot.x, y + slot.y, 16, 16);
             }
         }
     }
 
-    private void drawArrow(GuiGraphics context, int x, int y) {
+    private void drawArrow(GuiGraphicsExtractor gfx, int x, int y) {
         int cx = x + 28;
         int ay = y + 78;
-        context.fill(cx - 1, ay, cx + 1, ay + 3, ARROW_COLOR);
-        context.fill(cx - 3, ay + 3, cx + 3, ay + 4, ARROW_COLOR);
-        context.fill(cx - 2, ay + 4, cx + 2, ay + 5, ARROW_COLOR);
-        context.fill(cx - 1, ay + 5, cx + 1, ay + 6, ARROW_COLOR);
+        gfx.fill(cx - 1, ay, cx + 1, ay + 3, ARROW_COLOR);
+        gfx.fill(cx - 3, ay + 3, cx + 3, ay + 4, ARROW_COLOR);
+        gfx.fill(cx - 2, ay + 4, cx + 2, ay + 5, ARROW_COLOR);
+        gfx.fill(cx - 1, ay + 5, cx + 1, ay + 6, ARROW_COLOR);
     }
 
-    private void drawOutputSlot(GuiGraphics context, int x, int y) {
+    private void drawOutputSlot(GuiGraphicsExtractor gfx, int x, int y) {
         Slot slot = menu.slots.get(2);
-        slotBorder(context, x + slot.x - 1, y + slot.y - 1);
+        slotBorder(gfx, x + slot.x - 1, y + slot.y - 1);
     }
 
-    private void drawCatalogue(GuiGraphics context, int x, int y, int mouseX, int mouseY) {
+    private void drawCatalogue(GuiGraphicsExtractor gfx, int x, int y, int mouseX, int mouseY) {
         int cx = x + CAT_X, cy = y + CAT_Y;
 
-        context.fill(cx, cy, cx + CAT_W, cy + CAT_H, PANEL_BG);
-        borderInset(context, cx, cy, CAT_W, CAT_H);
+        gfx.fill(cx, cy, cx + CAT_W, cy + CAT_H, PANEL_BG);
+        borderInset(gfx, cx, cy, CAT_W, CAT_H);
 
         List<CatalogueEntry> entries = menu.getEntries();
         if (entries.isEmpty()) {
@@ -211,7 +186,7 @@ public class CatalogueScreen extends AbstractContainerScreen<CatalogueScreenHand
             int startY = cy + (CAT_H - totalH) / 2;
             for (int i = 0; i < lines.size(); i++) {
                 int lw = font.width(lines.get(i));
-                context.drawString(font, lines.get(i),
+                gfx.text(font, lines.get(i),
                         cx + (CAT_W - lw) / 2,
                         startY + i * (font.lineHeight + 2), 0xFF808080, false);
             }
@@ -223,34 +198,32 @@ public class CatalogueScreen extends AbstractContainerScreen<CatalogueScreenHand
         for (int i = scrollOffset; i < end; i++) {
             int row = i - scrollOffset;
             int ry = cy + 2 + row * (ROW_H + 1);
-            drawRow(context, entries.get(i), i, cx + 2, ry, rowW, mouseX, mouseY);
+            drawRow(gfx, entries.get(i), i, cx + 2, ry, rowW, mouseX, mouseY);
         }
 
-        drawScrollbar(context, cx + CAT_W - SCROLLBAR_W - 2, cy + 2, CAT_H - 4);
+        drawScrollbar(gfx, cx + CAT_W - SCROLLBAR_W - 2, cy + 2, CAT_H - 4);
     }
 
-    private void drawRow(GuiGraphics context, CatalogueEntry entry, int idx, int rx, int ry, int rw, int mx, int my) {
+    private void drawRow(GuiGraphicsExtractor gfx, CatalogueEntry entry, int idx, int rx, int ry, int rw, int mx, int my) {
         boolean selected = idx == menu.getSelectedIndex();
         boolean hovered = mx >= rx && mx < rx + rw && my >= ry && my < ry + ROW_H;
 
         int bg = selected ? ROW_SELECTED : (hovered ? ROW_HOVER : ROW_BG);
-        context.fill(rx, ry, rx + rw, ry + ROW_H, bg);
+        gfx.fill(rx, ry, rx + rw, ry + ROW_H, bg);
 
         int borderTop = selected ? 0xFF9A6090 : ROW_BORDER_L;
         int borderBot = selected ? 0xFF60305A : ROW_BORDER_D;
-        context.fill(rx, ry, rx + rw, ry + 1, borderTop);
-        context.fill(rx, ry + ROW_H - 1, rx + rw, ry + ROW_H, borderBot);
+        gfx.fill(rx, ry, rx + rw, ry + 1, borderTop);
+        gfx.fill(rx, ry + ROW_H - 1, rx + rw, ry + ROW_H, borderBot);
 
-        // Level buttons (right-aligned, drawn first so SGA clips before them)
         int lvX = rx + rw - 2 - entry.maxLevel() * (LV_BTN + LV_GAP);
         int sgaMaxX = lvX - 3;
 
-        // SGA gibberish (main row content, clipped before buttons)
         int sgaColor = selected ? 0xFFE0C0E0 : (hovered ? 0xFFB0A080 : 0xFF988870);
         String sga = sgaRows[idx % sgaRows.length];
         int sgaY = ry + (ROW_H - 8) / 2;
         Component sgaText = Component.literal(trimToWidth(sga, sgaMaxX - rx - 3)).setStyle(SGA_STYLE);
-        context.drawString(font, sgaText, rx + 3, sgaY, sgaColor);
+        gfx.text(font, sgaText, rx + 3, sgaY, sgaColor, true);
         int selLv = selected ? menu.getSelectedLevel() : 0;
 
         for (int lv = 1; lv <= entry.maxLevel(); lv++) {
@@ -259,21 +232,21 @@ public class CatalogueScreen extends AbstractContainerScreen<CatalogueScreenHand
             int lvBorderL = lvSel ? 0xFF7AB848 : (selected ? 0xFF6A4868 : 0xFF5A5048);
             int lvBorderD = lvSel ? 0xFF2A4810 : (selected ? 0xFF2A0828 : 0xFF1A1008);
             int lvY = ry + (ROW_H - LV_BTN) / 2;
-            context.fill(lvX, lvY, lvX + LV_BTN, lvY + LV_BTN, lvBg);
-            context.fill(lvX, lvY, lvX + LV_BTN, lvY + 1, lvBorderL);
-            context.fill(lvX, lvY, lvX + 1, lvY + LV_BTN, lvBorderL);
-            context.fill(lvX + LV_BTN - 1, lvY + 1, lvX + LV_BTN, lvY + LV_BTN, lvBorderD);
-            context.fill(lvX + 1, lvY + LV_BTN - 1, lvX + LV_BTN, lvY + LV_BTN, lvBorderD);
+            gfx.fill(lvX, lvY, lvX + LV_BTN, lvY + LV_BTN, lvBg);
+            gfx.fill(lvX, lvY, lvX + LV_BTN, lvY + 1, lvBorderL);
+            gfx.fill(lvX, lvY, lvX + 1, lvY + LV_BTN, lvBorderL);
+            gfx.fill(lvX + LV_BTN - 1, lvY + 1, lvX + LV_BTN, lvY + LV_BTN, lvBorderD);
+            gfx.fill(lvX + 1, lvY + LV_BTN - 1, lvX + LV_BTN, lvY + LV_BTN, lvBorderD);
 
             String r = toRoman(lv);
             int tw = font.width(r);
             int lvColor = lvSel ? 0xFFC0FF80 : (selected ? 0xFFB890B8 : 0xFF7A6A5A);
-            context.drawString(font, r, lvX + (LV_BTN - tw) / 2, lvY + 3, lvColor);
+            gfx.text(font, r, lvX + (LV_BTN - tw) / 2, lvY + 3, lvColor, true);
             lvX += LV_BTN + LV_GAP;
         }
     }
 
-    private void drawCatalogueTooltip(GuiGraphics context, int mx, int my) {
+    private void drawCatalogueTooltip(GuiGraphicsExtractor gfx, int mx, int my) {
         int cx = this.leftPos + CAT_X, cy = this.topPos + CAT_Y;
         if (mx < cx || mx >= cx + CAT_W || my < cy || my >= cy + CAT_H) return;
 
@@ -304,7 +277,7 @@ public class CatalogueScreen extends AbstractContainerScreen<CatalogueScreenHand
         tooltip.add(Component.literal(entry.entry().value().description().getString() + levelLabel)
                 .withStyle(entry.entry().is(EnchantmentTags.CURSE) ? ChatFormatting.RED : ChatFormatting.LIGHT_PURPLE));
         tooltip.add(Component.empty());
-        tooltip.add(costLine(reagentItem.getName().getString(), reagentCost, hasReagent));
+        tooltip.add(costLine(reagentItem.getName(ItemStack.EMPTY).getString(), reagentCost, hasReagent));
         tooltip.add(costLine("XP Levels", xpCost, hasXp));
         if (slotCost > 0) {
             tooltip.add(costLine("Slots", slotCost, hasSlots));
@@ -321,7 +294,7 @@ public class CatalogueScreen extends AbstractContainerScreen<CatalogueScreenHand
                     .withStyle(ChatFormatting.DARK_GRAY));
         }
 
-        context.setComponentTooltipForNextFrame(font, tooltip, mx, my);
+        gfx.setComponentTooltipForNextFrame(font, tooltip, mx, my);
     }
 
     private Component costLine(String label, int amount, boolean has) {
@@ -330,17 +303,17 @@ public class CatalogueScreen extends AbstractContainerScreen<CatalogueScreenHand
                 .append(Component.literal(String.valueOf(amount)).withStyle(color));
     }
 
-    private void drawScrollbar(GuiGraphics context, int sx, int sy, int sh) {
+    private void drawScrollbar(GuiGraphicsExtractor gfx, int sx, int sy, int sh) {
         if (!shouldScroll()) return;
-        context.fill(sx, sy, sx + SCROLLBAR_W, sy + sh, 0xFF2A2218);
+        gfx.fill(sx, sy, sx + SCROLLBAR_W, sy + sh, 0xFF2A2218);
 
         int thumbH = Math.max(10, sh * VISIBLE_ROWS / menu.getEntries().size());
         int thumbY = sy + (int) ((sh - thumbH) * scrollAmount);
-        context.fill(sx, thumbY, sx + SCROLLBAR_W, thumbY + thumbH, SLOT_BG);
-        border3D(context, sx, thumbY, SCROLLBAR_W, thumbH, 0xFFC6C6C6, 0xFF555555);
+        gfx.fill(sx, thumbY, sx + SCROLLBAR_W, thumbY + thumbH, SLOT_BG);
+        border3D(gfx, sx, thumbY, SCROLLBAR_W, thumbH, 0xFFC6C6C6, 0xFF555555);
     }
 
-    private void drawSlotBar(GuiGraphics context, int x, int y) {
+    private void drawSlotBar(GuiGraphicsExtractor gfx, int x, int y) {
         ItemStack item = menu.getSlot(0).getItem();
         if (item.isEmpty()) return;
 
@@ -377,21 +350,21 @@ public class CatalogueScreen extends AbstractContainerScreen<CatalogueScreenHand
             } else {
                 pipBg = 0xFF2A1848; pipBorderL = 0xFF3A2858; pipBorderD = 0xFF1A0838;
             }
-            context.fill(px, barY, px + pw, barY + ph, pipBg);
-            context.fill(px, barY, px + pw, barY + 1, pipBorderL);
-            context.fill(px, barY, px + 1, barY + ph, pipBorderL);
-            context.fill(px + pw - 1, barY + 1, px + pw, barY + ph, pipBorderD);
-            context.fill(px + 1, barY + ph - 1, px + pw, barY + ph, pipBorderD);
+            gfx.fill(px, barY, px + pw, barY + ph, pipBg);
+            gfx.fill(px, barY, px + pw, barY + 1, pipBorderL);
+            gfx.fill(px, barY, px + 1, barY + ph, pipBorderL);
+            gfx.fill(px + pw - 1, barY + 1, px + pw, barY + ph, pipBorderD);
+            gfx.fill(px + 1, barY + ph - 1, px + pw, barY + ph, pipBorderD);
         }
 
         int textX = barRight + 4;
-        context.drawString(font, countText, textX, barY - 1, TEXT_LIGHT);
+        gfx.text(font, countText, textX, barY - 1, TEXT_LIGHT, true);
     }
 
-    private void drawPlayerSlotBorders(GuiGraphics context, int x, int y) {
+    private void drawPlayerSlotBorders(GuiGraphicsExtractor gfx, int x, int y) {
         for (int i = 3; i < menu.slots.size(); i++) {
             Slot slot = menu.slots.get(i);
-            slotBorder(context, x + slot.x - 1, y + slot.y - 1);
+            slotBorder(gfx, x + slot.x - 1, y + slot.y - 1);
         }
     }
 
@@ -476,18 +449,18 @@ public class CatalogueScreen extends AbstractContainerScreen<CatalogueScreenHand
 
     // --- Drawing helpers ---
 
-    private void border3D(GuiGraphics ctx, int x, int y, int w, int h, int light, int dark) {
+    private void border3D(GuiGraphicsExtractor ctx, int x, int y, int w, int h, int light, int dark) {
         ctx.fill(x, y, x + w, y + 1, light);
         ctx.fill(x, y, x + 1, y + h, light);
         ctx.fill(x + w - 1, y + 1, x + w, y + h, dark);
         ctx.fill(x + 1, y + h - 1, x + w, y + h, dark);
     }
 
-    private void borderInset(GuiGraphics ctx, int x, int y, int w, int h) {
+    private void borderInset(GuiGraphicsExtractor ctx, int x, int y, int w, int h) {
         border3D(ctx, x, y, w, h, BORDER_D, BORDER_L);
     }
 
-    private void slotBorder(GuiGraphics ctx, int x, int y) {
+    private void slotBorder(GuiGraphicsExtractor ctx, int x, int y) {
         ctx.fill(x, y, x + 18, y + 1, BORDER_D);
         ctx.fill(x, y, x + 1, y + 18, BORDER_D);
         ctx.fill(x + 17, y + 1, x + 18, y + 18, BORDER_L);
