@@ -3,20 +3,74 @@ package com.akitain.enchantmentoverhaul.smithing;
 import com.akitain.enchantmentoverhaul.EnchantmentOverhaul;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
+import net.minecraft.item.SmithingTemplateItem;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
+import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.Rarity;
 
+import java.util.List;
 import java.util.Map;
 
 public class SmithingTemplates {
 
-    public static final Item HONING_TEMPLATE = register("honing_template");
-    public static final Item WARDING_TEMPLATE = register("warding_template");
-    public static final Item TEMPERING_TEMPLATE = register("tempering_template");
-    public static final Item GRINDING_TEMPLATE = register("grinding_template");
+    private static final Formatting DESC = Formatting.BLUE;
+
+    private static final Identifier SLOT_HELMET = Identifier.ofVanilla("container/slot/helmet");
+    private static final Identifier SLOT_CHESTPLATE = Identifier.ofVanilla("container/slot/chestplate");
+    private static final Identifier SLOT_LEGGINGS = Identifier.ofVanilla("container/slot/leggings");
+    private static final Identifier SLOT_BOOTS = Identifier.ofVanilla("container/slot/boots");
+    private static final Identifier SLOT_SWORD = Identifier.ofVanilla("container/slot/sword");
+    private static final Identifier SLOT_PICKAXE = Identifier.ofVanilla("container/slot/pickaxe");
+    private static final Identifier SLOT_AXE = Identifier.ofVanilla("container/slot/axe");
+    private static final Identifier SLOT_SHOVEL = Identifier.ofVanilla("container/slot/shovel");
+    private static final Identifier SLOT_HOE = Identifier.ofVanilla("container/slot/hoe");
+    private static final Identifier SLOT_SPEAR = Identifier.ofVanilla("container/slot/spear");
+    private static final Identifier SLOT_INGOT = Identifier.ofVanilla("container/slot/ingot");
+
+    private static final List<Identifier> ARMOR_SLOTS = List.of(SLOT_HELMET, SLOT_CHESTPLATE, SLOT_LEGGINGS, SLOT_BOOTS);
+    private static final List<Identifier> WEAPON_SLOTS = List.of(SLOT_SWORD, SLOT_AXE, SLOT_SPEAR);
+    private static final List<Identifier> TOOL_SLOTS = List.of(SLOT_PICKAXE, SLOT_AXE, SLOT_SHOVEL, SLOT_HOE);
+    private static final List<Identifier> ALL_EQUIPMENT_SLOTS = List.of(
+            SLOT_HELMET, SLOT_CHESTPLATE, SLOT_LEGGINGS, SLOT_BOOTS,
+            SLOT_SWORD, SLOT_PICKAXE, SLOT_AXE, SLOT_SHOVEL, SLOT_HOE, SLOT_SPEAR);
+    private static final List<Identifier> MATERIAL_SLOTS = List.of(SLOT_INGOT);
+
+    private static Text appliesTo(String key) {
+        return Text.translatable("item." + EnchantmentOverhaul.MOD_ID + ".smithing_template." + key + ".applies_to").formatted(DESC);
+    }
+
+    private static Text ingredients(String key) {
+        return Text.translatable("item." + EnchantmentOverhaul.MOD_ID + ".smithing_template." + key + ".ingredients").formatted(DESC);
+    }
+
+    private static Text baseSlot(String key) {
+        return Text.translatable("item." + EnchantmentOverhaul.MOD_ID + ".smithing_template." + key + ".base_slot_description");
+    }
+
+    private static Text additionsSlot(String key) {
+        return Text.translatable("item." + EnchantmentOverhaul.MOD_ID + ".smithing_template." + key + ".additions_slot_description");
+    }
+
+    public static final Item HONING_TEMPLATE = register("honing_template",
+            appliesTo("honing"), ingredients("honing"), baseSlot("honing"), additionsSlot("honing"),
+            WEAPON_SLOTS, MATERIAL_SLOTS);
+
+    public static final Item WARDING_TEMPLATE = register("warding_template",
+            appliesTo("warding"), ingredients("warding"), baseSlot("warding"), additionsSlot("warding"),
+            ARMOR_SLOTS, MATERIAL_SLOTS);
+
+    public static final Item TEMPERING_TEMPLATE = register("tempering_template",
+            appliesTo("tempering"), ingredients("tempering"), baseSlot("tempering"), additionsSlot("tempering"),
+            ALL_EQUIPMENT_SLOTS, MATERIAL_SLOTS);
+
+    public static final Item GRINDING_TEMPLATE = register("grinding_template",
+            appliesTo("grinding"), ingredients("grinding"), baseSlot("grinding"), additionsSlot("grinding"),
+            TOOL_SLOTS, MATERIAL_SLOTS);
 
     private static final Map<Item, UpgradeType> TEMPLATE_TO_TYPE = Map.of(
             HONING_TEMPLATE, UpgradeType.HONING,
@@ -52,10 +106,14 @@ public class SmithingTemplates {
         return TEMPLATE_TO_TYPE.containsKey(item);
     }
 
-    private static Item register(String name) {
+    private static Item register(String name, Text appliesTo, Text ingredients,
+                                  Text baseSlotDesc, Text additionsSlotDesc,
+                                  List<Identifier> baseSlotTextures, List<Identifier> additionsSlotTextures) {
         Identifier id = Identifier.of(EnchantmentOverhaul.MOD_ID, name);
         RegistryKey<Item> key = RegistryKey.of(RegistryKeys.ITEM, id);
-        return Registry.register(Registries.ITEM, key, new Item(new Item.Settings().registryKey(key)));
+        return Registry.register(Registries.ITEM, key,
+                new SmithingTemplateItem(appliesTo, ingredients, baseSlotDesc, additionsSlotDesc,
+                        baseSlotTextures, additionsSlotTextures, new Item.Settings().registryKey(key).rarity(Rarity.UNCOMMON)));
     }
 
     public static void register() {}

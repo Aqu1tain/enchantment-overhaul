@@ -6,9 +6,11 @@ import com.akitain.enchantmentoverhaul.enchant.ModScreenHandlers;
 import com.akitain.enchantmentoverhaul.loot.LootTableModifier;
 import com.akitain.enchantmentoverhaul.smithing.SmithingTemplates;
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroupEntries;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.minecraft.item.ItemGroups;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,10 +26,11 @@ public class EnchantmentOverhaul implements ModInitializer {
         SmithingTemplates.register();
 
         ItemGroupEvents.modifyEntriesEvent(ItemGroups.INGREDIENTS).register(entries -> {
-            entries.add(new ItemStack(SmithingTemplates.HONING_TEMPLATE));
-            entries.add(new ItemStack(SmithingTemplates.WARDING_TEMPLATE));
-            entries.add(new ItemStack(SmithingTemplates.TEMPERING_TEMPLATE));
-            entries.add(new ItemStack(SmithingTemplates.GRINDING_TEMPLATE));
+            entries.addBefore(Items.NETHERITE_UPGRADE_SMITHING_TEMPLATE,
+                    SmithingTemplates.HONING_TEMPLATE,
+                    SmithingTemplates.WARDING_TEMPLATE,
+                    SmithingTemplates.TEMPERING_TEMPLATE,
+                    SmithingTemplates.GRINDING_TEMPLATE);
         });
 
         LootTableModifier.register();

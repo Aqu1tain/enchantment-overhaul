@@ -1,0 +1,22 @@
+{
+  "sources": [
+    {
+      "type": "minecraft:paletted_permutations",
+      "palette_key": "enchantment-overhaul:trims/color_palettes/upgrade_palette",
+      "permutations": {
+        "copper": "enchantment-overhaul:trims/color_palettes/copper",
+        "iron": "enchantment-overhaul:trims/color_palettes/iron",
+        "gold": "enchantment-overhaul:trims/color_palettes/gold",
+        "diamond": "enchantment-overhaul:trims/color_palettes/diamond",
+        "netherite": "enchantment-overhaul:trims/color_palettes/netherite",
+        "leather": "enchantment-overhaul:trims/color_palettes/leather_tinted"
+      },
+      "textures": [
+        "enchantment-overhaul:trims/entity/humanoid/warding",
+        "enchantment-overhaul:trims/entity/humanoid_leggings/warding",
+        "enchantment-overhaul:trims/entity/humanoid/tempering",
+        "enchantment-overhaul:trims/entity/humanoid_leggings/tempering"
+      ]
+    }
+  ]
+}

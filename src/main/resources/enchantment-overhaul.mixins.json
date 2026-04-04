@@ -28,7 +28,8 @@
     ],
     "client": [
         "client.VeilNametagMixin",
-        "client.EnchantingTableParticleMixin"
+        "client.EnchantingTableParticleMixin",
+        "client.UpgradeOverlayMixin"
     ],
     "injectors": {
         "defaultRequire": 1
