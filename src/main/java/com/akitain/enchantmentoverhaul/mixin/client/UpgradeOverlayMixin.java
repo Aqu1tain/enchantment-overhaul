@@ -49,7 +49,7 @@ public class UpgradeOverlayMixin {
         String dir = layerType == EquipmentModel.LayerType.HUMANOID_LEGGINGS
                 ? "trims/entity/humanoid_leggings" : "trims/entity/humanoid";
 
-        int order = initialOrder + 10;
+        int order = initialOrder;
 
         if (stack.getOrDefault(ModComponents.WARDING_LEVEL, 0) > 0) {
             renderOverlay(dir + "/warding_" + material, model, state, matrices, queue, light, outlineColor, order++);
