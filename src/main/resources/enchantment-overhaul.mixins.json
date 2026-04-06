@@ -22,7 +22,8 @@
         "LootTableEnchantMixin",
         "RepairItemRecipeMixin",
         "RaidEnchantmentMixin",
-        "FarmlandTrampleMixin"
+        "FarmlandTrampleMixin",
+        "StrongholdLibraryMixin"
     ],
     "client": [
         "client.VeilNametagMixin",
