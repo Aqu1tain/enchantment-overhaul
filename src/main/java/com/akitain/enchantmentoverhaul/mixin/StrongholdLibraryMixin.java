@@ -45,33 +45,39 @@ public abstract class StrongholdLibraryMixin extends StructurePiece {
 
     @Inject(method = "postProcess", at = @At("TAIL"))
     private void modifyLibraryGround(WorldGenLevel world, StructureManager structureManager, ChunkGenerator chunkGenerator, RandomSource random, BoundingBox chunkBox, ChunkPos chunkPos, BlockPos pivot, CallbackInfo ci) {
-        // Vanilla local coords: X=0-13, Y=0+, Z=0-14. Door at X=4, Z=0.
-        // Mapped from NBT(nbtX, y, nbtZ) -> Vanilla(nbtZ, y, 14-nbtX)
-        // NBT obsidian (7,0,10) -> Vanilla (10, 0, 7)
-        // NBT bookshelves: (5,1,10)->(10,1,9), (7,1,12)->(12,1,7), (8,1,12)->(12,1,6), (9,1,11)->(11,1,5)
-        // NBT facings: east->north, north->west, west->south
+        // Exact diff computed from NBT structure vs vanilla generation
+        // Vanilla coords: X=0-13, Y=0+, Z=0-14. Door at X=4, Z=0.
+        BlockState air = Blocks.AIR.defaultBlockState();
+        BlockState bookshelf = Blocks.BOOKSHELF.defaultBlockState();
 
+        // Obsidian pedestal
         this.placeBlock(world, Blocks.OBSIDIAN.defaultBlockState(), 10, 1, 7, chunkBox);
 
-        BlockState air = Blocks.AIR.defaultBlockState();
+        // Remove bookshelves to clear enchanting area
+        // Z=9 column
+        this.placeBlock(world, air, 9, 2, 9, chunkBox);
+        this.placeBlock(world, air, 9, 3, 9, chunkBox);
+        this.placeBlock(world, air, 10, 3, 9, chunkBox);
 
-        // Clear bookshelves around the enchanting setup area
-        // Vanilla center bookshelves at X=9-10 for Z=7,9 need clearing
-        for (int y = 1; y <= 3; y++) {
-            this.placeBlock(world, air, 9, y, 7, chunkBox);
-            this.placeBlock(world, air, 10, y, 7, chunkBox);
-            this.placeBlock(world, air, 9, y, 9, chunkBox);
-            this.placeBlock(world, air, 10, y, 9, chunkBox);
+        // Z=7 column
+        this.placeBlock(world, air, 9, 1, 7, chunkBox);
+        this.placeBlock(world, air, 10, 1, 7, chunkBox);
+        this.placeBlock(world, air, 9, 2, 7, chunkBox);
+        this.placeBlock(world, air, 10, 2, 7, chunkBox);
+        this.placeBlock(world, air, 9, 3, 7, chunkBox);
+        this.placeBlock(world, air, 10, 3, 7, chunkBox);
 
-            // Clear air around obsidian
-            this.placeBlock(world, air, 10, y, 6, chunkBox);
-            this.placeBlock(world, air, 10, y, 7, chunkBox);
-            this.placeBlock(world, air, 10, y, 8, chunkBox);
-            this.placeBlock(world, air, 11, y, 6, chunkBox);
-            this.placeBlock(world, air, 11, y, 7, chunkBox);
-            this.placeBlock(world, air, 11, y, 8, chunkBox);
-        }
+        // Z=5 column
+        this.placeBlock(world, air, 9, 2, 5, chunkBox);
+        this.placeBlock(world, air, 9, 3, 5, chunkBox);
+        this.placeBlock(world, air, 10, 3, 5, chunkBox);
 
+        // Add bookshelves where vanilla had air
+        this.placeBlock(world, bookshelf, 11, 1, 9, chunkBox);
+        this.placeBlock(world, bookshelf, 11, 2, 9, chunkBox);
+        this.placeBlock(world, bookshelf, 11, 2, 5, chunkBox);
+
+        // Place chiseled bookshelves
         placeChiseledBookshelf(world, random, 10, 1, 9, Direction.NORTH, chunkBox);
         placeChiseledBookshelf(world, random, 12, 1, 7, Direction.WEST, chunkBox);
         placeChiseledBookshelf(world, random, 12, 1, 6, Direction.WEST, chunkBox);
