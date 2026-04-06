@@ -45,21 +45,17 @@ public abstract class StrongholdLibraryMixin extends StructurePiece {
 
     @Inject(method = "postProcess", at = @At("TAIL"))
     private void modifyLibraryGround(WorldGenLevel world, StructureManager structureManager, ChunkGenerator chunkGenerator, RandomSource random, BoundingBox chunkBox, ChunkPos chunkPos, BlockPos pivot, CallbackInfo ci) {
-        // Exact diff computed from NBT structure vs vanilla generation
-        // Vanilla coords: X=0-13, Y=0+, Z=0-14. Door at X=4, Z=0.
         BlockState air = Blocks.AIR.defaultBlockState();
         BlockState bookshelf = Blocks.BOOKSHELF.defaultBlockState();
 
-        // Obsidian pedestal
-        this.placeBlock(world, Blocks.OBSIDIAN.defaultBlockState(), 10, 1, 7, chunkBox);
+        this.placeBlock(world, Blocks.OBSIDIAN.defaultBlockState(), 10, 0, 7, chunkBox);
 
-        // Remove bookshelves to clear enchanting area
-        // Z=9 column
+        // Remove bookshelves around Z=9
         this.placeBlock(world, air, 9, 2, 9, chunkBox);
         this.placeBlock(world, air, 9, 3, 9, chunkBox);
         this.placeBlock(world, air, 10, 3, 9, chunkBox);
 
-        // Z=7 column
+        // Remove bookshelves around Z=7
         this.placeBlock(world, air, 9, 1, 7, chunkBox);
         this.placeBlock(world, air, 10, 1, 7, chunkBox);
         this.placeBlock(world, air, 9, 2, 7, chunkBox);
@@ -67,7 +63,7 @@ public abstract class StrongholdLibraryMixin extends StructurePiece {
         this.placeBlock(world, air, 9, 3, 7, chunkBox);
         this.placeBlock(world, air, 10, 3, 7, chunkBox);
 
-        // Z=5 column
+        // Remove bookshelves around Z=5
         this.placeBlock(world, air, 9, 2, 5, chunkBox);
         this.placeBlock(world, air, 9, 3, 5, chunkBox);
         this.placeBlock(world, air, 10, 3, 5, chunkBox);
@@ -77,11 +73,11 @@ public abstract class StrongholdLibraryMixin extends StructurePiece {
         this.placeBlock(world, bookshelf, 11, 2, 9, chunkBox);
         this.placeBlock(world, bookshelf, 11, 2, 5, chunkBox);
 
-        // Place chiseled bookshelves
-        placeChiseledBookshelf(world, random, 10, 1, 9, Direction.NORTH, chunkBox);
+        // Chiseled bookshelves with enchanted books
+        placeChiseledBookshelf(world, random, 10, 1, 9, Direction.SOUTH, chunkBox);
         placeChiseledBookshelf(world, random, 12, 1, 7, Direction.WEST, chunkBox);
         placeChiseledBookshelf(world, random, 12, 1, 6, Direction.WEST, chunkBox);
-        placeChiseledBookshelf(world, random, 11, 1, 5, Direction.SOUTH, chunkBox);
+        placeChiseledBookshelf(world, random, 11, 1, 5, Direction.NORTH, chunkBox);
     }
 
     @Unique
@@ -89,7 +85,7 @@ public abstract class StrongholdLibraryMixin extends StructurePiece {
         BlockState state = Blocks.CHISELED_BOOKSHELF.defaultBlockState()
                 .setValue(ChiseledBookShelfBlock.FACING, facing);
 
-        int bookCount = 1 + random.nextInt(2);
+        int bookCount = 1;
         boolean[] occupied = new boolean[6];
         for (int i = 0; i < bookCount; i++) {
             occupied[random.nextInt(6)] = true;
