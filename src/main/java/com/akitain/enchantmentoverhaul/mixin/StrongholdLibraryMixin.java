@@ -97,7 +97,7 @@ public abstract class StrongholdLibraryMixin extends StructurePiece {
         if (bb.isInside(worldPos) && world.getBlockEntity(worldPos) instanceof ChiseledBookShelfBlockEntity shelf) {
             for (int slot = 0; slot < 6; slot++) {
                 if (occupied[slot]) {
-                    shelf.setItem(slot, createEnchantedBook(world, random));
+                    shelf.setItemNoUpdate(slot, createEnchantedBook(world, random));
                 }
             }
         }
