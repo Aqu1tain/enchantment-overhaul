@@ -24,7 +24,9 @@
         "LootTableEnchantMixin",
         "RepairItemRecipeMixin",
         "RaidEnchantmentMixin",
-        "FarmlandTrampleMixin"
+        "FarmlandTrampleMixin",
+        "StrongholdLibraryMixin",
+        "accessor.ChiseledBookshelfBlockEntityAccessor"
     ],
     "client": [
         "client.VeilNametagMixin",
