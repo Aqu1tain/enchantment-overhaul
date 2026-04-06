@@ -74,6 +74,9 @@ public class UpgradeOverlayMixin {
 
     @Unique
     private static String getPaletteName(ItemStack stack) {
+        String id = net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(stack.getItem()).getPath();
+        if (id.startsWith("chainmail_")) return null;
+
         String mat = InnateMaterialProperties.getMaterial(stack);
         if (mat == null) return null;
         return switch (mat) {

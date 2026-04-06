@@ -45,14 +45,15 @@ public abstract class StrongholdLibraryMixin extends StructurePiece {
 
     @Inject(method = "postProcess", at = @At("TAIL"))
     private void modifyLibraryGround(WorldGenLevel world, StructureManager structureManager, ChunkGenerator chunkGenerator, RandomSource random, BoundingBox chunkBox, ChunkPos chunkPos, BlockPos pivot, CallbackInfo ci) {
-        this.placeBlock(world, Blocks.OBSIDIAN.defaultBlockState(), 7, 1, 10, chunkBox);
+        // NBT coords (x,z) map to vanilla structure coords (z,x) due to axis swap
+        this.placeBlock(world, Blocks.OBSIDIAN.defaultBlockState(), 10, 1, 7, chunkBox);
 
         clearEnchantingArea(world, chunkBox);
 
-        placeChiseledBookshelf(world, random, 5, 2, 10, Direction.EAST, chunkBox);
-        placeChiseledBookshelf(world, random, 7, 2, 12, Direction.NORTH, chunkBox);
-        placeChiseledBookshelf(world, random, 8, 2, 12, Direction.NORTH, chunkBox);
-        placeChiseledBookshelf(world, random, 9, 2, 11, Direction.WEST, chunkBox);
+        placeChiseledBookshelf(world, random, 10, 2, 5, Direction.EAST, chunkBox);
+        placeChiseledBookshelf(world, random, 12, 2, 7, Direction.NORTH, chunkBox);
+        placeChiseledBookshelf(world, random, 12, 2, 8, Direction.NORTH, chunkBox);
+        placeChiseledBookshelf(world, random, 11, 2, 9, Direction.WEST, chunkBox);
     }
 
     @Unique
@@ -60,17 +61,17 @@ public abstract class StrongholdLibraryMixin extends StructurePiece {
         BlockState air = Blocks.AIR.defaultBlockState();
 
         for (int y = 2; y <= 4; y++) {
-            for (int x = 6; x <= 8; x++) {
-                for (int z = 9; z <= 11; z++) {
+            for (int z = 6; z <= 8; z++) {
+                for (int x = 9; x <= 11; x++) {
                     this.placeBlock(world, air, x, y, z, bb);
                 }
             }
-            this.placeBlock(world, air, 5, y, 9, bb);
+            this.placeBlock(world, air, 9, y, 5, bb);
             this.placeBlock(world, air, 9, y, 9, bb);
-            this.placeBlock(world, air, 9, y, 10, bb);
+            this.placeBlock(world, air, 10, y, 9, bb);
         }
 
-        this.placeBlock(world, air, 5, 4, 10, bb);
+        this.placeBlock(world, air, 10, 4, 5, bb);
     }
 
     @Unique
