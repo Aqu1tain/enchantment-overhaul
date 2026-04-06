@@ -45,33 +45,36 @@ public abstract class StrongholdLibraryMixin extends StructurePiece {
 
     @Inject(method = "postProcess", at = @At("TAIL"))
     private void modifyLibraryGround(WorldGenLevel world, StructureManager structureManager, ChunkGenerator chunkGenerator, RandomSource random, BoundingBox chunkBox, ChunkPos chunkPos, BlockPos pivot, CallbackInfo ci) {
-        // NBT coords (x,z) map to vanilla structure coords (z,x) due to axis swap
-        this.placeBlock(world, Blocks.OBSIDIAN.defaultBlockState(), 10, 1, 7, chunkBox);
+        // Vanilla coord system: X=0-13 (left-right), Y=0+ (up), Z=0-14 (door=0, back=14)
+        // Center bookshelves are at X=3-4, 6-7, 9-10 for Z=3,5,7,9,11
+        // Place enchanting setup in back-right area: around X=9-10, Z=9-11
 
-        clearEnchantingArea(world, chunkBox);
+        // Obsidian pedestal where an enchanting table would go
+        this.placeBlock(world, Blocks.OBSIDIAN.defaultBlockState(), 7, 1, 10, chunkBox);
 
-        placeChiseledBookshelf(world, random, 10, 2, 5, Direction.EAST, chunkBox);
-        placeChiseledBookshelf(world, random, 12, 2, 7, Direction.NORTH, chunkBox);
-        placeChiseledBookshelf(world, random, 12, 2, 8, Direction.NORTH, chunkBox);
-        placeChiseledBookshelf(world, random, 11, 2, 9, Direction.WEST, chunkBox);
-    }
-
-    @Unique
-    private void clearEnchantingArea(WorldGenLevel world, BoundingBox bb) {
+        // Clear area around pedestal (layers 1-3)
         BlockState air = Blocks.AIR.defaultBlockState();
+        for (int y = 1; y <= 3; y++) {
+            // Remove center bookshelf columns near the setup
+            this.placeBlock(world, air, 9, y, 9, chunkBox);
+            this.placeBlock(world, air, 10, y, 9, chunkBox);
+            this.placeBlock(world, air, 9, y, 11, chunkBox);
+            this.placeBlock(world, air, 10, y, 11, chunkBox);
 
-        for (int y = 2; y <= 4; y++) {
-            for (int z = 6; z <= 8; z++) {
-                for (int x = 9; x <= 11; x++) {
-                    this.placeBlock(world, air, x, y, z, bb);
-                }
-            }
-            this.placeBlock(world, air, 9, y, 5, bb);
-            this.placeBlock(world, air, 9, y, 9, bb);
-            this.placeBlock(world, air, 10, y, 9, bb);
+            // Clear space around obsidian
+            this.placeBlock(world, air, 6, y, 10, chunkBox);
+            this.placeBlock(world, air, 7, y, 10, chunkBox);
+            this.placeBlock(world, air, 8, y, 10, chunkBox);
+            this.placeBlock(world, air, 6, y, 11, chunkBox);
+            this.placeBlock(world, air, 7, y, 11, chunkBox);
+            this.placeBlock(world, air, 8, y, 11, chunkBox);
         }
 
-        this.placeBlock(world, air, 10, 4, 5, bb);
+        // Place chiseled bookshelves facing toward the obsidian
+        placeChiseledBookshelf(world, random, 6, 1, 9, Direction.SOUTH, chunkBox);
+        placeChiseledBookshelf(world, random, 9, 1, 10, Direction.WEST, chunkBox);
+        placeChiseledBookshelf(world, random, 10, 1, 10, Direction.WEST, chunkBox);
+        placeChiseledBookshelf(world, random, 8, 1, 12, Direction.NORTH, chunkBox);
     }
 
     @Unique
@@ -82,8 +85,7 @@ public abstract class StrongholdLibraryMixin extends StructurePiece {
         int bookCount = 1 + random.nextInt(2);
         boolean[] occupied = new boolean[6];
         for (int i = 0; i < bookCount; i++) {
-            int slot = random.nextInt(6);
-            occupied[slot] = true;
+            occupied[random.nextInt(6)] = true;
         }
 
         for (int i = 0; i < 6; i++) {
