@@ -6,9 +6,6 @@ import net.minecraft.block.HorizontalFacingBlock;
 import net.minecraft.block.entity.ChiseledBookshelfBlockEntity;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.ItemEnchantmentsComponent;
-import net.minecraft.enchantment.Enchantment;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
 import net.minecraft.util.hit.BlockHitResult;
@@ -50,7 +47,7 @@ public final class ChiseledBookshelfHoverState {
         if (stack == cachedStack && slot == cachedSlot && pos.equals(cachedPos)) return;
 
         TextRenderer font = mc.textRenderer;
-        label = bookLabel(stack);
+        label = stack.getName();
         width = font.getWidth(label);
         cachedPos = pos.toImmutable();
         cachedSlot = slot;
@@ -63,14 +60,5 @@ public final class ChiseledBookshelfHoverState {
         cachedPos = null;
         cachedSlot = -1;
         cachedStack = null;
-    }
-
-    private static Text bookLabel(ItemStack stack) {
-        ItemEnchantmentsComponent enchantments = stack.get(DataComponentTypes.STORED_ENCHANTMENTS);
-        if (enchantments == null || enchantments.isEmpty()) {
-            return stack.getName();
-        }
-        var entry = enchantments.getEnchantmentEntries().iterator().next();
-        return Enchantment.getName(entry.getKey(), entry.getIntValue());
     }
 }
