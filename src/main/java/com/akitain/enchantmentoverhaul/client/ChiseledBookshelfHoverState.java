@@ -3,11 +3,8 @@ package com.akitain.enchantmentoverhaul.client;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.enchantment.Enchantment;
-import net.minecraft.world.item.enchantment.ItemEnchantments;
 import net.minecraft.world.level.block.ChiseledBookShelfBlock;
 import net.minecraft.world.level.block.HorizontalDirectionalBlock;
 import net.minecraft.world.level.block.entity.ChiseledBookShelfBlockEntity;
@@ -50,7 +47,7 @@ public final class ChiseledBookshelfHoverState {
         if (stack == cachedStack && slot == cachedSlot && pos.equals(cachedPos)) return;
 
         Font font = mc.font;
-        label = bookLabel(stack);
+        label = stack.getHoverName();
         width = font.width(label);
         cachedPos = pos.immutable();
         cachedSlot = slot;
@@ -63,14 +60,5 @@ public final class ChiseledBookshelfHoverState {
         cachedPos = null;
         cachedSlot = -1;
         cachedStack = null;
-    }
-
-    private static Component bookLabel(ItemStack stack) {
-        ItemEnchantments enchantments = stack.get(DataComponents.STORED_ENCHANTMENTS);
-        if (enchantments == null || enchantments.isEmpty()) {
-            return stack.getHoverName();
-        }
-        var entry = enchantments.entrySet().iterator().next();
-        return Enchantment.getFullname(entry.getKey(), entry.getIntValue());
     }
 }

@@ -22,6 +22,7 @@ public class EnchantmentOverhaulClient implements ClientModInitializer {
         ItemTooltipCallback.EVENT.register((stack, context, type, lines) -> {
             addUpgradeLines(stack, lines);
             addInnatePropertyLine(stack, lines);
+            addEnchantedBookSubtitle(stack, lines);
         });
 
         ClientTickEvents.END_CLIENT_TICK.register(ChiseledBookshelfHoverState::tick);
@@ -46,6 +47,19 @@ public class EnchantmentOverhaulClient implements ClientModInitializer {
         String name = InnateMaterialProperties.getResistanceName(material);
         if (name == null) return;
         lines.add(Component.literal(name + " (5% per piece)").withStyle(ChatFormatting.DARK_AQUA));
+    }
+
+    private static void addEnchantedBookSubtitle(ItemStack stack, java.util.List<Component> lines) {
+        if (!stack.is(net.minecraft.world.item.Items.ENCHANTED_BOOK)) return;
+        var enchantments = stack.get(net.minecraft.core.component.DataComponents.STORED_ENCHANTMENTS);
+        if (enchantments == null || enchantments.isEmpty()) return;
+
+        for (var entry : enchantments.entrySet()) {
+            String fullname = net.minecraft.world.item.enchantment.Enchantment.getFullname(entry.getKey(), entry.getIntValue()).getString();
+            lines.removeIf(line -> line.getString().equals(fullname));
+        }
+
+        lines.add(1, Component.translatable("item.minecraft.enchanted_book").withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
     }
 
 }
