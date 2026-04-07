@@ -7,7 +7,7 @@
   ],
   "key": {
     "C": "minecraft:copper_ingot",
-    "M": "minecraft:iron_nugget",
+    "M": "minecraft:iron_ingot",
     "T": "enchantment-overhaul:warding_template"
   },
   "result": {

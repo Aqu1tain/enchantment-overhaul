@@ -7,7 +7,7 @@
   ],
   "key": {
     "C": "minecraft:copper_ingot",
-    "M": "minecraft:coal",
+    "M": "minecraft:obsidian",
     "T": "enchantment-overhaul:tempering_template"
   },
   "result": {
