@@ -26,12 +26,14 @@
         "RaidEnchantmentMixin",
         "FarmlandTrampleMixin",
         "StrongholdLibraryMixin",
+        "ChiseledBookshelfBlockEntitySyncMixin",
         "accessor.ChiseledBookshelfBlockEntityAccessor"
     ],
     "client": [
         "client.VeilNametagMixin",
         "client.EnchantingTableParticleMixin",
-        "client.UpgradeOverlayMixin"
+        "client.UpgradeOverlayMixin",
+        "client.ChiseledBookshelfHoverMixin"
     ],
     "injectors": {
         "defaultRequire": 1
