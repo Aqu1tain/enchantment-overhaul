@@ -292,7 +292,7 @@ public class CatalogueScreen extends AbstractContainerScreen<CatalogueScreenHand
         tooltip.add(Component.literal(entry.entry().value().description().getString() + levelLabel)
                 .withStyle(entry.entry().is(EnchantmentTags.CURSE) ? ChatFormatting.RED : ChatFormatting.LIGHT_PURPLE));
         tooltip.add(Component.empty());
-        tooltip.add(costLine(reagentItem.getName(ItemStack.EMPTY).getString(), reagentCost, hasReagent));
+        tooltip.add(costLine(new ItemStack(reagentItem).getHoverName().getString(), reagentCost, hasReagent));
         tooltip.add(costLine("XP Levels", xpCost, hasXp));
         if (slotCost > 0) {
             tooltip.add(costLine("Slots", slotCost, hasSlots));
