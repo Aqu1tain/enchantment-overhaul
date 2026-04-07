@@ -1,10 +1,12 @@
 package com.akitain.enchantmentoverhaul;
 
 import com.akitain.enchantmentoverhaul.client.CatalogueScreen;
+import com.akitain.enchantmentoverhaul.client.ChiseledBookshelfHoverState;
 import com.akitain.enchantmentoverhaul.enchant.InnateMaterialProperties;
 import com.akitain.enchantmentoverhaul.enchant.ModScreenHandlers;
 import com.akitain.enchantmentoverhaul.smithing.UpgradeType;
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.screens.MenuScreens;
@@ -21,6 +23,8 @@ public class EnchantmentOverhaulClient implements ClientModInitializer {
             addUpgradeLines(stack, lines);
             addInnatePropertyLine(stack, lines);
         });
+
+        ClientTickEvents.END_CLIENT_TICK.register(ChiseledBookshelfHoverState::tick);
     }
 
     private static final String[] ROMAN = {"", "I", "II", "III", "IV", "V"};
