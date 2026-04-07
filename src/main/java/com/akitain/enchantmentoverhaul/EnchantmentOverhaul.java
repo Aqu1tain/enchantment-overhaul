@@ -4,6 +4,7 @@ import com.akitain.enchantmentoverhaul.component.ModComponents;
 import com.akitain.enchantmentoverhaul.enchant.ModEnchantments;
 import com.akitain.enchantmentoverhaul.enchant.VillagerTrades;
 import com.akitain.enchantmentoverhaul.enchant.ModScreenHandlers;
+import com.akitain.enchantmentoverhaul.gamerule.ModGameRules;
 import com.akitain.enchantmentoverhaul.loot.LootTableModifier;
 import com.akitain.enchantmentoverhaul.smithing.SmithingTemplates;
 import net.fabricmc.api.ModInitializer;
@@ -26,6 +27,7 @@ public class EnchantmentOverhaul implements ModInitializer {
         ModEnchantments.register();
         ModScreenHandlers.register();
         SmithingTemplates.register();
+        ModGameRules.register();
 
         ItemGroupEvents.modifyEntriesEvent(ItemGroups.INGREDIENTS).register(entries -> {
             entries.addBefore(Items.NETHERITE_UPGRADE_SMITHING_TEMPLATE,
