@@ -34,6 +34,7 @@ public class EnchantmentCosts {
         REAGENTS.put(Enchantments.AQUA_AFFINITY, Items.PRISMARINE_CRYSTALS);
         REAGENTS.put(Enchantments.SWEEPING, Items.IRON_NUGGET);
         REAGENTS.put(Enchantments.KNOCKBACK, Items.PISTON);
+        REAGENTS.put(Enchantments.PUNCH, Items.SNOWBALL);
         REAGENTS.put(Enchantments.FEATHER_FALLING, Items.FEATHER);
         REAGENTS.put(Enchantments.QUICK_CHARGE, Items.STRING);
         REAGENTS.put(Enchantments.LURE, Items.TROPICAL_FISH);

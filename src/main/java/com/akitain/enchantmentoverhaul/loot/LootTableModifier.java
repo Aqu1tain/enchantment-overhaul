@@ -53,7 +53,7 @@ public class LootTableModifier {
                     Enchantments.LUCK_OF_THE_SEA)),
 
             new StructureLoot("chests/simple_dungeon", 75, 12, List.of(
-                    Enchantments.KNOCKBACK, Enchantments.THORNS)),
+                    Enchantments.KNOCKBACK, Enchantments.THORNS, Enchantments.PUNCH)),
             new StructureLoot("chests/ruined_portal", 75, 12, List.of(
                     ModEnchantments.CURSE_OF_FRAGILITY, Enchantments.VANISHING_CURSE)),
             new StructureLoot("chests/underwater_ruin_small", 80, 8, List.of(
@@ -67,7 +67,7 @@ public class LootTableModifier {
             new StructureLoot("chests/abandoned_mineshaft", 75, 12, List.of(
                     Enchantments.SILK_TOUCH, Enchantments.FORTUNE)),
             new StructureLoot("chests/pillager_outpost", 75, 6, List.of(
-                    Enchantments.MULTISHOT, Enchantments.PIERCING, Enchantments.QUICK_CHARGE, Enchantments.SWEEPING)),
+                    Enchantments.MULTISHOT, Enchantments.PIERCING, Enchantments.QUICK_CHARGE, Enchantments.SWEEPING, Enchantments.PUNCH)),
 
             new StructureLoot("chests/buried_treasure", 65, 17, List.of(
                     Enchantments.RIPTIDE, Enchantments.LOYALTY, Enchantments.DEPTH_STRIDER)),
