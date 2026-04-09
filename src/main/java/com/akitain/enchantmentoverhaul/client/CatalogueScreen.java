@@ -326,7 +326,19 @@ public class CatalogueScreen extends AbstractContainerScreen<CatalogueScreenHand
         CatalogueEntry entry = entries.get(idx);
         ResourceKey<Enchantment> key = entry.key();
         boolean selected = idx == menu.getSelectedIndex();
-        int level = selected ? menu.getSelectedLevel() : 1;
+
+        int rowW = shouldScroll() ? CAT_W - SCROLLBAR_W - 4 : CAT_W - 4;
+        int rx = cx + 2;
+        int lvX = rx + rowW - 2 - entry.maxLevel() * (LV_BTN + LV_GAP);
+        int level;
+        if (mx >= lvX) {
+            int lvIdx = (mx - lvX) / (LV_BTN + LV_GAP);
+            level = Math.max(1, Math.min(lvIdx + 1, entry.maxLevel()));
+        } else if (selected) {
+            level = menu.getSelectedLevel();
+        } else {
+            level = 1;
+        }
 
         Item reagentItem = EnchantmentCosts.reagent(key);
         int reagentCost = EnchantmentCosts.reagentCost(level, menu.getNormalBookshelves());
@@ -341,7 +353,7 @@ public class CatalogueScreen extends AbstractContainerScreen<CatalogueScreenHand
         boolean hasXp = playerXp >= xpCost;
         boolean hasSlots = SlotSystem.getAvailableSlots(item) >= slotCost;
 
-        String levelLabel = selected ? " " + toRoman(level) : "";
+        String levelLabel = " " + toRoman(level);
         List<Component> tooltip = new ArrayList<>();
         tooltip.add(Component.literal(entry.entry().value().description().getString() + levelLabel)
                 .withStyle(entry.entry().is(EnchantmentTags.CURSE) ? ChatFormatting.RED : ChatFormatting.LIGHT_PURPLE));
