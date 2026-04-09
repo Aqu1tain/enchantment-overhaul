@@ -308,7 +308,19 @@ public class CatalogueScreen extends HandledScreen<CatalogueScreenHandler> {
         CatalogueEntry entry = entries.get(idx);
         Enchantment enchantment = entry.enchantment();
         boolean selected = idx == handler.getSelectedIndex();
-        int level = selected ? handler.getSelectedLevel() : 1;
+
+        int rowW = shouldScroll() ? CAT_W - SCROLLBAR_W - 4 : CAT_W - 4;
+        int rx = cx + 2;
+        int lvX = rx + rowW - 2 - entry.maxLevel() * (LV_BTN + LV_GAP);
+        int level;
+        if (mx >= lvX) {
+            int lvIdx = (mx - lvX) / (LV_BTN + LV_GAP);
+            level = Math.max(1, Math.min(lvIdx + 1, entry.maxLevel()));
+        } else if (selected) {
+            level = handler.getSelectedLevel();
+        } else {
+            level = 1;
+        }
 
         Item reagentItem = EnchantmentCosts.reagent(enchantment);
         int reagentCost = EnchantmentCosts.reagentCost(level, handler.getNormalBookshelves());
@@ -323,7 +335,7 @@ public class CatalogueScreen extends HandledScreen<CatalogueScreenHandler> {
         boolean hasXp = playerXp >= xpCost;
         boolean hasSlots = SlotSystem.getAvailableSlots(item) >= slotCost;
 
-        String levelLabel = selected ? " " + toRoman(level) : "";
+        String levelLabel = " " + toRoman(level);
         List<Text> tooltip = new ArrayList<>();
         tooltip.add(Text.literal(Text.translatable(enchantment.getTranslationKey()).getString() + levelLabel)
                 .formatted(enchantment.isCursed() ? Formatting.RED : Formatting.LIGHT_PURPLE));
