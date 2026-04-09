@@ -400,7 +400,9 @@ public class CatalogueScreen extends AbstractContainerScreen<CatalogueScreenHand
 
         int max = SlotSystem.getMaxSlots(item);
         int used = SlotSystem.getUsedSlots(item);
-        if (max <= 0) return;
+        int penalty = SlotSystem.getGrindstonePenalty(item);
+        int totalPips = max + penalty;
+        if (totalPips <= 0) return;
 
         int pendingCost = 0;
         if (menu.getSelectedIndex() >= 0 && menu.getSelectedIndex() < menu.getEntries().size()) {
@@ -415,11 +417,11 @@ public class CatalogueScreen extends AbstractContainerScreen<CatalogueScreenHand
         int barLeft = x + CAT_X;
         int barRight = x + CAT_X + CAT_W - countW - 4;
         int availableW = barRight - barLeft;
-        int gap = max > 1 ? Math.max(1, Math.min(2, (availableW - max * 4) / (max - 1))) : 2;
-        int pw = Math.max(4, (availableW - gap * (max - 1)) / max);
+        int gap = totalPips > 1 ? Math.max(1, Math.min(2, (availableW - totalPips * 4) / (totalPips - 1))) : 2;
+        int pw = Math.max(4, (availableW - gap * (totalPips - 1)) / totalPips);
         int barX = barLeft;
 
-        for (int i = 0; i < max; i++) {
+        for (int i = 0; i < totalPips; i++) {
             int px = barX + i * (pw + gap);
             int pipBg, pipBorderL, pipBorderD;
             if (i < used) {
@@ -428,8 +430,10 @@ public class CatalogueScreen extends AbstractContainerScreen<CatalogueScreenHand
                 boolean blink = (System.currentTimeMillis() / 400) % 2 == 0;
                 pipBg = blink ? 0xFFB880F0 : 0xFF5030A0;
                 pipBorderL = 0xFFD8A0FF; pipBorderD = 0xFF6840A0;
-            } else {
+            } else if (i < max) {
                 pipBg = 0xFF2A1848; pipBorderL = 0xFF3A2858; pipBorderD = 0xFF1A0838;
+            } else {
+                pipBg = 0xFF4A1818; pipBorderL = 0xFF6A2828; pipBorderD = 0xFF2A0808;
             }
             gfx.fill(px, barY, px + pw, barY + ph, pipBg);
             gfx.fill(px, barY, px + pw, barY + 1, pipBorderL);
