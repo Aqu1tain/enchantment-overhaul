@@ -21,8 +21,7 @@ public class DisabledEnchantments {
             Enchantments.IMPALING,
             Enchantments.UNBREAKING,
             Enchantments.EFFICIENCY,
-            Enchantments.BANE_OF_ARTHROPODS,
-            Enchantments.PUNCH
+            Enchantments.BANE_OF_ARTHROPODS
     );
 
     public static boolean isDisabled(RegistryEntry<Enchantment> entry) {

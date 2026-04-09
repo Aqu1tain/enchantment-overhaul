@@ -38,6 +38,7 @@ public class EnchantmentCosts {
             entry(Enchantments.SWEEPING_EDGE, Items.IRON_NUGGET),
             entry(Enchantments.BREACH, Items.BREEZE_ROD),
             entry(Enchantments.KNOCKBACK, Items.PISTON),
+            entry(Enchantments.PUNCH, Items.SNOWBALL),
             entry(Enchantments.LUNGE, Items.SLIME_BALL),
             entry(Enchantments.FEATHER_FALLING, Items.FEATHER),
             entry(Enchantments.QUICK_CHARGE, Items.STRING),
