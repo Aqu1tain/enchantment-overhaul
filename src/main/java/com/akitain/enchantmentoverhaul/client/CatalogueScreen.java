@@ -57,6 +57,11 @@ public class CatalogueScreen extends AbstractContainerScreen<CatalogueScreenHand
     private static final int ROW_BORDER_L = 0xFF7A6B5A;
     private static final int ROW_BORDER_D = 0xFF3A3028;
 
+    private static final int ROW_BG_DIM = 0xFF3A3228;
+    private static final int ROW_HOVER_DIM = 0xFF4A4038;
+    private static final int ROW_BORDER_L_DIM = 0xFF504838;
+    private static final int ROW_BORDER_D_DIM = 0xFF2A2018;
+
     private static final int PANEL_BG = 0xFF585858;
     private static final int TEXT_LIGHT = 0xFFD8C8F0;
     private static final int BG = 0xFFC6C6C6;
@@ -219,22 +224,57 @@ public class CatalogueScreen extends AbstractContainerScreen<CatalogueScreenHand
         drawScrollbar(gfx, cx + CAT_W - SCROLLBAR_W - 2, cy + 2, CAT_H - 4);
     }
 
+    private boolean isLevelAffordable(CatalogueEntry entry, int level) {
+        ItemStack item = menu.getSlot(0).getItem();
+        int slotCost = EnchantmentCosts.slotCost(entry.entry(), level);
+        if (SlotSystem.getAvailableSlots(item) < slotCost) return false;
+
+        if (Minecraft.getInstance().player.isCreative()) return true;
+
+        ItemStack reagent = menu.getSlot(1).getItem();
+        Item reagentItem = EnchantmentCosts.reagent(entry.key());
+        int reagentCost = EnchantmentCosts.reagentCost(level, menu.getNormalBookshelves());
+        int xpCost = EnchantmentCosts.xpCost(entry.key(), level);
+        int playerXp = Minecraft.getInstance().player.experienceLevel;
+
+        return reagent.is(reagentItem) && reagent.getCount() >= reagentCost && playerXp >= xpCost;
+    }
+
+    private boolean isAnyLevelAffordable(CatalogueEntry entry) {
+        for (int lv = 1; lv <= entry.maxLevel(); lv++) {
+            if (isLevelAffordable(entry, lv)) return true;
+        }
+        return false;
+    }
+
     private void drawRow(GuiGraphicsExtractor gfx, CatalogueEntry entry, int idx, int rx, int ry, int rw, int mx, int my) {
         boolean selected = idx == menu.getSelectedIndex();
         boolean hovered = mx >= rx && mx < rx + rw && my >= ry && my < ry + ROW_H;
+        boolean affordable = isAnyLevelAffordable(entry);
 
-        int bg = selected ? ROW_SELECTED : (hovered ? ROW_HOVER : ROW_BG);
+        int bg;
+        int borderTop, borderBot;
+        if (selected) {
+            bg = ROW_SELECTED;
+            borderTop = 0xFF9A6090;
+            borderBot = 0xFF60305A;
+        } else if (affordable) {
+            bg = hovered ? ROW_HOVER : ROW_BG;
+            borderTop = ROW_BORDER_L;
+            borderBot = ROW_BORDER_D;
+        } else {
+            bg = hovered ? ROW_HOVER_DIM : ROW_BG_DIM;
+            borderTop = ROW_BORDER_L_DIM;
+            borderBot = ROW_BORDER_D_DIM;
+        }
         gfx.fill(rx, ry, rx + rw, ry + ROW_H, bg);
-
-        int borderTop = selected ? 0xFF9A6090 : ROW_BORDER_L;
-        int borderBot = selected ? 0xFF60305A : ROW_BORDER_D;
         gfx.fill(rx, ry, rx + rw, ry + 1, borderTop);
         gfx.fill(rx, ry + ROW_H - 1, rx + rw, ry + ROW_H, borderBot);
 
         int lvX = rx + rw - 2 - entry.maxLevel() * (LV_BTN + LV_GAP);
         int sgaMaxX = lvX - 3;
 
-        int sgaColor = selected ? 0xFFE0C0E0 : (hovered ? 0xFFB0A080 : 0xFF988870);
+        int sgaColor = selected ? 0xFFE0C0E0 : (affordable ? (hovered ? 0xFFB0A080 : 0xFF988870) : 0xFF605848);
         String sga = sgaRows[idx % sgaRows.length];
         int sgaY = ry + (ROW_H - 8) / 2;
         Component sgaText = Component.literal(trimToWidth(sga, sgaMaxX - rx - 3)).setStyle(SGA_STYLE);
@@ -243,9 +283,24 @@ public class CatalogueScreen extends AbstractContainerScreen<CatalogueScreenHand
 
         for (int lv = 1; lv <= entry.maxLevel(); lv++) {
             boolean lvSel = selected && lv == selLv;
-            int lvBg = lvSel ? 0xFF5A8830 : (selected ? 0xFF4A2848 : 0xFF3A3028);
-            int lvBorderL = lvSel ? 0xFF7AB848 : (selected ? 0xFF6A4868 : 0xFF5A5048);
-            int lvBorderD = lvSel ? 0xFF2A4810 : (selected ? 0xFF2A0828 : 0xFF1A1008);
+            boolean lvAffordable = isLevelAffordable(entry, lv);
+
+            int lvBg, lvBorderL, lvBorderD, lvColor;
+            if (lvSel) {
+                lvBg = 0xFF5A8830; lvBorderL = 0xFF7AB848; lvBorderD = 0xFF2A4810;
+                lvColor = 0xFFC0FF80;
+            } else if (selected) {
+                lvBg = lvAffordable ? 0xFF4A2848 : 0xFF2A1828;
+                lvBorderL = lvAffordable ? 0xFF6A4868 : 0xFF3A2838;
+                lvBorderD = lvAffordable ? 0xFF2A0828 : 0xFF1A0818;
+                lvColor = lvAffordable ? 0xFFB890B8 : 0xFF685068;
+            } else {
+                lvBg = lvAffordable ? 0xFF3A3028 : 0xFF2A2018;
+                lvBorderL = lvAffordable ? 0xFF5A5048 : 0xFF3A3028;
+                lvBorderD = lvAffordable ? 0xFF1A1008 : 0xFF100A04;
+                lvColor = lvAffordable ? 0xFF7A6A5A : 0xFF504840;
+            }
+
             int lvY = ry + (ROW_H - LV_BTN) / 2;
             gfx.fill(lvX, lvY, lvX + LV_BTN, lvY + LV_BTN, lvBg);
             gfx.fill(lvX, lvY, lvX + LV_BTN, lvY + 1, lvBorderL);
@@ -255,7 +310,6 @@ public class CatalogueScreen extends AbstractContainerScreen<CatalogueScreenHand
 
             String r = toRoman(lv);
             int tw = font.width(r);
-            int lvColor = lvSel ? 0xFFC0FF80 : (selected ? 0xFFB890B8 : 0xFF7A6A5A);
             gfx.text(font, r, lvX + (LV_BTN - tw) / 2, lvY + 3, lvColor, true);
             lvX += LV_BTN + LV_GAP;
         }
@@ -413,6 +467,8 @@ public class CatalogueScreen extends AbstractContainerScreen<CatalogueScreenHand
             int lvIdx = (int) (mx - lvX) / (LV_BTN + LV_GAP);
             if (lvIdx >= 0 && lvIdx < entry.maxLevel()) level = lvIdx + 1;
         }
+
+        if (!isLevelAffordable(entry, level)) return false;
 
         menu.setSelection(idx, level);
         Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK.value(), 1.0F));
