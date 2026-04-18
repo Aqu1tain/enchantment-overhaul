@@ -25,7 +25,7 @@ public class VenomAttackMixin {
         int level = EnchantmentHelper.getLevel(ModEnchantments.VENOM, weapon);
         if (level <= 0) return;
 
-        int duration = 80 + 40 * (level - 1);
+        int duration = 120 + 80 * (level - 1);
         victim.addStatusEffect(new StatusEffectInstance(StatusEffects.POISON, duration, 0));
     }
 }
