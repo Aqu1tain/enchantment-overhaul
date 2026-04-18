@@ -12,13 +12,13 @@
                     "to_apply": "minecraft:poison",
                     "min_duration": {
                         "type": "minecraft:linear",
-                        "base": 80.0,
-                        "per_level_above_first": 40.0
+                        "base": 6.0,
+                        "per_level_above_first": 4.0
                     },
                     "max_duration": {
                         "type": "minecraft:linear",
-                        "base": 80.0,
-                        "per_level_above_first": 40.0
+                        "base": 6.0,
+                        "per_level_above_first": 4.0
                     },
                     "min_amplifier": 0.0,
                     "max_amplifier": 0.0
