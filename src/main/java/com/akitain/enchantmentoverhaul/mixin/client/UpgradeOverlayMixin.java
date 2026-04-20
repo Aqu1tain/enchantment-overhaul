@@ -59,6 +59,9 @@ public class UpgradeOverlayMixin<T extends LivingEntity, M extends BipedEntityMo
 
     @Unique
     private static String getPaletteName(ItemStack stack) {
+        String id = net.minecraft.registry.Registries.ITEM.getId(stack.getItem()).getPath();
+        if (id.startsWith("chainmail_")) return "chainmail";
+
         String mat = InnateMaterialProperties.getMaterial(stack);
         if (mat == null) return null;
         return switch (mat) {
