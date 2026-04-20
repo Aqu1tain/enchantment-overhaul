@@ -17,6 +17,22 @@
         "enchantment-overhaul:trims/entity/humanoid/tempering",
         "enchantment-overhaul:trims/entity/humanoid_leggings/tempering"
       ]
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "enchantment-overhaul:trims/entity/humanoid/warding_chainmail"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "enchantment-overhaul:trims/entity/humanoid_leggings/warding_chainmail"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "enchantment-overhaul:trims/entity/humanoid/tempering_chainmail"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "enchantment-overhaul:trims/entity/humanoid_leggings/tempering_chainmail"
     }
   ]
 }
