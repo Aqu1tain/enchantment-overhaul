@@ -31,9 +31,7 @@ public class LootTableModifier {
             new StructureLoot("chests/village/village_weaponsmith", 85, 5, List.of(
                     Enchantments.KNOCKBACK)),
             new StructureLoot("chests/village/village_armorer", 85, 5, List.of(
-                    Enchantments.FEATHER_FALLING)),
-            new StructureLoot("chests/village/village_toolsmith", 85, 5, List.of(
-                    ModEnchantments.STEP_UP)),
+                    Enchantments.FEATHER_FALLING, ModEnchantments.STEP_UP)),
             new StructureLoot("chests/village/village_fisher", 85, 5, List.of(
                     Enchantments.LUCK_OF_THE_SEA, Enchantments.LURE)),
             new StructureLoot("chests/village/village_plains_house", 95, 2, List.of(

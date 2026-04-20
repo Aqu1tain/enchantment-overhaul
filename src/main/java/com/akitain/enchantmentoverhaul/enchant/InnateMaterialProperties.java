@@ -41,10 +41,12 @@ public class InnateMaterialProperties {
 
     public static boolean resists(String material, DamageSource source) {
         return switch (material) {
-            case "copper", "netherite" -> source.is(DamageTypeTags.IS_FIRE);
+            case "netherite" -> source.is(DamageTypeTags.IS_FIRE);
+            case "copper" -> isPoisonOrEffect(source);
             case "iron" -> source.is(DamageTypeTags.IS_PROJECTILE);
             case "diamond" -> source.is(DamageTypeTags.IS_EXPLOSION);
             case "gold" -> isMagicDamage(source);
+            case "leather" -> source.is(DamageTypes.FALL);
             default -> false;
         };
     }
@@ -56,12 +58,19 @@ public class InnateMaterialProperties {
                 || source.is(DamageTypes.DRAGON_BREATH);
     }
 
+    private static boolean isPoisonOrEffect(DamageSource source) {
+        return source.is(DamageTypes.MAGIC)
+                || source.is(DamageTypes.INDIRECT_MAGIC);
+    }
+
     public static String getResistanceName(String material) {
         return switch (material) {
-            case "copper", "netherite" -> "Fire Resistance";
+            case "netherite" -> "Fire Resistance";
+            case "copper" -> "Poison Resistance";
             case "iron" -> "Projectile Resistance";
             case "diamond" -> "Explosion Resistance";
             case "gold" -> "Magic Resistance";
+            case "leather" -> "Fall Resistance";
             default -> null;
         };
     }
