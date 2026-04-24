@@ -36,3 +36,4 @@ New to the mod? Start with the [[Getting Started]] guide.
 
 - [Akitain](https://modrinth.com/user/akitain): design and development
 - [LolloNapo](https://modrinth.com/user/Napino): textures and art
+- [NotAida](https://namemc.com/profile/NotAida.1): logo design
