@@ -1,4 +1,6 @@
-# Enchantment Overhaul
+<p align="center">
+  <img src="docs/images/logo.png" alt="Enchantment Overhaul" width="600">
+</p>
 
 A Fabric mod for Minecraft 1.21.11 that rethinks the enchanting system.
 
