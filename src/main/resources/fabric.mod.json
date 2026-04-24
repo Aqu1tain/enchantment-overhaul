@@ -9,7 +9,7 @@
     "contact": {
         "sources": "https://github.com/Aqu1tain/enchantment-overhaul"
     },
-    "license": "All-Rights-Reserved",
+    "license": "CC-BY-NC-SA-4.0",
     "icon": "assets/enchantment-overhaul/icon.png",
     "environment": "*",
     "entrypoints": {
