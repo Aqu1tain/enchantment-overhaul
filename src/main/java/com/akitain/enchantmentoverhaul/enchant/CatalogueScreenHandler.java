@@ -10,7 +10,6 @@ import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
 import net.minecraft.registry.DynamicRegistryManager;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
@@ -67,7 +66,7 @@ public class CatalogueScreenHandler extends ScreenHandler {
             @Override
             public int getMaxItemCount() { return 1; }
             @Override
-            public boolean canInsert(ItemStack stack) { return !stack.isOf(Items.BOOK); }
+            public boolean canInsert(ItemStack stack) { return SlotSystem.getBaseMaxSlots(stack) > 0; }
         });
         this.addSlot(new Slot(this.inputInventory, 1, 31, 60) {
             @Override
