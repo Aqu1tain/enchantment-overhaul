@@ -20,6 +20,7 @@ See the [Wiki](https://github.com/Aqu1tain/enchantment-overhaul/wiki) for detail
 
 - **Aqu1tain** — design and development
 - **[LolloNapo](https://modrinth.com/user/Napino)** — textures and art
+- **[NotAida](https://namemc.com/profile/NotAida.1)** — logo design
 
 ## Requirements
 
