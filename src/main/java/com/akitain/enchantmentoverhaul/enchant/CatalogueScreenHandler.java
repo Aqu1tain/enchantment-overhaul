@@ -23,7 +23,6 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerLevelAccess;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.ItemEnchantments;
 import net.minecraft.world.level.block.Blocks;
@@ -66,7 +65,7 @@ public class CatalogueScreenHandler extends AbstractContainerMenu {
             @Override
             public int getMaxStackSize() { return 1; }
             @Override
-            public boolean mayPlace(ItemStack stack) { return !stack.is(Items.BOOK); }
+            public boolean mayPlace(ItemStack stack) { return SlotSystem.getBaseMaxSlots(stack) > 0; }
         });
         this.addSlot(new Slot(this.inputInventory, 1, 31, 60) {
             @Override
