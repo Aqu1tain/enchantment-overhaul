@@ -1,4 +1,6 @@
-# Enchantment Overhaul
+<p align="center">
+  <img src="images/logo.png" alt="Enchantment Overhaul" width="600">
+</p>
 
 Vanilla enchanting mixes stat boosts with magical effects in a single RNG system. This mod splits everything into three systems where every choice is deliberate.
 
