@@ -1,5 +1,6 @@
 package com.akitain.enchantmentoverhaul.client;
 
+import com.akitain.enchantmentoverhaul.EnchantmentOverhaul;
 import com.akitain.enchantmentoverhaul.enchant.CatalogueScreenHandler;
 import com.akitain.enchantmentoverhaul.enchant.CatalogueScreenHandler.CatalogueEntry;
 import com.akitain.enchantmentoverhaul.enchant.EnchantmentCosts;
@@ -9,19 +10,23 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
+import net.minecraft.client.render.DiffuseLighting;
+import net.minecraft.client.render.OverlayTexture;
+import net.minecraft.client.render.VertexConsumer;
+import net.minecraft.client.render.entity.model.BookModel;
 import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.registry.Registries;
-import net.minecraft.screen.slot.Slot;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.RotationAxis;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,41 +48,60 @@ public class CatalogueScreen extends HandledScreen<CatalogueScreenHandler> {
 
     private static final int BOOK_X = 3;
     private static final int BOOK_Y = 16;
+    private static final int BOOK_W = 50;
+    private static final int BOOK_H = 40;
 
     private static final int LV_BTN = 14;
     private static final int LV_GAP = 1;
 
     private static final int SLOT_BAR_Y = 104;
 
-    private static final int ROW_BG = 0xFF56493D;
-    private static final int ROW_HOVER = 0xFF6B5D4E;
-    private static final int ROW_SELECTED = 0xFF80507A;
-    private static final int ROW_BORDER_L = 0xFF7A6B5A;
-    private static final int ROW_BORDER_D = 0xFF3A3028;
-
-    private static final int ROW_BG_DIM = 0xFF3A3228;
-    private static final int ROW_HOVER_DIM = 0xFF4A4038;
-    private static final int ROW_BORDER_L_DIM = 0xFF504838;
-    private static final int ROW_BORDER_D_DIM = 0xFF2A2018;
-
-    private static final int PANEL_BG = 0xFF585858;
     private static final int TEXT_LIGHT = 0xFFD8C8F0;
-    private static final int BG = 0xFFC6C6C6;
-    private static final int SLOT_BG = 0xFF8B8B8B;
-    private static final int BORDER_L = 0xFFFFFFFF;
-    private static final int BORDER_D = 0xFF373737;
-    private static final int ARROW_COLOR = 0xFF9E9E9E;
-
-    private static final Identifier SLOT_SWORD = new Identifier("item/empty_slot_sword");
-    private static final Identifier SLOT_AMETHYST = new Identifier("item/empty_slot_amethyst_shard");
-
-    private static final Identifier[] SLOT_PLACEHOLDERS = { SLOT_SWORD, SLOT_AMETHYST };
+    private static final Identifier BACKGROUND_TEXTURE =
+            new Identifier(EnchantmentOverhaul.MOD_ID, "textures/gui/container/catalogue.png");
+    private static final Identifier BOOK_TEXTURE =
+            new Identifier("textures/entity/enchanting_table_book.png");
+    private static final Identifier ROW_TEXTURE =
+            new Identifier(EnchantmentOverhaul.MOD_ID, "textures/gui/container/catalogue/row.png");
+    private static final Identifier ROW_HOVER_TEXTURE =
+            new Identifier(EnchantmentOverhaul.MOD_ID, "textures/gui/container/catalogue/row_hover.png");
+    private static final Identifier ROW_SELECTED_TEXTURE =
+            new Identifier(EnchantmentOverhaul.MOD_ID, "textures/gui/container/catalogue/row_selected.png");
+    private static final Identifier ROW_DISABLED_TEXTURE =
+            new Identifier(EnchantmentOverhaul.MOD_ID, "textures/gui/container/catalogue/row_disabled.png");
+    private static final Identifier ROW_DISABLED_HOVER_TEXTURE =
+            new Identifier(EnchantmentOverhaul.MOD_ID, "textures/gui/container/catalogue/row_disabled_hover.png");
+    private static final Identifier LEVEL_SELECTED_TEXTURE =
+            new Identifier(EnchantmentOverhaul.MOD_ID, "textures/gui/container/catalogue/level_selected.png");
+    private static final Identifier LEVEL_SELECTED_AVAILABLE_TEXTURE =
+            new Identifier(EnchantmentOverhaul.MOD_ID, "textures/gui/container/catalogue/level_selected_available.png");
+    private static final Identifier LEVEL_SELECTED_UNAVAILABLE_TEXTURE =
+            new Identifier(EnchantmentOverhaul.MOD_ID, "textures/gui/container/catalogue/level_selected_unavailable.png");
+    private static final Identifier LEVEL_AVAILABLE_TEXTURE =
+            new Identifier(EnchantmentOverhaul.MOD_ID, "textures/gui/container/catalogue/level_available.png");
+    private static final Identifier LEVEL_UNAVAILABLE_TEXTURE =
+            new Identifier(EnchantmentOverhaul.MOD_ID, "textures/gui/container/catalogue/level_unavailable.png");
+    private static final Identifier SCROLLBAR_TRACK_TEXTURE =
+            new Identifier(EnchantmentOverhaul.MOD_ID, "textures/gui/container/catalogue/scrollbar_track.png");
+    private static final Identifier SCROLLBAR_THUMB_TEXTURE =
+            new Identifier(EnchantmentOverhaul.MOD_ID, "textures/gui/container/catalogue/scrollbar_thumb.png");
+    private static final Identifier SLOT_USED_TEXTURE =
+            new Identifier(EnchantmentOverhaul.MOD_ID, "textures/gui/container/catalogue/slot_used.png");
+    private static final Identifier SLOT_PENDING_ON_TEXTURE =
+            new Identifier(EnchantmentOverhaul.MOD_ID, "textures/gui/container/catalogue/slot_pending_on.png");
+    private static final Identifier SLOT_PENDING_OFF_TEXTURE =
+            new Identifier(EnchantmentOverhaul.MOD_ID, "textures/gui/container/catalogue/slot_pending_off.png");
+    private static final Identifier SLOT_FREE_TEXTURE =
+            new Identifier(EnchantmentOverhaul.MOD_ID, "textures/gui/container/catalogue/slot_free.png");
+    private static final Identifier SLOT_PENALTY_TEXTURE =
+            new Identifier(EnchantmentOverhaul.MOD_ID, "textures/gui/container/catalogue/slot_penalty.png");
 
     private static final Style SGA_STYLE = Style.EMPTY.withFont(new Identifier("minecraft", "alt"));
     private static final String SGA_CHARS = "abcdefghijklmnopqrstuvwxyz";
 
     private final String[] sgaRows = new String[20];
 
+    private BookModel bookModel;
     private float scrollAmount;
     private int scrollOffset;
     private boolean scrolling;
@@ -98,6 +122,7 @@ public class CatalogueScreen extends HandledScreen<CatalogueScreenHandler> {
     protected void init() {
         super.init();
         handler.rebuildEntries();
+        bookModel = new BookModel(BookModel.getTexturedModelData().createModel());
     }
 
     @Override
@@ -124,13 +149,10 @@ public class CatalogueScreen extends HandledScreen<CatalogueScreenHandler> {
     protected void drawBackground(DrawContext context, float delta, int mouseX, int mouseY) {
         int x = this.x, y = this.y;
 
-        drawRoundedFrame(context, x, y, BG_W, BG_H);
-        drawInputSlots(context, x, y);
-        drawArrow(context, x, y);
-        drawOutputSlot(context, x, y);
+        context.drawTexture(BACKGROUND_TEXTURE, x, y, 0, 0, BG_W, BG_H, BG_W, BG_H);
+        drawBook(context, x, y);
         drawCatalogue(context, x, y, mouseX, mouseY);
         drawSlotBar(context, x, y);
-        drawPlayerSlotBorders(context, x, y);
     }
 
     @Override
@@ -138,45 +160,8 @@ public class CatalogueScreen extends HandledScreen<CatalogueScreenHandler> {
         context.drawText(textRenderer, this.playerInventoryTitle, playerInventoryTitleX, playerInventoryTitleY, 0x404040, false);
     }
 
-    private void drawRoundedFrame(DrawContext ctx, int x, int y, int w, int h) {
-        int L = BORDER_L, D = BORDER_D;
-        ctx.fill(x + 2, y + 2, x + w - 2, y + h - 2, BG);
-        ctx.fill(x + 1, y, x + w - 1, y + 1, L);
-        ctx.fill(x, y + 1, x + w, y + 2, L);
-        ctx.fill(x, y + h - 2, x + w, y + h - 1, D);
-        ctx.fill(x + 1, y + h - 1, x + w - 1, y + h, D);
-        ctx.fill(x, y + 1, x + 1, y + h - 1, L);
-        ctx.fill(x + 1, y, x + 2, y + h, L);
-        ctx.fill(x + w - 2, y, x + w - 1, y + h, D);
-        ctx.fill(x + w - 1, y + 1, x + w, y + h - 1, D);
-    }
-
-    private void drawInputSlots(DrawContext context, int x, int y) {
-        for (int i = 0; i < 2; i++) {
-            Slot slot = handler.slots.get(i);
-            slotBorder(context, x + slot.x - 1, y + slot.y - 1);
-        }
-    }
-
-    private void drawArrow(DrawContext context, int x, int y) {
-        int cx = x + 28;
-        int ay = y + 78;
-        context.fill(cx - 1, ay, cx + 1, ay + 3, ARROW_COLOR);
-        context.fill(cx - 3, ay + 3, cx + 3, ay + 4, ARROW_COLOR);
-        context.fill(cx - 2, ay + 4, cx + 2, ay + 5, ARROW_COLOR);
-        context.fill(cx - 1, ay + 5, cx + 1, ay + 6, ARROW_COLOR);
-    }
-
-    private void drawOutputSlot(DrawContext context, int x, int y) {
-        Slot slot = handler.slots.get(2);
-        slotBorder(context, x + slot.x - 1, y + slot.y - 1);
-    }
-
     private void drawCatalogue(DrawContext context, int x, int y, int mouseX, int mouseY) {
         int cx = x + CAT_X, cy = y + CAT_Y;
-
-        context.fill(cx, cy, cx + CAT_W, cy + CAT_H, PANEL_BG);
-        borderInset(context, cx, cy, CAT_W, CAT_H);
 
         List<CatalogueEntry> entries = handler.getEntries();
         if (entries.isEmpty()) {
@@ -204,6 +189,27 @@ public class CatalogueScreen extends HandledScreen<CatalogueScreenHandler> {
         }
 
         drawScrollbar(context, cx + CAT_W - SCROLLBAR_W - 2, cy + 2, CAT_H - 4);
+    }
+
+    private void drawBook(DrawContext context, int x, int y) {
+        if (bookModel == null) return;
+        int bx = x + BOOK_X;
+        int by = y + BOOK_Y;
+
+        DiffuseLighting.method_34742();
+        context.getMatrices().push();
+        context.getMatrices().translate(bx + BOOK_W / 2.0F, by + 20.0F, 100.0F);
+        context.getMatrices().scale(-40.0F, 40.0F, 40.0F);
+        context.getMatrices().multiply(RotationAxis.POSITIVE_X.rotationDegrees(25.0F));
+        context.getMatrices().translate(0.02F, 0.05F, 0.03F);
+        context.getMatrices().multiply(RotationAxis.POSITIVE_Y.rotationDegrees(-81.0F));
+        context.getMatrices().multiply(RotationAxis.POSITIVE_X.rotationDegrees(180.0F));
+        bookModel.setPageAngles(0.0F, 0.55F, 0.75F, 0.9F);
+        VertexConsumer vertexConsumer = context.getVertexConsumers().getBuffer(bookModel.getLayer(BOOK_TEXTURE));
+        bookModel.render(context.getMatrices(), vertexConsumer, 15728880, OverlayTexture.DEFAULT_UV, 1.0F, 1.0F, 1.0F, 1.0F);
+        context.draw();
+        context.getMatrices().pop();
+        DiffuseLighting.enableGuiDepthLighting();
     }
 
     private boolean isLevelAffordable(CatalogueEntry entry, int level) {
@@ -234,24 +240,15 @@ public class CatalogueScreen extends HandledScreen<CatalogueScreenHandler> {
         boolean hovered = mx >= rx && mx < rx + rw && my >= ry && my < ry + ROW_H;
         boolean affordable = isAnyLevelAffordable(entry);
 
-        int bg;
-        int borderTop, borderBot;
+        Identifier rowTexture;
         if (selected) {
-            bg = ROW_SELECTED;
-            borderTop = 0xFF9A6090;
-            borderBot = 0xFF60305A;
+            rowTexture = ROW_SELECTED_TEXTURE;
         } else if (affordable) {
-            bg = hovered ? ROW_HOVER : ROW_BG;
-            borderTop = ROW_BORDER_L;
-            borderBot = ROW_BORDER_D;
+            rowTexture = hovered ? ROW_HOVER_TEXTURE : ROW_TEXTURE;
         } else {
-            bg = hovered ? ROW_HOVER_DIM : ROW_BG_DIM;
-            borderTop = ROW_BORDER_L_DIM;
-            borderBot = ROW_BORDER_D_DIM;
+            rowTexture = hovered ? ROW_DISABLED_HOVER_TEXTURE : ROW_DISABLED_TEXTURE;
         }
-        context.fill(rx, ry, rx + rw, ry + ROW_H, bg);
-        context.fill(rx, ry, rx + rw, ry + 1, borderTop);
-        context.fill(rx, ry + ROW_H - 1, rx + rw, ry + ROW_H, borderBot);
+        context.drawTexture(rowTexture, rx, ry, 0, 0, rw, ROW_H, 110, ROW_H);
 
         int lvX = rx + rw - 2 - entry.maxLevel() * (LV_BTN + LV_GAP);
         int sgaMaxX = lvX - 3;
@@ -267,28 +264,21 @@ public class CatalogueScreen extends HandledScreen<CatalogueScreenHandler> {
             boolean lvSel = selected && lv == selLv;
             boolean lvAffordable = isLevelAffordable(entry, lv);
 
-            int lvBg, lvBorderL, lvBorderD, lvColor;
+            Identifier lvTexture;
+            int lvColor;
             if (lvSel) {
-                lvBg = 0xFF5A8830; lvBorderL = 0xFF7AB848; lvBorderD = 0xFF2A4810;
+                lvTexture = LEVEL_SELECTED_TEXTURE;
                 lvColor = 0xFFC0FF80;
             } else if (selected) {
-                lvBg = lvAffordable ? 0xFF4A2848 : 0xFF2A1828;
-                lvBorderL = lvAffordable ? 0xFF6A4868 : 0xFF3A2838;
-                lvBorderD = lvAffordable ? 0xFF2A0828 : 0xFF1A0818;
+                lvTexture = lvAffordable ? LEVEL_SELECTED_AVAILABLE_TEXTURE : LEVEL_SELECTED_UNAVAILABLE_TEXTURE;
                 lvColor = lvAffordable ? 0xFFB890B8 : 0xFF685068;
             } else {
-                lvBg = lvAffordable ? 0xFF3A3028 : 0xFF2A2018;
-                lvBorderL = lvAffordable ? 0xFF5A5048 : 0xFF3A3028;
-                lvBorderD = lvAffordable ? 0xFF1A1008 : 0xFF100A04;
+                lvTexture = lvAffordable ? LEVEL_AVAILABLE_TEXTURE : LEVEL_UNAVAILABLE_TEXTURE;
                 lvColor = lvAffordable ? 0xFF7A6A5A : 0xFF504840;
             }
 
             int lvY = ry + (ROW_H - LV_BTN) / 2;
-            context.fill(lvX, lvY, lvX + LV_BTN, lvY + LV_BTN, lvBg);
-            context.fill(lvX, lvY, lvX + LV_BTN, lvY + 1, lvBorderL);
-            context.fill(lvX, lvY, lvX + 1, lvY + LV_BTN, lvBorderL);
-            context.fill(lvX + LV_BTN - 1, lvY + 1, lvX + LV_BTN, lvY + LV_BTN, lvBorderD);
-            context.fill(lvX + 1, lvY + LV_BTN - 1, lvX + LV_BTN, lvY + LV_BTN, lvBorderD);
+            context.drawTexture(lvTexture, lvX, lvY, 0, 0, LV_BTN, LV_BTN, LV_BTN, LV_BTN);
 
             String r = toRoman(lv);
             int tw = textRenderer.getWidth(r);
@@ -368,12 +358,11 @@ public class CatalogueScreen extends HandledScreen<CatalogueScreenHandler> {
 
     private void drawScrollbar(DrawContext context, int sx, int sy, int sh) {
         if (!shouldScroll()) return;
-        context.fill(sx, sy, sx + SCROLLBAR_W, sy + sh, 0xFF2A2218);
+        context.drawTexture(SCROLLBAR_TRACK_TEXTURE, sx, sy, 0, 0, SCROLLBAR_W, sh, SCROLLBAR_W, 82);
 
         int thumbH = Math.max(10, sh * VISIBLE_ROWS / handler.getEntries().size());
         int thumbY = sy + (int) ((sh - thumbH) * scrollAmount);
-        context.fill(sx, thumbY, sx + SCROLLBAR_W, thumbY + thumbH, SLOT_BG);
-        border3D(context, sx, thumbY, SCROLLBAR_W, thumbH, 0xFFC6C6C6, 0xFF555555);
+        context.drawTexture(SCROLLBAR_THUMB_TEXTURE, sx, thumbY, 0, 0, SCROLLBAR_W, thumbH, SCROLLBAR_W, 82);
     }
 
     private void drawSlotBar(DrawContext context, int x, int y) {
@@ -405,34 +394,22 @@ public class CatalogueScreen extends HandledScreen<CatalogueScreenHandler> {
 
         for (int i = 0; i < totalPips; i++) {
             int px = barX + i * (pw + gap);
-            int pipBg, pipBorderL, pipBorderD;
+            Identifier pipTexture;
             if (i < used) {
-                pipBg = 0xFF7B48B8; pipBorderL = 0xFF9B68D8; pipBorderD = 0xFF3B1878;
+                pipTexture = SLOT_USED_TEXTURE;
             } else if (i < used + pendingCost) {
                 boolean blink = (System.currentTimeMillis() / 400) % 2 == 0;
-                pipBg = blink ? 0xFFB880F0 : 0xFF5030A0;
-                pipBorderL = 0xFFD8A0FF; pipBorderD = 0xFF6840A0;
+                pipTexture = blink ? SLOT_PENDING_ON_TEXTURE : SLOT_PENDING_OFF_TEXTURE;
             } else if (i < max) {
-                pipBg = 0xFF2A1848; pipBorderL = 0xFF3A2858; pipBorderD = 0xFF1A0838;
+                pipTexture = SLOT_FREE_TEXTURE;
             } else {
-                pipBg = 0xFF4A1818; pipBorderL = 0xFF6A2828; pipBorderD = 0xFF2A0808;
+                pipTexture = SLOT_PENALTY_TEXTURE;
             }
-            context.fill(px, barY, px + pw, barY + ph, pipBg);
-            context.fill(px, barY, px + pw, barY + 1, pipBorderL);
-            context.fill(px, barY, px + 1, barY + ph, pipBorderL);
-            context.fill(px + pw - 1, barY + 1, px + pw, barY + ph, pipBorderD);
-            context.fill(px + 1, barY + ph - 1, px + pw, barY + ph, pipBorderD);
+            context.drawTexture(pipTexture, px, barY, 0, 0, pw, ph, 128, ph);
         }
 
         int textX = barRight + 4;
         context.drawTextWithShadow(textRenderer, countText, textX, barY - 1, TEXT_LIGHT);
-    }
-
-    private void drawPlayerSlotBorders(DrawContext context, int x, int y) {
-        for (int i = 3; i < handler.slots.size(); i++) {
-            Slot slot = handler.slots.get(i);
-            slotBorder(context, x + slot.x - 1, y + slot.y - 1);
-        }
     }
 
     @Override
@@ -511,25 +488,6 @@ public class CatalogueScreen extends HandledScreen<CatalogueScreenHandler> {
 
     private boolean shouldScroll() { return handler.getEntries().size() > VISIBLE_ROWS; }
     private int getMaxScroll() { return Math.max(0, handler.getEntries().size() - VISIBLE_ROWS); }
-
-    private void border3D(DrawContext ctx, int x, int y, int w, int h, int light, int dark) {
-        ctx.fill(x, y, x + w, y + 1, light);
-        ctx.fill(x, y, x + 1, y + h, light);
-        ctx.fill(x + w - 1, y + 1, x + w, y + h, dark);
-        ctx.fill(x + 1, y + h - 1, x + w, y + h, dark);
-    }
-
-    private void borderInset(DrawContext ctx, int x, int y, int w, int h) {
-        border3D(ctx, x, y, w, h, BORDER_D, BORDER_L);
-    }
-
-    private void slotBorder(DrawContext ctx, int x, int y) {
-        ctx.fill(x, y, x + 18, y + 1, BORDER_D);
-        ctx.fill(x, y, x + 1, y + 18, BORDER_D);
-        ctx.fill(x + 17, y + 1, x + 18, y + 18, BORDER_L);
-        ctx.fill(x + 1, y + 17, x + 18, y + 18, BORDER_L);
-        ctx.fill(x + 1, y + 1, x + 17, y + 17, SLOT_BG);
-    }
 
     private String trimToWidth(String text, int maxWidth) {
         int w = 0;
