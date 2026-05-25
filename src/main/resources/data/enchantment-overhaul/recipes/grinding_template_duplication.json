@@ -11,7 +11,7 @@
     "T": {"item": "enchantment-overhaul:grinding_template"}
   },
   "result": {
-    "id": "enchantment-overhaul:grinding_template",
+    "item": "enchantment-overhaul:grinding_template",
     "count": 2
   }
 }

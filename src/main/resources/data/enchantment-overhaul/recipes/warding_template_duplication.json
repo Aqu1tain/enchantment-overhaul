@@ -11,7 +11,7 @@
     "T": {"item": "enchantment-overhaul:warding_template"}
   },
   "result": {
-    "id": "enchantment-overhaul:warding_template",
+    "item": "enchantment-overhaul:warding_template",
     "count": 2
   }
 }

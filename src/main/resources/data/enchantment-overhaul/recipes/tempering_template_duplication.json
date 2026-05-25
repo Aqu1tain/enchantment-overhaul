@@ -11,7 +11,7 @@
     "T": {"item": "enchantment-overhaul:tempering_template"}
   },
   "result": {
-    "id": "enchantment-overhaul:tempering_template",
+    "item": "enchantment-overhaul:tempering_template",
     "count": 2
   }
 }

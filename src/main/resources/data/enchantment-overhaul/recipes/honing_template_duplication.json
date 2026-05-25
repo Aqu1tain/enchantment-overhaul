@@ -11,7 +11,7 @@
     "T": {"item": "enchantment-overhaul:honing_template"}
   },
   "result": {
-    "id": "enchantment-overhaul:honing_template",
+    "item": "enchantment-overhaul:honing_template",
     "count": 2
   }
 }
