@@ -50,14 +50,27 @@ public enum UpgradeType {
         stack.set(component, level);
 
         switch (this) {
-            case HONING -> boostBaseModifier(stack, Attributes.ATTACK_DAMAGE, Item.BASE_ATTACK_DAMAGE_ID, level - oldLevel, EquipmentSlotGroup.MAINHAND);
+            case HONING -> boostBaseModifier(stack, Attributes.ATTACK_DAMAGE, Item.BASE_ATTACK_DAMAGE_ID,
+                    sharpnessBonus(level) - sharpnessBonus(oldLevel), EquipmentSlotGroup.MAINHAND);
             case WARDING -> {}
-            case GRINDING -> replaceModifier(stack, Attributes.MINING_EFFICIENCY, level * 5, EquipmentSlotGroup.MAINHAND, "grinding");
+            case GRINDING -> replaceModifier(stack, Attributes.MINING_EFFICIENCY, efficiencyBonus(level), EquipmentSlotGroup.MAINHAND, "grinding");
             case TEMPERING -> {}
         }
     }
 
+    private static double sharpnessBonus(int level) {
+        int cappedLevel = Math.min(level, 5);
+        return cappedLevel <= 0 ? 0.0 : 1.0 + (cappedLevel - 1) * 0.5;
+    }
+
+    private static double efficiencyBonus(int level) {
+        int cappedLevel = Math.min(level, 5);
+        return cappedLevel <= 0 ? 0.0 : cappedLevel * cappedLevel + 1.0;
+    }
+
     private void boostBaseModifier(ItemStack stack, Holder<Attribute> attribute, Identifier baseId, double bonus, EquipmentSlotGroup slot) {
+        if (bonus == 0.0) return;
+
         ItemAttributeModifiers existing = stack.getOrDefault(DataComponents.ATTRIBUTE_MODIFIERS, ItemAttributeModifiers.EMPTY);
         ItemAttributeModifiers.Builder builder = ItemAttributeModifiers.builder();
 

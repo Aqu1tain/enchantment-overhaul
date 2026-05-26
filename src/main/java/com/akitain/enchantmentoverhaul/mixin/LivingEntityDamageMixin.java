@@ -30,6 +30,8 @@ public class LivingEntityDamageMixin {
     private static final EquipmentSlot[] ARMOR_SLOTS = {
             EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET
     };
+    private static final float PROTECTION_REDUCTION_PER_LEVEL = 0.04f;
+    private static final float WARDING_TO_PROTECTION_SCALE = 4.0f / 5.0f;
 
     private static float getWardingMultiplier(LivingEntity entity) {
         int totalEpf = 0;
@@ -38,7 +40,7 @@ public class LivingEntityDamageMixin {
         }
         if (totalEpf <= 0) return 1.0f;
         int capped = Math.min(totalEpf, 20);
-        return 1.0f - (capped * 0.032f);
+        return 1.0f - (capped * PROTECTION_REDUCTION_PER_LEVEL * WARDING_TO_PROTECTION_SCALE);
     }
 
     private static float getLastStandMultiplier(LivingEntity entity) {
