@@ -1,14 +1,17 @@
 package com.akitain.enchantmentoverhaul.smithing;
 
+import com.google.common.collect.Multimap;
 import com.akitain.enchantmentoverhaul.component.ModComponents;
 import net.minecraft.entity.EquipmentSlot;
+import net.minecraft.entity.attribute.EntityAttribute;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
-import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.item.*;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
+import net.minecraft.registry.Registries;
 
+import java.util.Map;
 import java.util.UUID;
 
 public enum UpgradeType {
@@ -18,7 +21,6 @@ public enum UpgradeType {
     GRINDING(ModComponents.GRINDING_LEVEL);
 
     private static final UUID HONING_UUID = UUID.fromString("a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d");
-    private static final UUID GRINDING_UUID = UUID.fromString("b2c3d4e5-f6a7-4b8c-9d0e-1f2a3b4c5d6e");
 
     private final String nbtKey;
 
@@ -46,27 +48,29 @@ public enum UpgradeType {
     }
 
     public void applyTo(ItemStack stack, int level) {
-        int oldLevel = currentLevel(stack);
         ModComponents.setInt(stack, nbtKey, level);
 
         switch (this) {
-            case HONING -> boostAttackDamage(stack, level - oldLevel);
+            case HONING -> boostAttackDamage(stack, level);
             case GRINDING -> {} // applied via mixin on getBlockBreakingSpeed
             case WARDING, TEMPERING -> {}
         }
     }
 
-    private void boostAttackDamage(ItemStack stack, double bonus) {
+    private void boostAttackDamage(ItemStack stack, int level) {
+        double bonus = sharpnessBonus(level);
         NbtCompound nbt = stack.getOrCreateNbt();
         NbtList modifiers = nbt.contains("AttributeModifiers", NbtElement.LIST_TYPE)
                 ? nbt.getList("AttributeModifiers", NbtElement.COMPOUND_TYPE)
                 : new NbtList();
 
+        ensureDefaultMainhandModifiers(stack, modifiers);
+
         boolean found = false;
         for (int i = 0; i < modifiers.size(); i++) {
             NbtCompound mod = modifiers.getCompound(i);
             if (isUuid(mod, HONING_UUID)) {
-                mod.putDouble("Amount", mod.getDouble("Amount") + bonus);
+                mod.putDouble("Amount", bonus);
                 found = true;
                 break;
             }
@@ -84,6 +88,33 @@ public enum UpgradeType {
         }
 
         nbt.put("AttributeModifiers", modifiers);
+    }
+
+    private static double sharpnessBonus(int level) {
+        int cappedLevel = Math.min(level, 5);
+        return cappedLevel <= 0 ? 0.0 : 1.0 + (cappedLevel - 1) * 0.5;
+    }
+
+    private static void ensureDefaultMainhandModifiers(ItemStack stack, NbtList modifiers) {
+        Multimap<EntityAttribute, EntityAttributeModifier> defaultModifiers =
+                stack.getItem().getAttributeModifiers(EquipmentSlot.MAINHAND);
+
+        for (Map.Entry<EntityAttribute, EntityAttributeModifier> entry : defaultModifiers.entries()) {
+            EntityAttributeModifier modifier = entry.getValue();
+            if (containsUuid(modifiers, modifier.getId())) continue;
+
+            NbtCompound mod = modifier.toNbt();
+            mod.putString("AttributeName", Registries.ATTRIBUTE.getId(entry.getKey()).toString());
+            mod.putString("Slot", "mainhand");
+            modifiers.add(mod);
+        }
+    }
+
+    private static boolean containsUuid(NbtList modifiers, UUID target) {
+        for (int i = 0; i < modifiers.size(); i++) {
+            if (isUuid(modifiers.getCompound(i), target)) return true;
+        }
+        return false;
     }
 
     private static boolean isUuid(NbtCompound mod, UUID target) {

@@ -3,6 +3,7 @@ package com.akitain.enchantmentoverhaul.mixin;
 import com.akitain.enchantmentoverhaul.component.ModComponents;
 import com.akitain.enchantmentoverhaul.enchant.ModEnchantments;
 import net.minecraft.enchantment.EnchantmentHelper;
+import net.minecraft.item.ArmorItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.math.random.Random;
@@ -19,9 +20,10 @@ public class ItemStackDamageMixin {
 
         int temperingLevel = ModComponents.getInt(self, ModComponents.TEMPERING_LEVEL, 0);
         if (temperingLevel > 0) {
+            int unbreakingLevel = unbreakingEquivalentLevel(temperingLevel);
             int reduced = 0;
             for (int i = 0; i < amount; i++) {
-                if (random.nextInt(temperingLevel + 1) == 0) reduced++;
+                if (shouldApplyTemperedDamage(self, unbreakingLevel, random)) reduced++;
             }
             amount = reduced;
         }
@@ -31,5 +33,16 @@ public class ItemStackDamageMixin {
         }
 
         return amount;
+    }
+
+    private static int unbreakingEquivalentLevel(int temperingLevel) {
+        return Math.max(1, Math.round(Math.min(temperingLevel, 5) * 3.0f / 5.0f));
+    }
+
+    private static boolean shouldApplyTemperedDamage(ItemStack stack, int unbreakingLevel, Random random) {
+        if (stack.getItem() instanceof ArmorItem && random.nextFloat() < 0.6f) {
+            return true;
+        }
+        return random.nextInt(unbreakingLevel + 1) == 0;
     }
 }
