@@ -28,14 +28,19 @@ public class InnateMaterialProperties {
     }
 
     public static String getMaterial(ItemStack stack) {
-        String id = BuiltInRegistries.ITEM.getKey(stack.getItem()).getPath();
-        if (id.startsWith("netherite_")) return "netherite";
-        if (id.startsWith("diamond_")) return "diamond";
-        if (id.startsWith("golden_")) return "gold";
-        if (id.startsWith("iron_")) return "iron";
-        if (id.startsWith("chainmail_")) return "iron";
-        if (id.startsWith("copper_")) return "copper";
-        if (id.startsWith("leather_")) return "leather";
+        var id = BuiltInRegistries.ITEM.getKey(stack.getItem());
+        String path = id.getPath();
+        if ("additionaladditions".equals(id.getNamespace())) {
+            if (path.startsWith("rose_gold_")) return "rose_gold";
+            if (path.startsWith("gilded_netherite_")) return "netherite";
+        }
+        if (path.startsWith("netherite_")) return "netherite";
+        if (path.startsWith("diamond_")) return "diamond";
+        if (path.startsWith("golden_")) return "gold";
+        if (path.startsWith("iron_")) return "iron";
+        if (path.startsWith("chainmail_")) return "iron";
+        if (path.startsWith("copper_")) return "copper";
+        if (path.startsWith("leather_")) return "leather";
         return null;
     }
 
@@ -45,6 +50,7 @@ public class InnateMaterialProperties {
             case "copper" -> isPoisonOrEffect(source);
             case "iron" -> source.is(DamageTypeTags.IS_PROJECTILE);
             case "diamond" -> source.is(DamageTypeTags.IS_EXPLOSION);
+            case "rose_gold" -> source.is(DamageTypeTags.IS_EXPLOSION);
             case "gold" -> isMagicDamage(source);
             case "leather" -> source.is(DamageTypes.FALL);
             default -> false;
@@ -69,6 +75,7 @@ public class InnateMaterialProperties {
             case "copper" -> "Poison Resistance";
             case "iron" -> "Projectile Resistance";
             case "diamond" -> "Explosion Resistance";
+            case "rose_gold" -> "Explosion Resistance";
             case "gold" -> "Magic Resistance";
             case "leather" -> "Fall Resistance";
             default -> null;
