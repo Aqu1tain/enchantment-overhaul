@@ -10,6 +10,7 @@ import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.registry.Registries;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.registry.tag.ItemTags;
 import net.minecraft.util.Identifier;
@@ -34,11 +35,39 @@ public enum UpgradeType {
         return switch (this) {
             case HONING -> stack.isIn(ItemTags.WEAPON_ENCHANTABLE)
                     || stack.isIn(ItemTags.BOW_ENCHANTABLE)
-                    || stack.isIn(ItemTags.CROSSBOW_ENCHANTABLE);
-            case WARDING -> stack.isIn(ItemTags.ARMOR_ENCHANTABLE);
+                    || stack.isIn(ItemTags.CROSSBOW_ENCHANTABLE)
+                    || isAdditionalAdditionsWeapon(stack);
+            case WARDING -> stack.isIn(ItemTags.ARMOR_ENCHANTABLE) || isAdditionalAdditionsArmor(stack);
             case TEMPERING -> stack.isIn(ItemTags.DURABILITY_ENCHANTABLE);
-            case GRINDING -> stack.isIn(ItemTags.MINING_ENCHANTABLE);
+            case GRINDING -> stack.isIn(ItemTags.MINING_ENCHANTABLE) || isAdditionalAdditionsMiningTool(stack);
         };
+    }
+
+    private static boolean isAdditionalAdditionsWeapon(ItemStack stack) {
+        Identifier id = Registries.ITEM.getId(stack.getItem());
+        if (!"additionaladditions".equals(id.getNamespace())) return false;
+        String path = id.getPath();
+        return path.endsWith("_sword") || path.endsWith("_spear");
+    }
+
+    private static boolean isAdditionalAdditionsArmor(ItemStack stack) {
+        Identifier id = Registries.ITEM.getId(stack.getItem());
+        if (!"additionaladditions".equals(id.getNamespace())) return false;
+        String path = id.getPath();
+        return path.endsWith("_helmet")
+                || path.endsWith("_chestplate")
+                || path.endsWith("_leggings")
+                || path.endsWith("_boots");
+    }
+
+    private static boolean isAdditionalAdditionsMiningTool(ItemStack stack) {
+        Identifier id = Registries.ITEM.getId(stack.getItem());
+        if (!"additionaladditions".equals(id.getNamespace())) return false;
+        String path = id.getPath();
+        return path.endsWith("_pickaxe")
+                || path.endsWith("_axe")
+                || path.endsWith("_shovel")
+                || path.endsWith("_hoe");
     }
 
     public int currentLevel(ItemStack stack) {
