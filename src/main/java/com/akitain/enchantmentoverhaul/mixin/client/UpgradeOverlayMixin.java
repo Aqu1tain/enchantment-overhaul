@@ -69,6 +69,7 @@ public class UpgradeOverlayMixin<T extends LivingEntity, M extends BipedEntityMo
             case "iron" -> "iron";
             case "gold" -> "gold";
             case "diamond" -> "diamond";
+            case "rose_gold" -> "gold";
             case "netherite" -> "netherite";
             case "leather" -> "leather";
             default -> null;
