@@ -6,6 +6,8 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.tags.ItemTags;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.ItemEnchantments;
@@ -24,9 +26,10 @@ public class ItemStackDamageMixin {
 
         int temperingLevel = self.getOrDefault(ModComponents.TEMPERING_LEVEL, 0);
         if (temperingLevel > 0) {
+            int unbreakingLevel = unbreakingEquivalentLevel(temperingLevel);
             int reduced = 0;
             for (int i = 0; i < result; i++) {
-                if (world.getRandom().nextInt(temperingLevel + 1) == 0) reduced++;
+                if (shouldApplyTemperedDamage(self, unbreakingLevel, world.getRandom())) reduced++;
             }
             result = reduced;
         }
@@ -36,6 +39,17 @@ public class ItemStackDamageMixin {
         }
 
         cir.setReturnValue(result);
+    }
+
+    private static int unbreakingEquivalentLevel(int temperingLevel) {
+        return Math.max(1, Math.round(Math.min(temperingLevel, 5) * 3.0f / 5.0f));
+    }
+
+    private static boolean shouldApplyTemperedDamage(ItemStack stack, int unbreakingLevel, RandomSource random) {
+        if (stack.is(ItemTags.ARMOR_ENCHANTABLE) && random.nextFloat() < 0.6f) {
+            return true;
+        }
+        return random.nextInt(unbreakingLevel + 1) == 0;
     }
 
     private static boolean hasEnchantment(ItemStack stack, ResourceKey<Enchantment> key) {
