@@ -1,6 +1,7 @@
 package com.akitain.enchantmentoverhaul;
 
 import com.akitain.enchantmentoverhaul.component.ModComponents;
+import com.akitain.enchantmentoverhaul.command.UpgradeCommand;
 import com.akitain.enchantmentoverhaul.enchant.ModScreenHandlers;
 import com.akitain.enchantmentoverhaul.gamerule.ModGameRules;
 import com.akitain.enchantmentoverhaul.loot.LootTableModifier;
@@ -23,6 +24,7 @@ public class EnchantmentOverhaul implements ModInitializer {
         ModScreenHandlers.register();
         SmithingTemplates.register();
         ModGameRules.register();
+        UpgradeCommand.register();
 
         CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.INGREDIENTS).register(entries -> {
             entries.insertBefore(Items.NETHERITE_UPGRADE_SMITHING_TEMPLATE,
