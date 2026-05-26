@@ -19,6 +19,10 @@ public class GrindingSpeedMixin {
         int level = ModComponents.getInt(tool, ModComponents.GRINDING_LEVEL, 0);
         if (level <= 0) return;
 
-        cir.setReturnValue(cir.getReturnValue() + level * 5.0f);
+        float baseSpeed = cir.getReturnValue();
+        if (baseSpeed <= 1.0f) return;
+
+        int cappedLevel = Math.min(level, 5);
+        cir.setReturnValue(baseSpeed + cappedLevel * cappedLevel + 1.0f);
     }
 }
