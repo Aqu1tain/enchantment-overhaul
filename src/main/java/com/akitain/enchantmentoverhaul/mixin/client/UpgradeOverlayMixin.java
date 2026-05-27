@@ -84,7 +84,7 @@ public class UpgradeOverlayMixin {
             case "iron" -> "iron";
             case "gold" -> "gold";
             case "diamond" -> "diamond";
-            case "rose_gold" -> "gold";
+            case "rose_gold" -> "rose_gold";
             case "netherite" -> "netherite";
             case "leather" -> "leather";
             default -> null;
