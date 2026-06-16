@@ -28,6 +28,8 @@ public abstract class AnvilScreenHandlerMixin extends ItemCombinerMenu {
 
     @Shadow @Nullable private String itemName;
     @Shadow @Final private DataSlot cost;
+    @Shadow private int repairItemCountCost;
+    @Shadow private boolean onlyRenaming;
 
     private AnvilScreenHandlerMixin(@Nullable MenuType<?> type, int syncId, Inventory playerInventory, ContainerLevelAccess context, ItemCombinerMenuSlotDefinition forgingSlotsManager) {
         super(type, syncId, playerInventory, context, forgingSlotsManager);
@@ -45,17 +47,18 @@ public abstract class AnvilScreenHandlerMixin extends ItemCombinerMenu {
 
         ItemStack result = first.copy();
         int restoreCost = tryRestoreSlot(first, second, result);
-        boolean changed = (restoreCost > 0) | tryRepair(first, second, result) | tryRename(first, result);
-
-        if (!second.isEmpty() && !changed) {
-            clearOutput(ci);
-            return;
-        }
+        int repairUnits = tryRepair(first, second, result);
+        boolean renamed = tryRename(first, result);
+        boolean changed = restoreCost > 0 || repairUnits > 0 || renamed;
 
         if (!changed) {
             clearOutput(ci);
             return;
         }
+
+        int unitsConsumed = repairUnits > 0 ? repairUnits : (restoreCost > 0 ? 1 : 0);
+        this.repairItemCountCost = unitsConsumed;
+        this.onlyRenaming = unitsConsumed == 0;
 
         result.remove(DataComponents.REPAIR_COST);
         this.cost.set(Math.max(1, restoreCost));
@@ -97,20 +100,21 @@ public abstract class AnvilScreenHandlerMixin extends ItemCombinerMenu {
         return 2;
     }
 
-    private boolean tryRepair(ItemStack first, ItemStack second, ItemStack result) {
-        if (second.isEmpty() || !first.isDamageableItem() || !first.isValidRepairItem(second)) return false;
+    private int tryRepair(ItemStack first, ItemStack second, ItemStack result) {
+        if (second.isEmpty() || !first.isDamageableItem() || !first.isValidRepairItem(second)) return 0;
 
-        int damage = first.getDamageValue();
         int repairPerUnit = first.getMaxDamage() / 4;
+        int damage = first.getDamageValue();
+        if (repairPerUnit <= 0 || damage <= 0) return 0;
 
-        for (int i = 0; i < second.getCount() && damage > 0; i++) {
+        int units = 0;
+        while (units < second.getCount() && damage > 0) {
             damage = Math.max(0, damage - repairPerUnit);
+            units++;
         }
 
-        if (damage >= first.getDamageValue()) return false;
-
         result.setDamageValue(damage);
-        return true;
+        return units;
     }
 
     private boolean tryRename(ItemStack first, ItemStack result) {
@@ -126,6 +130,8 @@ public abstract class AnvilScreenHandlerMixin extends ItemCombinerMenu {
     }
 
     private void clearOutput(CallbackInfo ci) {
+        this.repairItemCountCost = 0;
+        this.onlyRenaming = false;
         this.resultSlots.setItem(0, ItemStack.EMPTY);
         this.cost.set(0);
         ci.cancel();
