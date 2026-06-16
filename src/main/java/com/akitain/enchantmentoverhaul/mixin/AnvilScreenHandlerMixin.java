@@ -28,6 +28,8 @@ public abstract class AnvilScreenHandlerMixin extends ForgingScreenHandler {
 
     @Shadow @Nullable private String newItemName;
     @Shadow @Final private Property levelCost;
+    @Shadow private int repairItemUsage;
+    @Shadow private boolean keepSecondSlot;
 
     private AnvilScreenHandlerMixin(@Nullable ScreenHandlerType<?> type, int syncId, PlayerInventory playerInventory, ScreenHandlerContext context, ForgingSlotsManager forgingSlotsManager) {
         super(type, syncId, playerInventory, context, forgingSlotsManager);
@@ -45,17 +47,18 @@ public abstract class AnvilScreenHandlerMixin extends ForgingScreenHandler {
 
         ItemStack result = first.copy();
         int restoreCost = tryRestoreSlot(first, second, result);
-        boolean changed = (restoreCost > 0) | tryRepair(first, second, result) | tryRename(first, result);
-
-        if (!second.isEmpty() && !changed) {
-            clearOutput(ci);
-            return;
-        }
+        int repairUnits = tryRepair(first, second, result);
+        boolean renamed = tryRename(first, result);
+        boolean changed = restoreCost > 0 || repairUnits > 0 || renamed;
 
         if (!changed) {
             clearOutput(ci);
             return;
         }
+
+        int unitsConsumed = repairUnits > 0 ? repairUnits : (restoreCost > 0 ? 1 : 0);
+        this.repairItemUsage = unitsConsumed;
+        this.keepSecondSlot = unitsConsumed == 0;
 
         result.remove(DataComponentTypes.REPAIR_COST);
         this.levelCost.set(Math.max(1, restoreCost));
@@ -97,20 +100,21 @@ public abstract class AnvilScreenHandlerMixin extends ForgingScreenHandler {
         return 2;
     }
 
-    private boolean tryRepair(ItemStack first, ItemStack second, ItemStack result) {
-        if (second.isEmpty() || !first.isDamageable() || !first.canRepairWith(second)) return false;
+    private int tryRepair(ItemStack first, ItemStack second, ItemStack result) {
+        if (second.isEmpty() || !first.isDamageable() || !first.canRepairWith(second)) return 0;
 
-        int damage = first.getDamage();
         int repairPerUnit = first.getMaxDamage() / 4;
+        int damage = first.getDamage();
+        if (repairPerUnit <= 0 || damage <= 0) return 0;
 
-        for (int i = 0; i < second.getCount() && damage > 0; i++) {
+        int units = 0;
+        while (units < second.getCount() && damage > 0) {
             damage = Math.max(0, damage - repairPerUnit);
+            units++;
         }
 
-        if (damage >= first.getDamage()) return false;
-
         result.setDamage(damage);
-        return true;
+        return units;
     }
 
     private boolean tryRename(ItemStack first, ItemStack result) {
@@ -126,6 +130,8 @@ public abstract class AnvilScreenHandlerMixin extends ForgingScreenHandler {
     }
 
     private void clearOutput(CallbackInfo ci) {
+        this.repairItemUsage = 0;
+        this.keepSecondSlot = false;
         this.output.setStack(0, ItemStack.EMPTY);
         this.levelCost.set(0);
         ci.cancel();
