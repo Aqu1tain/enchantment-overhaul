@@ -2,6 +2,7 @@ package com.akitain.enchantmentoverhaul.enchant.enchantments;
 
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentTarget;
+import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.SwordItem;
@@ -21,6 +22,11 @@ public class VenomEnchantment extends Enchantment {
 
     @Override
     public int getMaxLevel() { return 2; }
+
+    @Override
+    public boolean canAccept(Enchantment other) {
+        return other != Enchantments.FIRE_ASPECT && super.canAccept(other);
+    }
 
     @Override
     public boolean isAcceptableItem(ItemStack stack) {
