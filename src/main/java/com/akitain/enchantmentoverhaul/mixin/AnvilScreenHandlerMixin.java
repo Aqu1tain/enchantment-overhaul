@@ -2,6 +2,7 @@ package com.akitain.enchantmentoverhaul.mixin;
 
 import com.akitain.enchantmentoverhaul.component.ModComponents;
 import com.akitain.enchantmentoverhaul.enchant.SlotSystem;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -17,6 +18,7 @@ import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -27,6 +29,9 @@ public abstract class AnvilScreenHandlerMixin extends ForgingScreenHandler {
     @Shadow @Nullable private String newItemName;
     @Shadow @Final private Property levelCost;
     @Shadow private int repairItemUsage;
+
+    @Unique
+    private static final boolean EASY_ANVILS = FabricLoader.getInstance().isModLoaded("easyanvils");
 
     private AnvilScreenHandlerMixin(@Nullable ScreenHandlerType<?> type, int syncId, PlayerInventory playerInventory, ScreenHandlerContext context) {
         super(type, syncId, playerInventory, context);
@@ -39,6 +44,10 @@ public abstract class AnvilScreenHandlerMixin extends ForgingScreenHandler {
 
         if (first.isEmpty()) {
             clearOutput(ci);
+            return;
+        }
+
+        if (EASY_ANVILS && shouldDeferToEasyAnvils(first, second)) {
             return;
         }
 
@@ -59,6 +68,15 @@ public abstract class AnvilScreenHandlerMixin extends ForgingScreenHandler {
         this.levelCost.set(Math.max(1, restoreCost));
         this.output.setStack(0, result);
         ci.cancel();
+    }
+
+    @Unique
+    private boolean shouldDeferToEasyAnvils(ItemStack first, ItemStack second) {
+        if (second.isEmpty()) return true;
+        if (first.getItem().canRepair(first, second)) return false;
+        if (SlotSystem.getGrindstonePenalty(first) > 0 && second.isOf(getRepairIngot(first))) return false;
+        if (second.isOf(Items.ENCHANTED_BOOK)) return false;
+        return true;
     }
 
     private int tryRestoreSlot(ItemStack first, ItemStack second, ItemStack result) {
