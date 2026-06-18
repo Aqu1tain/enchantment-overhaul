@@ -113,6 +113,7 @@ public class CatalogueScreenHandler extends ScreenHandler {
             if (DisabledEnchantments.isDisabled(enchantment)) continue;
             if (!enchantment.isAcceptableItem(item)) continue;
             if (existing.containsKey(enchantment)) continue;
+            if (conflictsWithExisting(enchantment, existing.keySet())) continue;
 
             Identifier id = Registries.ENCHANTMENT.getId(enchantment);
             if (id == null || !unlockedIds.contains(id)) continue;
@@ -121,6 +122,13 @@ public class CatalogueScreenHandler extends ScreenHandler {
         }
 
         this.entries = result;
+    }
+
+    private static boolean conflictsWithExisting(Enchantment candidate, java.util.Set<Enchantment> existing) {
+        for (Enchantment other : existing) {
+            if (!candidate.canCombine(other)) return true;
+        }
+        return false;
     }
 
     @Override
