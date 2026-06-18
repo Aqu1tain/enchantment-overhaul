@@ -34,9 +34,9 @@ public class EnchantedBookNameMixin {
         if (level > 1) {
             name.append(" ").append(Text.translatable("enchantment.level." + level));
         }
-        name.append(Text.literal(" Book"));
+        MutableText bookName = Text.translatable("item.enchantment-overhaul.enchanted_book", name);
 
         Formatting color = enchantment.isCursed() ? Formatting.RED : Formatting.LIGHT_PURPLE;
-        cir.setReturnValue(name.setStyle(Style.EMPTY.withColor(color)));
+        cir.setReturnValue(bookName.setStyle(Style.EMPTY.withColor(color)));
     }
 }
