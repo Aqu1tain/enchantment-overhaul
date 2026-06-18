@@ -119,6 +119,7 @@ public class CatalogueScreenHandler extends AbstractContainerMenu {
             if (DisabledEnchantments.isDisabled(entry)) continue;
             if (!entry.value().canEnchant(item)) continue;
             if (existing.keySet().contains(entry)) continue;
+            if (conflictsWithExisting(entry, existing)) continue;
             if (!unlockedIds.contains(key.identifier())) continue;
 
             int maxLevel = entry.value().getMaxLevel();
@@ -126,6 +127,13 @@ public class CatalogueScreenHandler extends AbstractContainerMenu {
         }
 
         this.entries = result;
+    }
+
+    private static boolean conflictsWithExisting(Holder<Enchantment> candidate, ItemEnchantments existing) {
+        for (Holder<Enchantment> other : existing.keySet()) {
+            if (!Enchantment.areCompatible(candidate, other)) return true;
+        }
+        return false;
     }
 
     @Override
