@@ -102,7 +102,7 @@ public class CatalogueScreenHandler extends AbstractContainerMenu {
 
     public void rebuildEntries() {
         ItemStack item = this.inputInventory.getItem(0);
-        if (item.isEmpty()) {
+        if (item.isEmpty() || LegendaryItems.isLegendary(item)) {
             this.entries = List.of();
             return;
         }
@@ -150,7 +150,7 @@ public class CatalogueScreenHandler extends AbstractContainerMenu {
         }
 
         ItemStack item = inputInventory.getItem(0);
-        if (item.isEmpty()) {
+        if (item.isEmpty() || LegendaryItems.isLegendary(item)) {
             outputInventory.setItem(0, ItemStack.EMPTY);
             return;
         }
