@@ -4,7 +4,6 @@ import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.ItemEnchantmentsComponent;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.item.ItemStack;
-import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
@@ -29,6 +28,6 @@ public final class LegendaryItems {
 
     public static Text tooltip() {
         return Text.translatable("item.enchantment-overhaul.legendary.tooltip")
-                .setStyle(Style.EMPTY.withColor(COLOR));
+                .formatted(Formatting.GRAY, Formatting.ITALIC);
     }
 }
