@@ -101,7 +101,7 @@ public class CatalogueScreenHandler extends ScreenHandler {
 
     public void rebuildEntries() {
         ItemStack item = this.inputInventory.getStack(0);
-        if (item.isEmpty()) {
+        if (item.isEmpty() || LegendaryItems.isLegendary(item)) {
             this.entries = List.of();
             return;
         }
@@ -145,7 +145,7 @@ public class CatalogueScreenHandler extends ScreenHandler {
         }
 
         ItemStack item = inputInventory.getStack(0);
-        if (item.isEmpty()) {
+        if (item.isEmpty() || LegendaryItems.isLegendary(item)) {
             outputInventory.setStack(0, ItemStack.EMPTY);
             return;
         }

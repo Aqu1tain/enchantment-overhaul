@@ -11,6 +11,8 @@
         "EnchantBookFactoryMixin",
         "EnchantmentNameMixin",
         "EnchantedBookNameMixin",
+        "LegendaryNameMixin",
+        "LegendaryMendingMixin",
         "ItemGroupsMixin",
         "EnchantingTableBlockMixin",
         "GrindstoneScreenHandlerMixin",
@@ -35,6 +37,7 @@
         "accessor.EntityAccessor"
     ],
     "client": [
+        "client.LegendaryTooltipMixin",
         "client.VeilNametagMixin",
         "client.EnchantingTableParticleMixin",
         "client.UpgradeOverlayMixin",
