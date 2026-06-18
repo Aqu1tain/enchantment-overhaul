@@ -1,6 +1,7 @@
 package com.akitain.enchantmentoverhaul.mixin;
 
 import com.akitain.enchantmentoverhaul.component.ModComponents;
+import com.akitain.enchantmentoverhaul.enchant.LegendaryItems;
 import com.akitain.enchantmentoverhaul.enchant.SlotSystem;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.entity.player.PlayerInventory;
@@ -41,6 +42,11 @@ public abstract class AnvilScreenHandlerMixin extends ForgingScreenHandler {
         ItemStack second = this.input.getStack(1);
 
         if (first.isEmpty()) {
+            clearOutput(ci);
+            return;
+        }
+
+        if (LegendaryItems.isLegendary(first)) {
             clearOutput(ci);
             return;
         }
