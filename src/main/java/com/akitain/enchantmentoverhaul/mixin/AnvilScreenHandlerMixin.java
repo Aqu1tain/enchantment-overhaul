@@ -1,6 +1,7 @@
 package com.akitain.enchantmentoverhaul.mixin;
 
 import com.akitain.enchantmentoverhaul.component.ModComponents;
+import com.akitain.enchantmentoverhaul.enchant.LegendaryItems;
 import com.akitain.enchantmentoverhaul.enchant.SlotSystem;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -41,6 +42,11 @@ public abstract class AnvilScreenHandlerMixin extends ItemCombinerMenu {
         ItemStack second = this.inputSlots.getItem(1);
 
         if (first.isEmpty()) {
+            clearOutput(ci);
+            return;
+        }
+
+        if (LegendaryItems.isLegendary(first)) {
             clearOutput(ci);
             return;
         }
