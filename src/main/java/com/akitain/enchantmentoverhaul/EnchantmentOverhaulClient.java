@@ -54,13 +54,15 @@ public class EnchantmentOverhaulClient implements ClientModInitializer {
         if (!stack.isOf(net.minecraft.item.Items.ENCHANTED_BOOK)) return;
         java.util.Map<net.minecraft.enchantment.Enchantment, Integer> enchantments =
                 net.minecraft.enchantment.EnchantmentHelper.get(stack);
-        if (enchantments.isEmpty()) return;
+        if (enchantments.isEmpty() || lines.isEmpty()) return;
 
         for (var entry : enchantments.entrySet()) {
             String fullname = entry.getKey().getName(entry.getValue()).getString();
-            lines.removeIf(line -> line.getString().equals(fullname));
+            for (int i = lines.size() - 1; i >= 1; i--) {
+                if (lines.get(i).getString().equals(fullname)) lines.remove(i);
+            }
         }
 
-        lines.add(1, Text.translatable("item.minecraft.enchanted_book").formatted(Formatting.DARK_GRAY, Formatting.ITALIC));
+        lines.add(Math.min(1, lines.size()), Text.translatable("item.minecraft.enchanted_book").formatted(Formatting.DARK_GRAY, Formatting.ITALIC));
     }
 }
