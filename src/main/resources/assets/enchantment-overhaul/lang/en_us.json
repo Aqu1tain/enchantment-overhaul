@@ -24,6 +24,7 @@
   "enchantment.enchantment-overhaul.venom": "Venom",
   "enchantment.enchantment-overhaul.venom.desc": "Applies Poison to the target on hit.",
   "item.enchantment-overhaul.legendary.tooltip": "Too unstable to repair or enchant",
+  "item.enchantment-overhaul.enchanted_book": "%s Book",
   "enchantment.enchantment-overhaul.last_stand": "Last Stand",
   "enchantment.enchantment-overhaul.last_stand.desc": "Below 20% health, take 10% less damage per level.",
   "enchantment.enchantment-overhaul.curse_of_fragility": "Curse of Fragility",
