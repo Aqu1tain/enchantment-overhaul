@@ -120,6 +120,7 @@ public class CatalogueScreenHandler extends ScreenHandler {
             if (DisabledEnchantments.isDisabled(entry)) continue;
             if (!entry.value().isAcceptableItem(item)) continue;
             if (existing.getEnchantments().contains(entry)) continue;
+            if (conflictsWithExisting(entry, existing)) continue;
             if (!unlockedIds.contains(key.getValue())) continue;
 
             int maxLevel = entry.value().getMaxLevel();
@@ -127,6 +128,13 @@ public class CatalogueScreenHandler extends ScreenHandler {
         }
 
         this.entries = result;
+    }
+
+    private static boolean conflictsWithExisting(RegistryEntry<Enchantment> candidate, ItemEnchantmentsComponent existing) {
+        for (RegistryEntry<Enchantment> other : existing.getEnchantments()) {
+            if (!Enchantment.canBeCombined(candidate, other)) return true;
+        }
+        return false;
     }
 
     @Override
