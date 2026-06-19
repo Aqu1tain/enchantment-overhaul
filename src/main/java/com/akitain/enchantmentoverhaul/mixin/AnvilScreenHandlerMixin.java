@@ -108,7 +108,8 @@ public abstract class AnvilScreenHandlerMixin extends ItemCombinerMenu {
     }
 
     private int tryRepair(ItemStack first, ItemStack second, ItemStack result) {
-        if (second.isEmpty() || !first.isDamageableItem() || !first.isValidRepairItem(second)) return 0;
+        if (second.isEmpty() || !first.isDamageableItem()) return 0;
+        if (!first.isValidRepairItem(second) && !isCombineOnlyRepairItem(first, second)) return 0;
 
         int repairPerUnit = first.getMaxDamage() / 4;
         int damage = first.getDamageValue();
@@ -122,6 +123,25 @@ public abstract class AnvilScreenHandlerMixin extends ItemCombinerMenu {
 
         result.setDamageValue(damage);
         return units;
+    }
+
+    // Items vanilla can only repair by combining two of them (no repair ingredient): give them a material repair
+    // so players don't have to sacrifice a second copy. Mending and vanilla combine still work too.
+    private static boolean isCombineOnlyRepairItem(ItemStack stack, ItemStack material) {
+        Item repairMaterial = combineOnlyRepairMaterial(stack.getItem());
+        return repairMaterial != null && material.is(repairMaterial);
+    }
+
+    private static Item combineOnlyRepairMaterial(Item item) {
+        if (item == Items.BOW
+                || item == Items.CROSSBOW
+                || item == Items.FISHING_ROD
+                || item == Items.CARROT_ON_A_STICK
+                || item == Items.WARPED_FUNGUS_ON_A_STICK) return Items.STRING;
+        if (item == Items.SHEARS || item == Items.FLINT_AND_STEEL) return Items.IRON_INGOT;
+        if (item == Items.BRUSH) return Items.COPPER_INGOT;
+        if (item == Items.TRIDENT) return Items.PRISMARINE_SHARD;
+        return null;
     }
 
     private boolean tryRename(ItemStack first, ItemStack result) {
