@@ -41,12 +41,15 @@ public abstract class AnvilScreenHandlerMixin extends ItemCombinerMenu {
         ItemStack first = this.inputSlots.getItem(0);
         ItemStack second = this.inputSlots.getItem(1);
 
-        if (first.isEmpty()) {
+        if (first.isEmpty()) return;
+
+        if (LegendaryItems.isLegendary(first)) {
             clearOutput(ci);
             return;
         }
 
-        if (LegendaryItems.isLegendary(first)) {
+        // Enchanting stays exclusive to the Catalogue: never merge enchanted books on the anvil.
+        if (second.is(Items.ENCHANTED_BOOK)) {
             clearOutput(ci);
             return;
         }
@@ -54,17 +57,15 @@ public abstract class AnvilScreenHandlerMixin extends ItemCombinerMenu {
         ItemStack result = first.copy();
         int restoreCost = tryRestoreSlot(first, second, result);
         int repairUnits = tryRepair(first, second, result);
-        boolean renamed = tryRename(first, result);
-        boolean changed = restoreCost > 0 || repairUnits > 0 || renamed;
 
-        if (!changed) {
-            clearOutput(ci);
-            return;
-        }
+        // Not a mod-handled operation: let vanilla and other mods run (combine two items, modded/datapack repairs, rename).
+        if (restoreCost <= 0 && repairUnits <= 0) return;
 
-        int unitsConsumed = repairUnits > 0 ? repairUnits : (restoreCost > 0 ? 1 : 0);
+        tryRename(first, result);
+
+        int unitsConsumed = repairUnits > 0 ? repairUnits : 1;
         this.repairItemCountCost = unitsConsumed;
-        this.onlyRenaming = unitsConsumed == 0;
+        this.onlyRenaming = false;
 
         result.remove(DataComponents.REPAIR_COST);
         this.cost.set(Math.max(1, restoreCost));
