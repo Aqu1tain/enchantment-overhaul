@@ -41,12 +41,15 @@ public abstract class AnvilScreenHandlerMixin extends ForgingScreenHandler {
         ItemStack first = this.input.getStack(0);
         ItemStack second = this.input.getStack(1);
 
-        if (first.isEmpty()) {
+        if (first.isEmpty()) return;
+
+        if (LegendaryItems.isLegendary(first)) {
             clearOutput(ci);
             return;
         }
 
-        if (LegendaryItems.isLegendary(first)) {
+        // Enchanting stays exclusive to the Catalogue: never merge enchanted books on the anvil.
+        if (second.isOf(Items.ENCHANTED_BOOK)) {
             clearOutput(ci);
             return;
         }
@@ -54,17 +57,15 @@ public abstract class AnvilScreenHandlerMixin extends ForgingScreenHandler {
         ItemStack result = first.copy();
         int restoreCost = tryRestoreSlot(first, second, result);
         int repairUnits = tryRepair(first, second, result);
-        boolean renamed = tryRename(first, result);
-        boolean changed = restoreCost > 0 || repairUnits > 0 || renamed;
 
-        if (!changed) {
-            clearOutput(ci);
-            return;
-        }
+        // Not a mod-handled operation: let vanilla and other mods run (combine two items, modded/datapack repairs, rename).
+        if (restoreCost <= 0 && repairUnits <= 0) return;
 
-        int unitsConsumed = repairUnits > 0 ? repairUnits : (restoreCost > 0 ? 1 : 0);
+        tryRename(first, result);
+
+        int unitsConsumed = repairUnits > 0 ? repairUnits : 1;
         this.repairItemUsage = unitsConsumed;
-        this.keepSecondSlot = unitsConsumed == 0;
+        this.keepSecondSlot = false;
 
         result.remove(DataComponentTypes.REPAIR_COST);
         this.levelCost.set(Math.max(1, restoreCost));
@@ -107,7 +108,8 @@ public abstract class AnvilScreenHandlerMixin extends ForgingScreenHandler {
     }
 
     private int tryRepair(ItemStack first, ItemStack second, ItemStack result) {
-        if (second.isEmpty() || !first.isDamageable() || !first.canRepairWith(second)) return 0;
+        if (second.isEmpty() || !first.isDamageable()) return 0;
+        if (!first.canRepairWith(second) && !isCombineOnlyRepairItem(first, second)) return 0;
 
         int repairPerUnit = first.getMaxDamage() / 4;
         int damage = first.getDamage();
@@ -121,6 +123,25 @@ public abstract class AnvilScreenHandlerMixin extends ForgingScreenHandler {
 
         result.setDamage(damage);
         return units;
+    }
+
+    // Items vanilla can only repair by combining two of them (no repair ingredient): give them a material repair
+    // so players don't have to sacrifice a second copy. Mending and vanilla combine still work too.
+    private static boolean isCombineOnlyRepairItem(ItemStack stack, ItemStack material) {
+        Item repairMaterial = combineOnlyRepairMaterial(stack.getItem());
+        return repairMaterial != null && material.isOf(repairMaterial);
+    }
+
+    private static Item combineOnlyRepairMaterial(Item item) {
+        if (item == Items.BOW
+                || item == Items.CROSSBOW
+                || item == Items.FISHING_ROD
+                || item == Items.CARROT_ON_A_STICK
+                || item == Items.WARPED_FUNGUS_ON_A_STICK) return Items.STRING;
+        if (item == Items.SHEARS || item == Items.FLINT_AND_STEEL) return Items.IRON_INGOT;
+        if (item == Items.BRUSH) return Items.COPPER_INGOT;
+        if (item == Items.TRIDENT) return Items.PRISMARINE_SHARD;
+        return null;
     }
 
     private boolean tryRename(ItemStack first, ItemStack result) {
