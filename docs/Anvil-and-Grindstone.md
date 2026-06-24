@@ -16,7 +16,7 @@ The anvil is a maintenance station. Enchantment combining has been removed. Book
 
 ### Slot Restoration
 
-After a grindstone removes enchantments and applies a -1 slot penalty, the anvil restores the lost slot. Place the item in the left slot and the matching repair material in the right slot.
+After a grindstone removes enchantments and applies a -1 slot penalty, the anvil restores the lost slot. Place the item in the left slot and any of its repair materials in the right slot. Restoration accepts the same materials that repair the item's durability, so anything added by tags, datapacks, or other mods works too.
 
 ![Anvil restoring a grindstone penalty on a Diamond Sword](images/anvil-restore.png)
 
@@ -24,7 +24,7 @@ Repair Materials:
 
 | Item Material | Repair Material |
 |---|---|
-| Netherite | Netherite Ingot |
+| Netherite | Netherite Ingot or Diamond |
 | Diamond | Diamond |
 | Gold | Gold Ingot |
 | Iron / Chainmail | Iron Ingot |
