@@ -5,6 +5,8 @@
     "mixins": [
         "EnchantmentScreenHandlerMixin",
         "AnvilScreenHandlerMixin",
+        "ToolMaterialsMixin",
+        "ArmorMaterialsMixin",
         "EnchantWithLevelsLootFunctionMixin",
         "EnchantRandomlyLootFunctionMixin",
         "MobEntityMixin",
