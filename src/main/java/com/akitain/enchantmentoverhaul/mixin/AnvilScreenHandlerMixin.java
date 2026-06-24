@@ -75,9 +75,7 @@ public abstract class AnvilScreenHandlerMixin extends ForgingScreenHandler {
     private int tryRestoreSlot(ItemStack first, ItemStack second, ItemStack result) {
         int penalty = SlotSystem.getGrindstonePenalty(first);
         if (penalty <= 0 || second.isEmpty()) return 0;
-
-        Item repairIngot = getRepairIngot(first);
-        if (repairIngot == null || !second.isOf(repairIngot)) return 0;
+        if (!first.canRepairWith(second)) return 0;
 
         result.set(ModComponents.GRINDSTONE_PENALTY, penalty - 1);
         return getRestoreCost(first);
