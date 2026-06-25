@@ -86,4 +86,21 @@ public class EnchantmentCosts {
         if (entry.matchesKey(Enchantments.MENDING)) return 3;
         return level;
     }
+
+    public static int slotCost(RegistryEntry<Enchantment> entry, int newLevel, int oldLevel) {
+        if (oldLevel <= 0) return slotCost(entry, newLevel);
+        if (entry.isIn(EnchantmentTags.CURSE)) return 0;
+        if (entry.matchesKey(Enchantments.MENDING)) return 0;
+        return Math.max(0, newLevel - oldLevel);
+    }
+
+    public static int reagentCost(int newLevel, int oldLevel, int normalBookshelves) {
+        if (oldLevel <= 0) return reagentCost(newLevel, normalBookshelves);
+        return Math.max(0, reagentCost(newLevel, normalBookshelves) - reagentCost(oldLevel, normalBookshelves));
+    }
+
+    public static int xpCost(RegistryKey<Enchantment> key, int newLevel, int oldLevel) {
+        if (oldLevel <= 0) return xpCost(key, newLevel);
+        return Math.max(0, xpCost(key, newLevel) - xpCost(key, oldLevel));
+    }
 }
