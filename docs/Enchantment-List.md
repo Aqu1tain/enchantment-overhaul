@@ -36,7 +36,7 @@
 | Mending | I (3 slots) | Any | XP repairs item |
 | Lure | III | Fishing Rod | Faster fish bite |
 
-## New Enchantments (6)
+## New Enchantments (8)
 
 | Enchantment | Max | Item | Effect |
 |---|---|---|---|
@@ -44,6 +44,8 @@
 | Last Stand | III | Chestplate | Below 20% HP, -10% damage taken per level |
 | Step-Up | I | Boots | Adds 0.4 to step height (0.6 to 1.0), walk up full blocks without jumping. Disabled while sneaking. |
 | Venom | II | Sword/Spear | Apply Poison on hit |
+| Burnishing | I | Axe | Right-click weathering copper to strip all oxidation in one click; the axe loses durability equal to the stages skipped |
+| Wraith | I | Armor | The enchanted piece is hidden while the wearer has Invisibility (per piece) |
 | Curse of Fragility | I | Any | Double durability damage, +1 slot |
 | Curse of Hunger | I | Armor | +30% hunger per piece, +1 slot |
 
@@ -105,6 +107,8 @@ Each enchantment requires a specific reagent item in the [[Enchanting Table]] al
 | Last Stand | Golden Apple |
 | Step-Up | Rabbit Foot |
 | Venom | Spider Eye |
+| Burnishing | Honeycomb |
+| Wraith | Phantom Membrane |
 | Curse of Fragility | Glass Pane |
 | Curse of Hunger | Rotten Flesh |
 | Curse of Binding | Chain |
