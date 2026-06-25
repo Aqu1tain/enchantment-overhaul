@@ -34,6 +34,7 @@
         "ChiseledBookshelfBlockEntitySyncMixin",
         "VenomAttackMixin",
         "GrindingSpeedMixin",
+        "BurnishingMixin",
         "accessor.ChiseledBookshelfBlockEntityAccessor",
         "accessor.ChiseledBookshelfBlockInvoker",
         "accessor.EntityAccessor"
@@ -43,7 +44,8 @@
         "client.VeilNametagMixin",
         "client.EnchantingTableParticleMixin",
         "client.UpgradeOverlayMixin",
-        "client.ChiseledBookshelfHoverMixin"
+        "client.ChiseledBookshelfHoverMixin",
+        "client.WraithMixin"
     ],
     "injectors": {
         "defaultRequire": 1

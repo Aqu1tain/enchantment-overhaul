@@ -15,6 +15,8 @@ public class ModEnchantments {
     public static final Enchantment CURSE_OF_FRAGILITY = register("curse_of_fragility", new CurseOfFragilityEnchantment());
     public static final Enchantment CURSE_OF_HUNGER = register("curse_of_hunger", new CurseOfHungerEnchantment());
     public static final Enchantment VEIL = register("veil", new VeilEnchantment());
+    public static final Enchantment BURNISHING = register("burnishing", new BurnishingEnchantment());
+    public static final Enchantment WRAITH = register("wraith", new WraithEnchantment());
 
     private static Enchantment register(String name, Enchantment enchantment) {
         return Registry.register(Registries.ENCHANTMENT, new Identifier(EnchantmentOverhaul.MOD_ID, name), enchantment);

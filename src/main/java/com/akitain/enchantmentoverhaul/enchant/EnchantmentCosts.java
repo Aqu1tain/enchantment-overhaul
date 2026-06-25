@@ -47,6 +47,8 @@ public class EnchantmentCosts {
         REAGENTS.put(ModEnchantments.CURSE_OF_FRAGILITY, Items.GLASS_PANE);
         REAGENTS.put(ModEnchantments.CURSE_OF_HUNGER, Items.ROTTEN_FLESH);
         REAGENTS.put(ModEnchantments.VEIL, Items.FERMENTED_SPIDER_EYE);
+        REAGENTS.put(ModEnchantments.BURNISHING, Items.HONEYCOMB);
+        REAGENTS.put(ModEnchantments.WRAITH, Items.PHANTOM_MEMBRANE);
     }
 
     private static final int[] XP_BY_LEVEL = {0, 2, 4, 7, 10};
