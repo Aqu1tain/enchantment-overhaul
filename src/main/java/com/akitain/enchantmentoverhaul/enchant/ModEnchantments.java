@@ -14,6 +14,8 @@ public class ModEnchantments {
     public static final ResourceKey<Enchantment> CURSE_OF_FRAGILITY = of("curse_of_fragility");
     public static final ResourceKey<Enchantment> CURSE_OF_HUNGER = of("curse_of_hunger");
     public static final ResourceKey<Enchantment> VEIL = of("veil");
+    public static final ResourceKey<Enchantment> BURNISHING = of("burnishing");
+    public static final ResourceKey<Enchantment> WRAITH = of("wraith");
 
     private static ResourceKey<Enchantment> of(String name) {
         return ResourceKey.create(Registries.ENCHANTMENT, Identifier.fromNamespaceAndPath(EnchantmentOverhaul.MOD_ID, name));
