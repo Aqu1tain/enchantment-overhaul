@@ -23,6 +23,7 @@
         "PlayerExhaustionMixin",
         "VeilDetectionMixin",
         "StepUpMixin",
+        "BurnishingMixin",
         "ArmorEquipMixin",
         "SellEnchantedToolMixin",
         "LootTableEnchantMixin",
@@ -34,6 +35,7 @@
         "accessor.ChiseledBookshelfBlockEntityAccessor"
     ],
     "client": [
+        "client.WraithMixin",
         "client.VeilNametagMixin",
         "client.EnchantingTableParticleMixin",
         "client.UpgradeOverlayMixin",
