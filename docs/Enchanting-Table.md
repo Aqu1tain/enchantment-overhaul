@@ -37,7 +37,11 @@ Chiseled bookshelves with books emit enchanting particles toward the table, show
 
 Normal bookshelves reduce reagent cost. The discount is linear: each bookshelf reduces the reagent cost by ~3.3%, up to 15 bookshelves for a 50% discount. Beyond 15 bookshelves there is no additional benefit.
 
-## Stronghold Library
+## Upgrading Enchantments
+
+You can raise an enchantment already on an item to a higher level without stripping it first. An applied enchantment that is below its max level appears in the catalogue with its owned levels shown as greyed, non-clickable pips, and only the next levels selectable. The tooltip reads "N to M".
+
+The cost is the delta: slots, reagent, and XP are charged as the new level minus the current level, so reaching a level costs the same total whether you applied it directly or upgraded into it. Curses and single-level enchantments are not upgradeable.
 
 The vanilla Stronghold Library has been remodeled into a starter enchanting room. The center now hosts an obsidian pedestal flanked by chiseled bookshelves pre-filled with random enchanted books drawn from the early-game pool. This gives you a guaranteed first taste of the enchanting catalogue once you reach the Stronghold.
 

@@ -1,0 +1,21 @@
+{
+    "anvil_cost": 2,
+    "description": {
+        "translate": "enchantment.enchantment-overhaul.burnishing"
+    },
+    "effects": {},
+    "max_cost": {
+        "base": 25,
+        "per_level_above_first": 0
+    },
+    "max_level": 1,
+    "min_cost": {
+        "base": 10,
+        "per_level_above_first": 0
+    },
+    "slots": [
+        "mainhand"
+    ],
+    "supported_items": "#enchantment-overhaul:enchantable/burnishing",
+    "weight": 5
+}
