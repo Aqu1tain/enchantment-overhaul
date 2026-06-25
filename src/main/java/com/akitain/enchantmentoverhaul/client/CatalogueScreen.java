@@ -215,16 +215,18 @@ public class CatalogueScreen extends HandledScreen<CatalogueScreenHandler> {
     }
 
     private boolean isLevelAffordable(CatalogueEntry entry, int level) {
+        if (level <= entry.currentLevel()) return false;
+
         ItemStack item = handler.getSlot(0).getStack();
-        int slotCost = EnchantmentCosts.slotCost(entry.entry(), level);
+        int slotCost = EnchantmentCosts.slotCost(entry.entry(), level, entry.currentLevel());
         if (SlotSystem.getAvailableSlots(item) < slotCost) return false;
 
         if (MinecraftClient.getInstance().player.isCreative()) return true;
 
         ItemStack reagent = handler.getSlot(1).getStack();
         Item reagentItem = EnchantmentCosts.reagent(entry.key());
-        int reagentCost = EnchantmentCosts.reagentCost(level, handler.getNormalBookshelves());
-        int xpCost = EnchantmentCosts.xpCost(entry.key(), level);
+        int reagentCost = EnchantmentCosts.reagentCost(level, entry.currentLevel(), handler.getNormalBookshelves());
+        int xpCost = EnchantmentCosts.xpCost(entry.key(), level, entry.currentLevel());
         int playerXp = MinecraftClient.getInstance().player.experienceLevel;
 
         return reagent.isOf(reagentItem) && reagent.getCount() >= reagentCost && playerXp >= xpCost;
@@ -263,12 +265,16 @@ public class CatalogueScreen extends HandledScreen<CatalogueScreenHandler> {
         int selLv = selected ? handler.getSelectedLevel() : 0;
 
         for (int lv = 1; lv <= entry.maxLevel(); lv++) {
+            boolean owned = lv <= entry.currentLevel();
             boolean lvSel = selected && lv == selLv;
             boolean lvAffordable = isLevelAffordable(entry, lv);
 
             Identifier lvTexture;
             int lvColor;
-            if (lvSel) {
+            if (owned) {
+                lvTexture = LEVEL_UNAVAILABLE_TEXTURE;
+                lvColor = 0xFF3E7A4E;
+            } else if (lvSel) {
                 lvTexture = LEVEL_SELECTED_TEXTURE;
                 lvColor = 0xFFC0FF80;
             } else if (selected) {
@@ -307,17 +313,17 @@ public class CatalogueScreen extends HandledScreen<CatalogueScreenHandler> {
         int level;
         if (mx >= lvX) {
             int lvIdx = (mx - lvX) / (LV_BTN + LV_GAP);
-            level = Math.max(1, Math.min(lvIdx + 1, entry.maxLevel()));
+            level = Math.max(entry.currentLevel() + 1, Math.min(lvIdx + 1, entry.maxLevel()));
         } else if (selected) {
             level = handler.getSelectedLevel();
         } else {
-            level = 1;
+            level = entry.currentLevel() + 1;
         }
 
         Item reagentItem = EnchantmentCosts.reagent(key);
-        int reagentCost = EnchantmentCosts.reagentCost(level, handler.getNormalBookshelves());
-        int xpCost = EnchantmentCosts.xpCost(key, level);
-        int slotCost = EnchantmentCosts.slotCost(entry.entry(), level);
+        int reagentCost = EnchantmentCosts.reagentCost(level, entry.currentLevel(), handler.getNormalBookshelves());
+        int xpCost = EnchantmentCosts.xpCost(key, level, entry.currentLevel());
+        int slotCost = EnchantmentCosts.slotCost(entry.entry(), level, entry.currentLevel());
 
         ItemStack item = handler.getSlot(0).getStack();
         ItemStack reagent = handler.getSlot(1).getStack();
@@ -327,7 +333,9 @@ public class CatalogueScreen extends HandledScreen<CatalogueScreenHandler> {
         boolean hasXp = playerXp >= xpCost;
         boolean hasSlots = SlotSystem.getAvailableSlots(item) >= slotCost;
 
-        String levelLabel = " " + toRoman(level);
+        String levelLabel = entry.currentLevel() > 0
+                ? " " + toRoman(entry.currentLevel()) + " → " + toRoman(level)
+                : " " + toRoman(level);
         List<Text> tooltip = new ArrayList<>();
         tooltip.add(Text.literal(entry.entry().value().description().getString() + levelLabel)
                 .formatted(entry.entry().isIn(EnchantmentTags.CURSE) ? Formatting.RED : Formatting.LIGHT_PURPLE));
@@ -380,7 +388,7 @@ public class CatalogueScreen extends HandledScreen<CatalogueScreenHandler> {
         int pendingCost = 0;
         if (handler.getSelectedIndex() >= 0 && handler.getSelectedIndex() < handler.getEntries().size()) {
             CatalogueEntry e = handler.getEntries().get(handler.getSelectedIndex());
-            pendingCost = EnchantmentCosts.slotCost(e.entry(), handler.getSelectedLevel());
+            pendingCost = EnchantmentCosts.slotCost(e.entry(), handler.getSelectedLevel(), e.currentLevel());
         }
 
         int barY = y + SLOT_BAR_Y;
@@ -438,7 +446,7 @@ public class CatalogueScreen extends HandledScreen<CatalogueScreenHandler> {
         CatalogueEntry entry = entries.get(idx);
         int rx = cx + 2;
         int lvX = rx + rowW - 2 - entry.maxLevel() * (LV_BTN + LV_GAP);
-        int level = 1;
+        int level = entry.currentLevel() + 1;
         if (mx >= lvX) {
             int lvIdx = (int) (mx - lvX) / (LV_BTN + LV_GAP);
             if (lvIdx >= 0 && lvIdx < entry.maxLevel()) level = lvIdx + 1;

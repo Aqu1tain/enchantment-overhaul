@@ -51,7 +51,7 @@ public class LootTableModifier {
             new StructureLoot("chests/shipwreck_treasure", 85, 5, List.of(
                     Enchantments.LUCK_OF_THE_SEA, Enchantments.LURE)),
             new StructureLoot("chests/shipwreck_supply", 90, 5, List.of(
-                    Enchantments.LUCK_OF_THE_SEA)),
+                    Enchantments.LUCK_OF_THE_SEA, ModEnchantments.BURNISHING)),
 
             // Medium (25% chance)
             new StructureLoot("chests/simple_dungeon", 75, 12, List.of(
@@ -59,7 +59,7 @@ public class LootTableModifier {
             new StructureLoot("chests/ruined_portal", 75, 12, List.of(
                     ModEnchantments.CURSE_OF_FRAGILITY, Enchantments.VANISHING_CURSE)),
             new StructureLoot("chests/underwater_ruin_small", 80, 8, List.of(
-                    Enchantments.AQUA_AFFINITY, Enchantments.RESPIRATION)),
+                    Enchantments.AQUA_AFFINITY, Enchantments.RESPIRATION, ModEnchantments.BURNISHING)),
             new StructureLoot("chests/desert_pyramid", 75, 12, List.of(
                     Enchantments.CHANNELING, ModEnchantments.CURSE_OF_FRAGILITY, Enchantments.FIRE_ASPECT)),
             new StructureLoot("chests/jungle_temple", 75, 12, List.of(
@@ -67,7 +67,7 @@ public class LootTableModifier {
             new StructureLoot("chests/underwater_ruin_big", 75, 8, List.of(
                     Enchantments.DEPTH_STRIDER, Enchantments.AQUA_AFFINITY, Enchantments.RESPIRATION, Enchantments.RIPTIDE, Enchantments.LOYALTY)),
             new StructureLoot("chests/abandoned_mineshaft", 75, 12, List.of(
-                    Enchantments.SILK_TOUCH, Enchantments.FORTUNE)),
+                    Enchantments.SILK_TOUCH, Enchantments.FORTUNE, ModEnchantments.BURNISHING)),
             new StructureLoot("chests/pillager_outpost", 75, 6, List.of(
                     Enchantments.MULTISHOT, Enchantments.PIERCING, Enchantments.QUICK_CHARGE, Enchantments.SWEEPING_EDGE, Enchantments.PUNCH)),
 
@@ -77,7 +77,7 @@ public class LootTableModifier {
             new StructureLoot("chests/nether_bridge", 65, 12, List.of(
                     Enchantments.FIRE_ASPECT, Enchantments.FLAME, ModEnchantments.VENOM, Enchantments.LOOTING)),
             new StructureLoot("chests/woodland_mansion", 65, 12, List.of(
-                    Enchantments.SWEEPING_EDGE, Enchantments.LOOTING, ModEnchantments.CURSE_OF_HUNGER, Enchantments.SILK_TOUCH, Enchantments.THORNS)),
+                    Enchantments.SWEEPING_EDGE, Enchantments.LOOTING, ModEnchantments.CURSE_OF_HUNGER, Enchantments.SILK_TOUCH, Enchantments.THORNS, ModEnchantments.WRAITH)),
             new StructureLoot("chests/bastion_treasure", 65, 35, List.of(
                     Enchantments.SOUL_SPEED)),
             new StructureLoot("chests/bastion_bridge", 75, 12, List.of(
@@ -95,7 +95,7 @@ public class LootTableModifier {
 
             // Endgame (50% chance)
             new StructureLoot("chests/ancient_city", 50, 17, List.of(
-                    ModEnchantments.VEIL, Enchantments.SWIFT_SNEAK, Enchantments.BINDING_CURSE)),
+                    ModEnchantments.VEIL, ModEnchantments.WRAITH, Enchantments.SWIFT_SNEAK, Enchantments.BINDING_CURSE)),
             new StructureLoot("chests/trial_chambers/reward_rare", 50, 12, List.of(
                     Enchantments.WIND_BURST, Enchantments.BREACH, Enchantments.LUNGE, ModEnchantments.LAST_STAND)),
             new StructureLoot("chests/trial_chambers/reward_ominous_rare", 50, 12, List.of(
