@@ -112,13 +112,19 @@ public class CatalogueScreenHandler extends ScreenHandler {
         for (Enchantment enchantment : Registries.ENCHANTMENT) {
             if (DisabledEnchantments.isDisabled(enchantment)) continue;
             if (!enchantment.isAcceptableItem(item)) continue;
-            if (existing.containsKey(enchantment)) continue;
-            if (conflictsWithExisting(enchantment, existing.keySet())) continue;
 
             Identifier id = Registries.ENCHANTMENT.getId(enchantment);
             if (id == null || !unlockedIds.contains(id)) continue;
 
-            result.add(new CatalogueEntry(enchantment, id, enchantment.getMaxLevel()));
+            int maxLevel = enchantment.getMaxLevel();
+            int current = existing.getOrDefault(enchantment, 0);
+            if (current > 0) {
+                if (current >= maxLevel) continue;
+                if (enchantment.isCursed()) continue;
+            } else if (conflictsWithExisting(enchantment, existing.keySet())) {
+                continue;
+            }
+            result.add(new CatalogueEntry(enchantment, id, maxLevel, current));
         }
 
         this.entries = result;
@@ -138,7 +144,8 @@ public class CatalogueScreenHandler extends ScreenHandler {
             int level = (id % 10) + 1;
             if (index < entries.size()) {
                 this.selectedIndex = index;
-                this.selectedLevel = Math.min(level, entries.get(index).maxLevel());
+                CatalogueEntry clicked = entries.get(index);
+                this.selectedLevel = Math.max(clicked.currentLevel() + 1, Math.min(level, clicked.maxLevel()));
                 updateResult();
                 return true;
             }
@@ -159,9 +166,9 @@ public class CatalogueScreenHandler extends ScreenHandler {
         }
 
         CatalogueEntry entry = entries.get(selectedIndex);
-        int level = Math.min(selectedLevel, entry.maxLevel());
+        int level = Math.max(entry.currentLevel() + 1, Math.min(selectedLevel, entry.maxLevel()));
 
-        int slotsNeeded = EnchantmentCosts.slotCost(entry.enchantment(), level);
+        int slotsNeeded = EnchantmentCosts.slotCost(entry.enchantment(), level, entry.currentLevel());
         if (SlotSystem.getAvailableSlots(item) < slotsNeeded) {
             outputInventory.setStack(0, ItemStack.EMPTY);
             return;
@@ -173,7 +180,9 @@ public class CatalogueScreenHandler extends ScreenHandler {
         }
 
         ItemStack result = item.copy();
-        result.addEnchantment(entry.enchantment(), level);
+        Map<Enchantment, Integer> resultEnchants = EnchantmentHelper.get(result);
+        resultEnchants.put(entry.enchantment(), level);
+        EnchantmentHelper.set(resultEnchants, result);
         outputInventory.setStack(0, result);
     }
 
@@ -183,17 +192,17 @@ public class CatalogueScreenHandler extends ScreenHandler {
         ItemStack reagent = inputInventory.getStack(1);
         Enchantment enchantment = entry.enchantment();
         return reagent.isOf(EnchantmentCosts.reagent(enchantment))
-                && reagent.getCount() >= EnchantmentCosts.reagentCost(level, normalBookshelves)
-                && this.player.experienceLevel >= EnchantmentCosts.xpCost(enchantment, level);
+                && reagent.getCount() >= EnchantmentCosts.reagentCost(level, entry.currentLevel(), normalBookshelves)
+                && this.player.experienceLevel >= EnchantmentCosts.xpCost(enchantment, level, entry.currentLevel());
     }
 
     private boolean canTakeOutput(PlayerEntity player) {
         if (selectedIndex < 0 || selectedIndex >= entries.size()) return false;
         CatalogueEntry entry = entries.get(selectedIndex);
-        int level = Math.min(selectedLevel, entry.maxLevel());
+        int level = Math.max(entry.currentLevel() + 1, Math.min(selectedLevel, entry.maxLevel()));
 
         ItemStack item = inputInventory.getStack(0);
-        if (SlotSystem.getAvailableSlots(item) < EnchantmentCosts.slotCost(entry.enchantment(), level)) return false;
+        if (SlotSystem.getAvailableSlots(item) < EnchantmentCosts.slotCost(entry.enchantment(), level, entry.currentLevel())) return false;
         return canAfford(entry, level);
     }
 
@@ -201,12 +210,12 @@ public class CatalogueScreenHandler extends ScreenHandler {
         if (selectedIndex < 0 || selectedIndex >= entries.size()) return;
 
         CatalogueEntry entry = entries.get(selectedIndex);
-        int level = Math.min(selectedLevel, entry.maxLevel());
+        int level = Math.max(entry.currentLevel() + 1, Math.min(selectedLevel, entry.maxLevel()));
         Enchantment enchantment = entry.enchantment();
 
         if (!player.isCreative()) {
-            inputInventory.getStack(1).decrement(EnchantmentCosts.reagentCost(level, normalBookshelves));
-            player.addExperienceLevels(-EnchantmentCosts.xpCost(enchantment, level));
+            inputInventory.getStack(1).decrement(EnchantmentCosts.reagentCost(level, entry.currentLevel(), normalBookshelves));
+            player.addExperienceLevels(-EnchantmentCosts.xpCost(enchantment, level, entry.currentLevel()));
         }
 
         inputInventory.setStack(0, ItemStack.EMPTY);
@@ -270,5 +279,5 @@ public class CatalogueScreenHandler extends ScreenHandler {
         updateResult();
     }
 
-    public record CatalogueEntry(Enchantment enchantment, Identifier id, int maxLevel) {}
+    public record CatalogueEntry(Enchantment enchantment, Identifier id, int maxLevel, int currentLevel) {}
 }
