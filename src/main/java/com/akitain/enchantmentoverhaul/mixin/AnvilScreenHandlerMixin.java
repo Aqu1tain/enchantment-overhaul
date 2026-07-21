@@ -46,12 +46,23 @@ public abstract class AnvilScreenHandlerMixin extends ItemCombinerMenu {
         ItemStack first = this.inputSlots.getItem(0);
         ItemStack second = this.inputSlots.getItem(1);
 
-        if (first.isEmpty()) {
+        if (first.isEmpty()) return;
+
+        if (LegendaryItems.isLegendary(first)) {
             clearOutput(ci);
             return;
         }
 
-        if (LegendaryItems.isLegendary(first)) {
+        // Enchanting stays exclusive to the Catalogue. Check the component rather
+        // than the vanilla item so modded stored-enchantment items are blocked too.
+        if (second.has(DataComponents.STORED_ENCHANTMENTS)) {
+            clearOutput(ci);
+            return;
+        }
+
+        // Vanilla uses a second copy both to repair durability and to transfer its
+        // enchantments. Enchantment Overhaul intentionally removes that operation.
+        if (!second.isEmpty() && second.is(first.getItem())) {
             clearOutput(ci);
             return;
         }
@@ -63,17 +74,16 @@ public abstract class AnvilScreenHandlerMixin extends ItemCombinerMenu {
         ItemStack result = first.copy();
         int restoreCost = tryRestoreSlot(first, second, result);
         int repairUnits = tryRepair(first, second, result);
-        boolean renamed = tryRename(first, result);
-        boolean changed = restoreCost > 0 || repairUnits > 0 || renamed;
 
-        if (!changed) {
-            clearOutput(ci);
-            return;
-        }
+        // Not a mod-handled operation: let vanilla and other mods handle renames
+        // and unrelated custom operations. Same-item combining was rejected above.
+        if (restoreCost <= 0 && repairUnits <= 0) return;
 
-        int unitsConsumed = repairUnits > 0 ? repairUnits : (restoreCost > 0 ? 1 : 0);
+        tryRename(first, result);
+
+        int unitsConsumed = repairUnits > 0 ? repairUnits : 1;
         this.repairItemCountCost = unitsConsumed;
-        this.onlyRenaming = unitsConsumed == 0;
+        this.onlyRenaming = false;
 
         result.remove(DataComponents.REPAIR_COST);
         this.cost.set(Math.max(1, restoreCost));
