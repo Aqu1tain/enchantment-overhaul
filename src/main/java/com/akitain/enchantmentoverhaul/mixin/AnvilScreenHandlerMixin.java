@@ -13,6 +13,7 @@ import net.minecraft.world.inventory.DataSlot;
 import net.minecraft.world.inventory.ItemCombinerMenu;
 import net.minecraft.world.inventory.ItemCombinerMenuSlotDefinition;
 import net.minecraft.world.inventory.MenuType;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -20,6 +21,7 @@ import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -31,6 +33,9 @@ public abstract class AnvilScreenHandlerMixin extends ItemCombinerMenu {
     @Shadow @Final private DataSlot cost;
     @Shadow private int repairItemCountCost;
     @Shadow private boolean onlyRenaming;
+
+    @Unique
+    private static final boolean EASY_ANVILS = FabricLoader.getInstance().isModLoaded("easyanvils");
 
     private AnvilScreenHandlerMixin(@Nullable MenuType<?> type, int syncId, Inventory playerInventory, ContainerLevelAccess context, ItemCombinerMenuSlotDefinition forgingSlotsManager) {
         super(type, syncId, playerInventory, context, forgingSlotsManager);
@@ -61,6 +66,10 @@ public abstract class AnvilScreenHandlerMixin extends ItemCombinerMenu {
             clearOutput(ci);
             return;
         }
+
+        // Easy Anvils owns its enhanced rename UI. Item-to-item combining remains
+        // blocked by Enchantment Overhaul, even when Easy Anvils is installed.
+        if (EASY_ANVILS && second.isEmpty()) return;
 
         ItemStack result = first.copy();
         int restoreCost = tryRestoreSlot(first, second, result);
