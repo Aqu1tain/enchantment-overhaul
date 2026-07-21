@@ -2,7 +2,7 @@
   <img src="docs/images/logo.png" alt="Enchantment Overhaul" width="600">
 </p>
 
-A Fabric mod for Minecraft 1.21.11 that rethinks the enchanting system.
+A Fabric mod for Minecraft 26.1.2 that rethinks the enchanting system.
 
 Vanilla enchanting mixes stat boosts with magical effects in a single RNG system. This mod separates everything into three distinct systems where every choice is deliberate:
 
@@ -24,6 +24,12 @@ See the [Wiki](https://github.com/Aqu1tain/enchantment-overhaul/wiki) for detail
 
 ## Requirements
 
-- Minecraft 1.21.11
-- Fabric Loader >= 0.18.4
+- Minecraft 26.1.2
+- Fabric Loader >= 0.18.6
 - Fabric API
+
+## Version support
+
+Enchantment Overhaul supports only the latest Minecraft version targeted by
+the `dev` branch, currently Minecraft 26.1.2. Older Minecraft versions do not
+receive backports, bug fixes, or compatibility updates.
