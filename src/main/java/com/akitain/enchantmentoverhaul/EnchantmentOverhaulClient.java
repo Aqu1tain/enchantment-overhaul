@@ -52,14 +52,16 @@ public class EnchantmentOverhaulClient implements ClientModInitializer {
     private static void addEnchantedBookSubtitle(ItemStack stack, java.util.List<Component> lines) {
         if (!stack.is(net.minecraft.world.item.Items.ENCHANTED_BOOK)) return;
         var enchantments = stack.get(net.minecraft.core.component.DataComponents.STORED_ENCHANTMENTS);
-        if (enchantments == null || enchantments.isEmpty()) return;
+        if (enchantments == null || enchantments.isEmpty() || lines.isEmpty()) return;
 
         for (var entry : enchantments.entrySet()) {
             String fullname = net.minecraft.world.item.enchantment.Enchantment.getFullname(entry.getKey(), entry.getIntValue()).getString();
-            lines.removeIf(line -> line.getString().equals(fullname));
+            for (int i = lines.size() - 1; i >= 1; i--) {
+                if (lines.get(i).getString().equals(fullname)) lines.remove(i);
+            }
         }
 
-        lines.add(1, Component.translatable("item.minecraft.enchanted_book").withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
+        lines.add(Math.min(1, lines.size()), Component.translatable("item.minecraft.enchanted_book").withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
     }
 
 }

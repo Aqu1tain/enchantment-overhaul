@@ -50,7 +50,9 @@ public class EnchantmentCosts {
             entry(ModEnchantments.LAST_STAND, Items.GOLDEN_APPLE),
             entry(ModEnchantments.CURSE_OF_FRAGILITY, Items.GLASS_PANE),
             entry(ModEnchantments.CURSE_OF_HUNGER, Items.ROTTEN_FLESH),
-            entry(ModEnchantments.VEIL, Items.FERMENTED_SPIDER_EYE)
+            entry(ModEnchantments.VEIL, Items.FERMENTED_SPIDER_EYE),
+            entry(ModEnchantments.BURNISHING, Items.HONEYCOMB),
+            entry(ModEnchantments.WRAITH, Items.PHANTOM_MEMBRANE)
     );
 
     private static final int[] XP_BY_LEVEL = {0, 2, 4, 7, 10};
@@ -82,5 +84,22 @@ public class EnchantmentCosts {
         if (entry.is(EnchantmentTags.CURSE)) return 0;
         if (entry.is(Enchantments.MENDING)) return 3;
         return level;
+    }
+
+    public static int slotCost(Holder<Enchantment> entry, int newLevel, int oldLevel) {
+        if (oldLevel <= 0) return slotCost(entry, newLevel);
+        if (entry.is(EnchantmentTags.CURSE)) return 0;
+        if (entry.is(Enchantments.MENDING)) return 0;
+        return Math.max(0, newLevel - oldLevel);
+    }
+
+    public static int reagentCost(int newLevel, int oldLevel, int normalBookshelves) {
+        if (oldLevel <= 0) return reagentCost(newLevel, normalBookshelves);
+        return Math.max(0, reagentCost(newLevel, normalBookshelves) - reagentCost(oldLevel, normalBookshelves));
+    }
+
+    public static int xpCost(ResourceKey<Enchantment> key, int newLevel, int oldLevel) {
+        if (oldLevel <= 0) return xpCost(key, newLevel);
+        return Math.max(0, xpCost(key, newLevel) - xpCost(key, oldLevel));
     }
 }

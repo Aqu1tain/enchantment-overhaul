@@ -34,9 +34,9 @@ public class EnchantedBookNameMixin {
         if (level > 1) {
             name.append(CommonComponents.SPACE).append(Component.translatable("enchantment.level." + level));
         }
-        name.append(Component.literal(" Book"));
+        MutableComponent bookName = Component.translatable("item.enchantment-overhaul.enchanted_book", name);
 
         ChatFormatting color = holder.is(EnchantmentTags.CURSE) ? ChatFormatting.RED : ChatFormatting.LIGHT_PURPLE;
-        cir.setReturnValue(name.withStyle(Style.EMPTY.withColor(color)));
+        cir.setReturnValue(bookName.withStyle(Style.EMPTY.withColor(color)));
     }
 }

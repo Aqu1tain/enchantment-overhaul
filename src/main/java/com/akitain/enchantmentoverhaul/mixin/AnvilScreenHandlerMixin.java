@@ -1,6 +1,7 @@
 package com.akitain.enchantmentoverhaul.mixin;
 
 import com.akitain.enchantmentoverhaul.component.ModComponents;
+import com.akitain.enchantmentoverhaul.enchant.LegendaryItems;
 import com.akitain.enchantmentoverhaul.enchant.SlotSystem;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -50,9 +51,14 @@ public abstract class AnvilScreenHandlerMixin extends ItemCombinerMenu {
             return;
         }
 
-        if (EASY_ANVILS && shouldDeferToEasyAnvils(first, second)) {
+        if (LegendaryItems.isLegendary(first)) {
+            clearOutput(ci);
             return;
         }
+
+        // Easy Anvils owns its enhanced rename UI. Item-to-item combining remains
+        // blocked by Enchantment Overhaul, even when Easy Anvils is installed.
+        if (EASY_ANVILS && second.isEmpty()) return;
 
         ItemStack result = first.copy();
         int restoreCost = tryRestoreSlot(first, second, result);
@@ -75,21 +81,10 @@ public abstract class AnvilScreenHandlerMixin extends ItemCombinerMenu {
         ci.cancel();
     }
 
-    @Unique
-    private boolean shouldDeferToEasyAnvils(ItemStack first, ItemStack second) {
-        if (second.isEmpty()) return true;
-        if (first.isValidRepairItem(second)) return false;
-        if (SlotSystem.getGrindstonePenalty(first) > 0 && second.is(getRepairIngot(first))) return false;
-        if (second.has(DataComponents.STORED_ENCHANTMENTS)) return false;
-        return true;
-    }
-
     private int tryRestoreSlot(ItemStack first, ItemStack second, ItemStack result) {
         int penalty = SlotSystem.getGrindstonePenalty(first);
         if (penalty <= 0 || second.isEmpty()) return 0;
-
-        Item repairIngot = getRepairIngot(first);
-        if (repairIngot == null || !second.is(repairIngot)) return 0;
+        if (!first.isValidRepairItem(second)) return 0;
 
         result.set(ModComponents.GRINDSTONE_PENALTY, penalty - 1);
         return getRestoreCost(first);

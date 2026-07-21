@@ -10,6 +10,9 @@
         "MobEntityMixin",
         "EnchantmentNameMixin",
         "EnchantedBookNameMixin",
+        "LegendaryNameMixin",
+        "LegendaryTooltipMixin",
+        "LegendaryMendingMixin",
         "ItemGroupsMixin",
         "EnchantingTableBlockMixin",
         "GrindstoneScreenHandlerMixin",
@@ -19,6 +22,7 @@
         "PlayerExhaustionMixin",
         "VeilDetectionMixin",
         "StepUpMixin",
+        "BurnishingMixin",
         "ArmorEquipMixin",
         "LootTableEnchantMixin",
         "RepairItemRecipeMixin",
@@ -28,6 +32,7 @@
         "ChiseledBookShelfBlockEntitySyncMixin"
     ],
     "client": [
+        "client.WraithMixin",
         "client.VeilNametagMixin",
         "client.EnchantingTableParticleMixin",
         "client.UpgradeOverlayMixin",
