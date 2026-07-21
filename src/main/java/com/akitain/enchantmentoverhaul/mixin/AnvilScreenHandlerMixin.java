@@ -48,8 +48,16 @@ public abstract class AnvilScreenHandlerMixin extends ItemCombinerMenu {
             return;
         }
 
-        // Enchanting stays exclusive to the Catalogue: never merge enchanted books on the anvil.
-        if (second.is(Items.ENCHANTED_BOOK)) {
+        // Enchanting stays exclusive to the Catalogue. Check the component rather
+        // than the vanilla item so modded stored-enchantment items are blocked too.
+        if (second.has(DataComponents.STORED_ENCHANTMENTS)) {
+            clearOutput(ci);
+            return;
+        }
+
+        // Vanilla uses a second copy both to repair durability and to transfer its
+        // enchantments. Enchantment Overhaul intentionally removes that operation.
+        if (!second.isEmpty() && second.is(first.getItem())) {
             clearOutput(ci);
             return;
         }
@@ -58,7 +66,8 @@ public abstract class AnvilScreenHandlerMixin extends ItemCombinerMenu {
         int restoreCost = tryRestoreSlot(first, second, result);
         int repairUnits = tryRepair(first, second, result);
 
-        // Not a mod-handled operation: let vanilla and other mods run (combine two items, modded/datapack repairs, rename).
+        // Not a mod-handled operation: let vanilla and other mods handle renames
+        // and unrelated custom operations. Same-item combining was rejected above.
         if (restoreCost <= 0 && repairUnits <= 0) return;
 
         tryRename(first, result);
@@ -76,9 +85,7 @@ public abstract class AnvilScreenHandlerMixin extends ItemCombinerMenu {
     private int tryRestoreSlot(ItemStack first, ItemStack second, ItemStack result) {
         int penalty = SlotSystem.getGrindstonePenalty(first);
         if (penalty <= 0 || second.isEmpty()) return 0;
-
-        Item repairIngot = getRepairIngot(first);
-        if (repairIngot == null || !second.is(repairIngot)) return 0;
+        if (!first.isValidRepairItem(second)) return 0;
 
         result.set(ModComponents.GRINDSTONE_PENALTY, penalty - 1);
         return getRestoreCost(first);
@@ -108,8 +115,7 @@ public abstract class AnvilScreenHandlerMixin extends ItemCombinerMenu {
     }
 
     private int tryRepair(ItemStack first, ItemStack second, ItemStack result) {
-        if (second.isEmpty() || !first.isDamageableItem()) return 0;
-        if (!first.isValidRepairItem(second) && !isCombineOnlyRepairItem(first, second)) return 0;
+        if (second.isEmpty() || !first.isDamageableItem() || !first.isValidRepairItem(second)) return 0;
 
         int repairPerUnit = first.getMaxDamage() / 4;
         int damage = first.getDamageValue();
@@ -123,25 +129,6 @@ public abstract class AnvilScreenHandlerMixin extends ItemCombinerMenu {
 
         result.setDamageValue(damage);
         return units;
-    }
-
-    // Items vanilla can only repair by combining two of them (no repair ingredient): give them a material repair
-    // so players don't have to sacrifice a second copy. Mending and vanilla combine still work too.
-    private static boolean isCombineOnlyRepairItem(ItemStack stack, ItemStack material) {
-        Item repairMaterial = combineOnlyRepairMaterial(stack.getItem());
-        return repairMaterial != null && material.is(repairMaterial);
-    }
-
-    private static Item combineOnlyRepairMaterial(Item item) {
-        if (item == Items.BOW
-                || item == Items.CROSSBOW
-                || item == Items.FISHING_ROD
-                || item == Items.CARROT_ON_A_STICK
-                || item == Items.WARPED_FUNGUS_ON_A_STICK) return Items.STRING;
-        if (item == Items.SHEARS || item == Items.FLINT_AND_STEEL) return Items.IRON_INGOT;
-        if (item == Items.BRUSH) return Items.COPPER_INGOT;
-        if (item == Items.TRIDENT) return Items.PRISMARINE_SHARD;
-        return null;
     }
 
     private boolean tryRename(ItemStack first, ItemStack result) {
