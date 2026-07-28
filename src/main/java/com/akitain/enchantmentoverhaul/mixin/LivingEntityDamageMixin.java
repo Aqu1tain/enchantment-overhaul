@@ -4,7 +4,6 @@ import com.akitain.enchantmentoverhaul.component.ModComponents;
 import com.akitain.enchantmentoverhaul.enchant.InnateMaterialProperties;
 import com.akitain.enchantmentoverhaul.enchant.ModEnchantments;
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
@@ -18,8 +17,10 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
 @Mixin(LivingEntity.class)
 public class LivingEntityDamageMixin {
 
-    @ModifyVariable(method = "actuallyHurt", at = @At("HEAD"), argsOnly = true, ordinal = 0)
-    private float applyCustomResistances(float amount, ServerLevel world, DamageSource source, float original) {
+    // Target getDamageAfterArmorAbsorb, not actuallyHurt: Player overrides actuallyHurt without calling super,
+    // so injecting there never runs for players. Both Player and LivingEntity route through this shared method.
+    @ModifyVariable(method = "getDamageAfterArmorAbsorb", at = @At("HEAD"), argsOnly = true, ordinal = 0)
+    private float applyCustomResistances(float amount, DamageSource source, float damage) {
         LivingEntity self = (LivingEntity) (Object) this;
         float result = amount * InnateMaterialProperties.getDamageMultiplier(self, source);
         result *= getWardingMultiplier(self);
