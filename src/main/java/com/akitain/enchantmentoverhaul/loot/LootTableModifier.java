@@ -1,5 +1,6 @@
 package com.akitain.enchantmentoverhaul.loot;
 
+import com.akitain.enchantmentoverhaul.EnchantmentOverhaul;
 import com.akitain.enchantmentoverhaul.enchant.ModEnchantments;
 import com.akitain.enchantmentoverhaul.smithing.SmithingTemplates;
 import net.fabricmc.fabric.api.loot.v3.LootTableEvents;
@@ -67,7 +68,8 @@ public class LootTableModifier {
             new StructureLoot("chests/abandoned_mineshaft", 75, 12, List.of(
                     Enchantments.SILK_TOUCH, Enchantments.FORTUNE, ModEnchantments.BURNISHING)),
             new StructureLoot("chests/pillager_outpost", 75, 6, List.of(
-                    Enchantments.MULTISHOT, Enchantments.PIERCING, Enchantments.QUICK_CHARGE, Enchantments.SWEEPING_EDGE, Enchantments.PUNCH)),
+                    Enchantments.MULTISHOT, Enchantments.PIERCING, Enchantments.QUICK_CHARGE, Enchantments.SWEEPING_EDGE, Enchantments.PUNCH,
+                    ModEnchantments.PARRY)),
 
             // Hard (35% chance)
             new StructureLoot("chests/buried_treasure", 65, 17, List.of(
@@ -95,9 +97,11 @@ public class LootTableModifier {
             new StructureLoot("chests/ancient_city", 50, 17, List.of(
                     ModEnchantments.VEIL, ModEnchantments.WRAITH, Enchantments.SWIFT_SNEAK, Enchantments.BINDING_CURSE)),
             new StructureLoot("chests/trial_chambers/reward_rare", 50, 12, List.of(
-                    Enchantments.WIND_BURST, Enchantments.BREACH, Enchantments.LUNGE, ModEnchantments.LAST_STAND)),
+                    Enchantments.WIND_BURST, Enchantments.BREACH, Enchantments.LUNGE, ModEnchantments.LAST_STAND,
+                    ModEnchantments.PARRY)),
             new StructureLoot("chests/trial_chambers/reward_ominous_rare", 50, 12, List.of(
-                    Enchantments.WIND_BURST, Enchantments.BREACH, Enchantments.LUNGE, ModEnchantments.LAST_STAND)),
+                    Enchantments.WIND_BURST, Enchantments.BREACH, Enchantments.LUNGE, ModEnchantments.LAST_STAND,
+                    ModEnchantments.PARRY)),
             new StructureLoot("chests/end_city_treasure", 50, 50, List.of(
                     Enchantments.MENDING))
     );
@@ -125,7 +129,10 @@ public class LootTableModifier {
 
     public static void register() {
         LootTableEvents.MODIFY.register((key, tableBuilder, source, registries) -> {
-            if (!source.isBuiltin()) return;
+            // Vanilla ships several structure chests through a built-in datapack (mineshaft, ancient city,
+            // desert pyramid, jungle temple, pillager outpost). Skipping non-builtin sources silently dropped
+            // this mod's books and templates from those structures, so we only skip tables we ourselves replace.
+            if (key.identifier().getNamespace().equals(EnchantmentOverhaul.MOD_ID)) return;
 
             String path = key.identifier().getPath();
             HolderLookup<Enchantment> enchantmentRegistry = registries.lookupOrThrow(Registries.ENCHANTMENT);
