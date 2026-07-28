@@ -13,7 +13,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(LivingEntity.class)
 public class ArmorEquipMixin {
 
-    @Inject(method = "onEquipItem", at = @At("TAIL"))
+    // HEAD, not TAIL: vanilla's body is wrapped in early-out conditions (sound/game-event gating), so a TAIL
+    // injection never runs for a plain armor swap and the advancement was never granted.
+    @Inject(method = "onEquipItem", at = @At("HEAD"))
     private void onArmorChanged(EquipmentSlot slot, ItemStack oldStack, ItemStack newStack, CallbackInfo ci) {
         if (!slot.isArmor()) return;
         if ((Object) this instanceof ServerPlayer player) {
