@@ -47,7 +47,7 @@ public class UpgradeCommand {
             return 0;
         }
 
-        if (!type.appliesTo(stack)) {
+        if (!type.appliesTo(stack, source.getLevel())) {
             source.sendFailure(Component.literal(typeName(type) + " cannot be applied to this item."));
             return 0;
         }
