@@ -44,7 +44,7 @@ public abstract class SmithingScreenHandlerMixin extends ItemCombinerMenu {
 
         int level = SmithingTemplates.getMaterialLevel(material.getItem());
         if (level == 0) return;
-        if (!type.appliesTo(base)) {
+        if (!type.appliesTo(base, this.player.level())) {
             this.resultSlots.setItem(0, ItemStack.EMPTY);
             return;
         }

@@ -64,7 +64,7 @@ public class MobEntityMixin {
             ItemStack stack = self.getItemBySlot(slot);
             List<UpgradeType> applicable = new ArrayList<>();
             for (UpgradeType type : UpgradeType.values()) {
-                if (type.appliesTo(stack)) applicable.add(type);
+                if (type.appliesTo(stack, world.getLevel())) applicable.add(type);
             }
             if (!applicable.isEmpty()) {
                 UpgradeType upgrade = applicable.get(random.nextInt(applicable.size()));

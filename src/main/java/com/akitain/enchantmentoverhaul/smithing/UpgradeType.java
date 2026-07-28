@@ -1,6 +1,7 @@
 package com.akitain.enchantmentoverhaul.smithing;
 
 import com.akitain.enchantmentoverhaul.component.ModComponents;
+import com.akitain.enchantmentoverhaul.gamerule.ModGameRules;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.component.DataComponents;
@@ -13,6 +14,9 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.ItemAttributeModifiers;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.Level;
+import org.jetbrains.annotations.Nullable;
 
 public enum UpgradeType {
     HONING(ModComponents.HONING_LEVEL),
@@ -31,14 +35,26 @@ public enum UpgradeType {
     }
 
     public boolean appliesTo(ItemStack stack) {
+        return appliesTo(stack, null);
+    }
+
+    public boolean appliesTo(ItemStack stack, @Nullable Level level) {
         return switch (this) {
-            case HONING -> stack.is(ItemTags.WEAPON_ENCHANTABLE)
+            case HONING -> (stack.is(ItemTags.WEAPON_ENCHANTABLE)
                     || stack.is(ItemTags.BOW_ENCHANTABLE)
-                    || stack.is(ItemTags.CROSSBOW_ENCHANTABLE);
+                    || stack.is(ItemTags.CROSSBOW_ENCHANTABLE))
+                    && (honingOnAxes(level) || !stack.is(ItemTags.AXES));
             case WARDING -> stack.is(ItemTags.ARMOR_ENCHANTABLE);
             case TEMPERING -> stack.is(ItemTags.DURABILITY_ENCHANTABLE);
             case GRINDING -> stack.is(ItemTags.MINING_ENCHANTABLE);
         };
+    }
+
+    // Game rules only exist server-side; the client stays permissive and the server's result sync corrects it.
+    private static boolean honingOnAxes(@Nullable Level level) {
+        if (ModGameRules.HONING_ON_AXES == null) return true;
+        if (!(level instanceof ServerLevel serverLevel)) return true;
+        return serverLevel.getGameRules().get(ModGameRules.HONING_ON_AXES);
     }
 
     public int currentLevel(ItemStack stack) {
