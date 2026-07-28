@@ -1,6 +1,7 @@
 package com.akitain.enchantmentoverhaul.mixin;
 
 import com.akitain.enchantmentoverhaul.enchant.BookshelfScanner;
+import com.akitain.enchantmentoverhaul.gamerule.ModGameRules;
 import com.akitain.enchantmentoverhaul.enchant.CatalogueData;
 import com.akitain.enchantmentoverhaul.enchant.CatalogueScreenHandler;
 import com.akitain.enchantmentoverhaul.enchant.ModAdvancements;
@@ -44,6 +45,7 @@ public class EnchantingTableBlockMixin {
                 .map(ResourceKey::identifier)
                 .toList();
         int bookshelves = scan.normalBookshelves();
+        boolean xpCostEnabled = serverPlayer.level().getGameRules().get(ModGameRules.ENCHANTING_XP_COST);
         ModAdvancements.checkEndgameBooks(serverPlayer, scan.unlocked());
         Component title = world.getBlockEntity(pos) instanceof EnchantingTableBlockEntity entity
                 ? entity.getDisplayName()
@@ -52,7 +54,7 @@ public class EnchantingTableBlockMixin {
         serverPlayer.openMenu(new ExtendedMenuProvider<CatalogueData>() {
             @Override
             public CatalogueData getScreenOpeningData(ServerPlayer p) {
-                return new CatalogueData(unlocked, bookshelves);
+                return new CatalogueData(unlocked, bookshelves, xpCostEnabled);
             }
 
             @Override
@@ -62,7 +64,7 @@ public class EnchantingTableBlockMixin {
 
             @Override
             public AbstractContainerMenu createMenu(int syncId, Inventory inv, Player p) {
-                return new CatalogueScreenHandler(syncId, inv, ContainerLevelAccess.create(world, pos), unlocked, bookshelves);
+                return new CatalogueScreenHandler(syncId, inv, ContainerLevelAccess.create(world, pos), unlocked, bookshelves, xpCostEnabled);
             }
         });
 

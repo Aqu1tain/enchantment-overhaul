@@ -43,23 +43,25 @@ public class CatalogueScreenHandler extends AbstractContainerMenu {
     private final RegistryAccess registryManager;
     private final Set<Identifier> unlockedIds;
     private final int normalBookshelves;
+    private final boolean xpCostEnabled;
 
     private List<CatalogueEntry> entries = List.of();
     private int selectedIndex = -1;
     private int selectedLevel = 1;
 
     public static CatalogueScreenHandler fromData(int syncId, Inventory playerInventory, CatalogueData data) {
-        return new CatalogueScreenHandler(syncId, playerInventory, ContainerLevelAccess.NULL, data.unlocked(), data.normalBookshelves());
+        return new CatalogueScreenHandler(syncId, playerInventory, ContainerLevelAccess.NULL, data.unlocked(), data.normalBookshelves(), data.xpCostEnabled());
     }
 
     public CatalogueScreenHandler(int syncId, Inventory playerInventory, ContainerLevelAccess context,
-                                   List<Identifier> unlocked, int normalBookshelves) {
+                                   List<Identifier> unlocked, int normalBookshelves, boolean xpCostEnabled) {
         super(ModScreenHandlers.CATALOGUE, syncId);
         this.context = context;
         this.player = playerInventory.player;
         this.registryManager = playerInventory.player.registryAccess();
         this.unlockedIds = Set.copyOf(unlocked);
         this.normalBookshelves = normalBookshelves;
+        this.xpCostEnabled = xpCostEnabled;
 
         this.addSlot(new Slot(this.inputInventory, 0, 9, 60) {
             @Override
@@ -195,7 +197,7 @@ public class CatalogueScreenHandler extends AbstractContainerMenu {
         ResourceKey<Enchantment> key = entry.key();
         return reagent.is(EnchantmentCosts.reagent(key))
                 && reagent.getCount() >= EnchantmentCosts.reagentCost(level, entry.currentLevel(), normalBookshelves)
-                && this.player.experienceLevel >= EnchantmentCosts.xpCost(key, level, entry.currentLevel());
+                && (!xpCostEnabled || this.player.experienceLevel >= EnchantmentCosts.xpCost(key, level, entry.currentLevel()));
     }
 
     private boolean canTakeOutput(Player player) {
@@ -217,7 +219,7 @@ public class CatalogueScreenHandler extends AbstractContainerMenu {
 
         if (!player.isCreative()) {
             inputInventory.getItem(1).shrink(EnchantmentCosts.reagentCost(level, entry.currentLevel(), normalBookshelves));
-            player.giveExperienceLevels(-EnchantmentCosts.xpCost(key, level, entry.currentLevel()));
+            if (xpCostEnabled) player.giveExperienceLevels(-EnchantmentCosts.xpCost(key, level, entry.currentLevel()));
         }
 
         inputInventory.setItem(0, ItemStack.EMPTY);
@@ -274,6 +276,8 @@ public class CatalogueScreenHandler extends AbstractContainerMenu {
     public int getSelectedIndex() { return selectedIndex; }
     public int getSelectedLevel() { return selectedLevel; }
     public int getNormalBookshelves() { return normalBookshelves; }
+
+    public boolean isXpCostEnabled() { return xpCostEnabled; }
     public Set<Identifier> getUnlockedIds() { return unlockedIds; }
 
     public void setSelection(int index, int level) {

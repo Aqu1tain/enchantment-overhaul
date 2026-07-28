@@ -224,7 +224,8 @@ public class CatalogueScreen extends AbstractContainerScreen<CatalogueScreenHand
         int xpCost = EnchantmentCosts.xpCost(entry.key(), level, entry.currentLevel());
         int playerXp = Minecraft.getInstance().player.experienceLevel;
 
-        return reagent.is(reagentItem) && reagent.getCount() >= reagentCost && playerXp >= xpCost;
+        return reagent.is(reagentItem) && reagent.getCount() >= reagentCost
+                && (!menu.isXpCostEnabled() || playerXp >= xpCost);
     }
 
     private boolean isAnyLevelAffordable(CatalogueEntry entry) {
@@ -335,12 +336,12 @@ public class CatalogueScreen extends AbstractContainerScreen<CatalogueScreenHand
         tooltip.add(Component.literal(entry.entry().value().description().getString() + levelLabel)
                 .withStyle(entry.entry().is(EnchantmentTags.CURSE) ? ChatFormatting.RED : ChatFormatting.LIGHT_PURPLE));
         tooltip.add(Component.empty());
-        tooltip.add(costLine(new ItemStack(reagentItem).getHoverName().getString(), reagentCost, hasReagent));
-        tooltip.add(costLine("XP Levels", xpCost, hasXp));
+        tooltip.add(costLine(new ItemStack(reagentItem).getHoverName(), reagentCost, hasReagent));
+        if (menu.isXpCostEnabled()) tooltip.add(costLine(label("xp_levels"), xpCost, hasXp));
         if (slotCost > 0) {
-            tooltip.add(costLine("Slots", slotCost, hasSlots));
+            tooltip.add(costLine(label("slots"), slotCost, hasSlots));
         } else {
-            tooltip.add(Component.literal("Slots: ").withStyle(ChatFormatting.GRAY)
+            tooltip.add(Component.translatable("screen.enchantment-overhaul.catalogue.cost", label("slots")).withStyle(ChatFormatting.GRAY)
                     .append(Component.literal("+1").withStyle(ChatFormatting.GREEN)));
         }
 
@@ -348,17 +349,22 @@ public class CatalogueScreen extends AbstractContainerScreen<CatalogueScreenHand
             int pct = (int) (EnchantmentCosts.baseReagentCost(level) > 0
                     ? (1.0 - (double) reagentCost / EnchantmentCosts.baseReagentCost(level)) * 100 : 0);
             tooltip.add(Component.empty());
-            tooltip.add(Component.literal("Bookshelves: " + menu.getNormalBookshelves() + " (-" + pct + "% reagent)")
+            tooltip.add(Component.translatable("screen.enchantment-overhaul.catalogue.bookshelves",
+                            menu.getNormalBookshelves(), pct)
                     .withStyle(ChatFormatting.DARK_GRAY));
         }
 
         gfx.setComponentTooltipForNextFrame(font, tooltip, mx, my);
     }
 
-    private Component costLine(String label, int amount, boolean has) {
+    private Component costLine(Component label, int amount, boolean has) {
         ChatFormatting color = has ? ChatFormatting.GREEN : ChatFormatting.RED;
-        return Component.literal(label + ": ").withStyle(ChatFormatting.GRAY)
+        return Component.translatable("screen.enchantment-overhaul.catalogue.cost", label).withStyle(ChatFormatting.GRAY)
                 .append(Component.literal(String.valueOf(amount)).withStyle(color));
+    }
+
+    private static Component label(String key) {
+        return Component.translatable("screen.enchantment-overhaul.catalogue." + key);
     }
 
     private void drawScrollbar(GuiGraphicsExtractor gfx, int sx, int sy, int sh) {
