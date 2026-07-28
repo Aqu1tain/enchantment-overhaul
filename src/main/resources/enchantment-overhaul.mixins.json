@@ -19,6 +19,8 @@
         "SmithingScreenHandlerMixin",
         "ItemStackDamageMixin",
         "LivingEntityDamageMixin",
+        "HoningProjectileMixin",
+        "AbstractArrowBaseDamageAccessor",
         "PlayerExhaustionMixin",
         "VeilDetectionMixin",
         "StepUpMixin",

@@ -63,6 +63,11 @@ public enum UpgradeType {
         return cappedLevel <= 0 ? 0.0 : 1.0 + (cappedLevel - 1) * 0.5;
     }
 
+    // Bonus base damage honing grants to a fired arrow. Matches vanilla Power (disabled here), which honing replaces.
+    public static double honingBonus(int level) {
+        return sharpnessBonus(level);
+    }
+
     private static double efficiencyBonus(int level) {
         int cappedLevel = Math.min(level, 5);
         return cappedLevel <= 0 ? 0.0 : cappedLevel * cappedLevel + 1.0;
