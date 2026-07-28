@@ -82,7 +82,7 @@ public class UpgradeOverlayMixin {
         return switch (mat) {
             case "copper" -> "copper";
             case "iron" -> "iron";
-            case "gold" -> "gold";
+            case "gold", "rose_gold" -> "gold";
             case "diamond" -> "diamond";
             case "netherite" -> "netherite";
             case "leather" -> "leather";
