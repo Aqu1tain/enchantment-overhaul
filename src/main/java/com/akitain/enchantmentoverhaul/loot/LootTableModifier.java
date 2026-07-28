@@ -68,7 +68,8 @@ public class LootTableModifier {
             new StructureLoot("chests/abandoned_mineshaft", 75, 12, List.of(
                     Enchantments.SILK_TOUCH, Enchantments.FORTUNE, ModEnchantments.BURNISHING)),
             new StructureLoot("chests/pillager_outpost", 75, 6, List.of(
-                    Enchantments.MULTISHOT, Enchantments.PIERCING, Enchantments.QUICK_CHARGE, Enchantments.SWEEPING_EDGE, Enchantments.PUNCH)),
+                    Enchantments.MULTISHOT, Enchantments.PIERCING, Enchantments.QUICK_CHARGE, Enchantments.SWEEPING_EDGE, Enchantments.PUNCH,
+                    ModEnchantments.PARRY)),
 
             // Hard (35% chance)
             new StructureLoot("chests/buried_treasure", 65, 17, List.of(
@@ -96,9 +97,11 @@ public class LootTableModifier {
             new StructureLoot("chests/ancient_city", 50, 17, List.of(
                     ModEnchantments.VEIL, ModEnchantments.WRAITH, Enchantments.SWIFT_SNEAK, Enchantments.BINDING_CURSE)),
             new StructureLoot("chests/trial_chambers/reward_rare", 50, 12, List.of(
-                    Enchantments.WIND_BURST, Enchantments.BREACH, Enchantments.LUNGE, ModEnchantments.LAST_STAND)),
+                    Enchantments.WIND_BURST, Enchantments.BREACH, Enchantments.LUNGE, ModEnchantments.LAST_STAND,
+                    ModEnchantments.PARRY)),
             new StructureLoot("chests/trial_chambers/reward_ominous_rare", 50, 12, List.of(
-                    Enchantments.WIND_BURST, Enchantments.BREACH, Enchantments.LUNGE, ModEnchantments.LAST_STAND)),
+                    Enchantments.WIND_BURST, Enchantments.BREACH, Enchantments.LUNGE, ModEnchantments.LAST_STAND,
+                    ModEnchantments.PARRY)),
             new StructureLoot("chests/end_city_treasure", 50, 50, List.of(
                     Enchantments.MENDING))
     );

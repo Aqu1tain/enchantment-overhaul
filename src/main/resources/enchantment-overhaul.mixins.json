@@ -19,6 +19,7 @@
         "SmithingScreenHandlerMixin",
         "ItemStackDamageMixin",
         "LivingEntityDamageMixin",
+        "ParryMixin",
         "HoningProjectileMixin",
         "AbstractArrowBaseDamageAccessor",
         "PlayerExhaustionMixin",

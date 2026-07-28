@@ -1,0 +1,21 @@
+{
+    "anvil_cost": 4,
+    "description": {
+        "translate": "enchantment.enchantment-overhaul.parry"
+    },
+    "effects": {},
+    "max_cost": {
+        "base": 30,
+        "per_level_above_first": 0
+    },
+    "max_level": 1,
+    "min_cost": {
+        "base": 15,
+        "per_level_above_first": 0
+    },
+    "slots": [
+        "hand"
+    ],
+    "supported_items": "minecraft:shield",
+    "weight": 2
+}
