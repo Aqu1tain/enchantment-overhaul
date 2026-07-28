@@ -28,7 +28,12 @@ public class InnateMaterialProperties {
     }
 
     public static String getMaterial(ItemStack stack) {
-        String id = BuiltInRegistries.ITEM.getKey(stack.getItem()).getPath();
+        var key = BuiltInRegistries.ITEM.getKey(stack.getItem());
+        String id = key.getPath();
+
+        // Additional Additions rose gold armor: a gold alloy, given diamond-style explosion resistance.
+        if (key.getNamespace().equals("additionaladditions") && id.startsWith("rose_gold_")) return "rose_gold";
+
         if (id.startsWith("netherite_")) return "netherite";
         if (id.startsWith("diamond_")) return "diamond";
         if (id.startsWith("golden_")) return "gold";
@@ -42,6 +47,7 @@ public class InnateMaterialProperties {
     public static boolean resists(String material, DamageSource source) {
         return switch (material) {
             case "netherite" -> source.is(DamageTypeTags.IS_FIRE);
+            case "rose_gold" -> source.is(DamageTypeTags.IS_EXPLOSION);
             case "copper" -> isPoisonOrEffect(source);
             case "iron" -> source.is(DamageTypeTags.IS_PROJECTILE);
             case "diamond" -> source.is(DamageTypeTags.IS_EXPLOSION);
@@ -66,6 +72,7 @@ public class InnateMaterialProperties {
     public static String getResistanceName(String material) {
         return switch (material) {
             case "netherite" -> "Fire Resistance";
+            case "rose_gold" -> "Explosion Resistance";
             case "copper" -> "Poison Resistance";
             case "iron" -> "Projectile Resistance";
             case "diamond" -> "Explosion Resistance";
