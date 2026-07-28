@@ -25,11 +25,18 @@ jobs:
           chmod +x gradlew
           ./gradlew build
 
+      # On a real release use the tag; on a manual dispatch fall back to the version in gradle.properties
+      # so the Modrinth version is never named after the branch.
       - name: Resolve version
         id: ver
-        run: echo "value=${TAG#v}" >> "$GITHUB_OUTPUT"
+        run: |
+          if [ -n "$TAG" ]; then
+            echo "value=${TAG#v}" >> "$GITHUB_OUTPUT"
+          else
+            echo "value=$(grep '^mod_version=' gradle.properties | cut -d= -f2)-beta+26.1" >> "$GITHUB_OUTPUT"
+          fi
         env:
-          TAG: ${{ github.event.release.tag_name || github.ref_name }}
+          TAG: ${{ github.event.release.tag_name }}
 
       - uses: Kir-Antipov/mc-publish@v3.3
         with:
