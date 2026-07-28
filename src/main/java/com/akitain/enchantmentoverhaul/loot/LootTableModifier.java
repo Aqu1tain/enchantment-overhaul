@@ -131,7 +131,7 @@ public class LootTableModifier {
         LootTableEvents.MODIFY.register((key, tableBuilder, source, registries) -> {
             // Vanilla ships several structure chests through a built-in datapack (mineshaft, ancient city,
             // desert pyramid, jungle temple, pillager outpost). Skipping non-builtin sources silently dropped
-            // this mod's books and templates from those structures, so we only skip tables we ourselves replace.
+            // this mod's books and templates from those structures, so only our own tables are skipped here.
             if (key.identifier().getNamespace().equals(EnchantmentOverhaul.MOD_ID)) return;
 
             String path = key.identifier().getPath();
