@@ -54,5 +54,12 @@
   "advancements.enchantment-overhaul.jack_of_all_trades.title": "Touche-à-tout",
   "advancements.enchantment-overhaul.jack_of_all_trades.description": "Applique Affûtage, Blindage, Trempe et Meulage",
   "advancements.enchantment-overhaul.walking_fortress.title": "Forteresse Ambulante",
-  "advancements.enchantment-overhaul.walking_fortress.description": "Porte un équipement complet avec Blindage V"
+  "advancements.enchantment-overhaul.walking_fortress.description": "Porte un équipement complet avec Blindage V",
+  "screen.enchantment-overhaul.catalogue.cost": "%s : ",
+  "screen.enchantment-overhaul.catalogue.xp_levels": "Niveaux d'XP",
+  "screen.enchantment-overhaul.catalogue.slots": "Emplacements",
+  "screen.enchantment-overhaul.catalogue.bookshelves": "Bibliothèques : %s (-%s%% de réactif)",
+  "gamerule.enchantment-overhaul.mob_gear_enchantments": "Enchanter l'équipement des monstres",
+  "gamerule.enchantment-overhaul.honing_on_axes": "Autoriser l'Affûtage sur les haches",
+  "gamerule.enchantment-overhaul.enchanting_xp_cost": "L'enchantement coûte des niveaux d'XP"
 }

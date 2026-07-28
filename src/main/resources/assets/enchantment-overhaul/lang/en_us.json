@@ -54,5 +54,12 @@
   "advancements.enchantment-overhaul.jack_of_all_trades.title": "Jack of All Trades",
   "advancements.enchantment-overhaul.jack_of_all_trades.description": "Apply Honing, Warding, Tempering, and Grinding",
   "advancements.enchantment-overhaul.walking_fortress.title": "Walking Fortress",
-  "advancements.enchantment-overhaul.walking_fortress.description": "Wear a full set of Warding V armor"
+  "advancements.enchantment-overhaul.walking_fortress.description": "Wear a full set of Warding V armor",
+  "screen.enchantment-overhaul.catalogue.cost": "%s: ",
+  "screen.enchantment-overhaul.catalogue.xp_levels": "XP Levels",
+  "screen.enchantment-overhaul.catalogue.slots": "Slots",
+  "screen.enchantment-overhaul.catalogue.bookshelves": "Bookshelves: %s (-%s%% reagent)",
+  "gamerule.enchantment-overhaul.mob_gear_enchantments": "Enchant mob equipment",
+  "gamerule.enchantment-overhaul.honing_on_axes": "Allow Honing on axes",
+  "gamerule.enchantment-overhaul.enchanting_xp_cost": "Enchanting costs XP levels"
 }
