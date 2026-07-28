@@ -1,5 +1,6 @@
 package com.akitain.enchantmentoverhaul.loot;
 
+import com.akitain.enchantmentoverhaul.EnchantmentOverhaul;
 import com.akitain.enchantmentoverhaul.enchant.ModEnchantments;
 import com.akitain.enchantmentoverhaul.smithing.SmithingTemplates;
 import net.fabricmc.fabric.api.loot.v3.LootTableEvents;
@@ -125,7 +126,10 @@ public class LootTableModifier {
 
     public static void register() {
         LootTableEvents.MODIFY.register((key, tableBuilder, source, registries) -> {
-            if (!source.isBuiltin()) return;
+            // Vanilla ships several structure chests through a built-in datapack (mineshaft, ancient city,
+            // desert pyramid, jungle temple, pillager outpost). Skipping non-builtin sources silently dropped
+            // this mod's books and templates from those structures, so only our own tables are skipped here.
+            if (key.identifier().getNamespace().equals(EnchantmentOverhaul.MOD_ID)) return;
 
             String path = key.identifier().getPath();
             HolderLookup<Enchantment> enchantmentRegistry = registries.lookupOrThrow(Registries.ENCHANTMENT);
