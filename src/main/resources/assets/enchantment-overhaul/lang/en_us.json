@@ -63,5 +63,5 @@
   "gamerule.enchantment-overhaul.honing_on_axes": "Allow Honing on axes",
   "gamerule.enchantment-overhaul.enchanting_xp_cost": "Enchanting costs XP levels",
   "enchantment.enchantment-overhaul.parry": "Parry",
-  "enchantment.enchantment-overhaul.parry.desc": "On a successful block, knocks the attacker back and spares the shield any durability damage."
+  "enchantment.enchantment-overhaul.parry.desc": "Block just as the blow lands to knock the attacker back and take no durability damage."
 }

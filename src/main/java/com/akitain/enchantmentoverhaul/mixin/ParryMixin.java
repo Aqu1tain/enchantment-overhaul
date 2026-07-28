@@ -18,23 +18,41 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-// Parry: blocking with an enchanted shield pushes the attacker away and costs the shield no durability.
+// Parry: blocking within a short window right after raising an enchanted shield pushes the attacker
+// away and costs the shield no durability. Holding the shield up past the window blocks as usual.
 @Mixin(LivingEntity.class)
 public abstract class ParryMixin {
 
+    @Unique
+    private static final int PARRY_WINDOW_TICKS = 10;
+    @Unique
+    private static final double PARRY_KNOCKBACK = 1.0;
+
     @Shadow @Nullable public abstract ItemStack getItemBlockingWith();
+
+    @Shadow public abstract int getTicksUsingItem();
 
     @Inject(method = "blockUsingItem", at = @At("HEAD"))
     private void eoParryKnockback(ServerLevel level, LivingEntity attacker, CallbackInfo ci) {
+        if (!isParrying(getItemBlockingWith())) return;
         LivingEntity defender = (LivingEntity) (Object) this;
-        if (parryLevel(getItemBlockingWith()) <= 0) return;
-        attacker.knockback(0.5, defender.getX() - attacker.getX(), defender.getZ() - attacker.getZ());
+        attacker.knockback(PARRY_KNOCKBACK, defender.getX() - attacker.getX(), defender.getZ() - attacker.getZ());
     }
 
     @WrapWithCondition(method = "applyItemBlocking",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/component/BlocksAttacks;hurtBlockingItem(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/InteractionHand;F)V"))
     private boolean eoParrySkipDurability(BlocksAttacks blocksAttacks, Level level, ItemStack item, LivingEntity user, InteractionHand hand, float damage) {
-        return parryLevel(item) <= 0;
+        return !isParrying(item);
+    }
+
+    // The window opens once the shield actually starts blocking and lasts PARRY_WINDOW_TICKS.
+    @Unique
+    private boolean isParrying(@Nullable ItemStack stack) {
+        if (parryLevel(stack) <= 0) return false;
+        BlocksAttacks blocksAttacks = stack.get(DataComponents.BLOCKS_ATTACKS);
+        if (blocksAttacks == null) return false;
+        int heldFor = getTicksUsingItem();
+        return heldFor <= blocksAttacks.blockDelayTicks() + PARRY_WINDOW_TICKS;
     }
 
     @Unique

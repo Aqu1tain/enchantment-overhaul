@@ -63,5 +63,5 @@
   "gamerule.enchantment-overhaul.honing_on_axes": "Autoriser l'Affûtage sur les haches",
   "gamerule.enchantment-overhaul.enchanting_xp_cost": "L'enchantement coûte des niveaux d'XP",
   "enchantment.enchantment-overhaul.parry": "Parade",
-  "enchantment.enchantment-overhaul.parry.desc": "Sur un blocage réussi, repousse l'attaquant et épargne toute perte de durabilité au bouclier."
+  "enchantment.enchantment-overhaul.parry.desc": "Bloquez juste au moment de l'impact pour repousser l'attaquant sans perdre de durabilité."
 }
