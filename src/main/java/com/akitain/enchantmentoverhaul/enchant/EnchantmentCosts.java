@@ -52,7 +52,8 @@ public class EnchantmentCosts {
             entry(ModEnchantments.CURSE_OF_HUNGER, Items.ROTTEN_FLESH),
             entry(ModEnchantments.VEIL, Items.FERMENTED_SPIDER_EYE),
             entry(ModEnchantments.BURNISHING, Items.HONEYCOMB),
-            entry(ModEnchantments.WRAITH, Items.PHANTOM_MEMBRANE)
+            entry(ModEnchantments.WRAITH, Items.PHANTOM_MEMBRANE),
+            entry(ModEnchantments.PARRY, Items.IRON_BARS)
     );
 
     private static final int[] XP_BY_LEVEL = {0, 2, 4, 7, 10};

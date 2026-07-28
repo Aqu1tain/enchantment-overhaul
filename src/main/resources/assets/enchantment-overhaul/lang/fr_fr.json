@@ -61,5 +61,7 @@
   "screen.enchantment-overhaul.catalogue.bookshelves": "Bibliothèques : %s (-%s%% de réactif)",
   "gamerule.enchantment-overhaul.mob_gear_enchantments": "Enchanter l'équipement des monstres",
   "gamerule.enchantment-overhaul.honing_on_axes": "Autoriser l'Affûtage sur les haches",
-  "gamerule.enchantment-overhaul.enchanting_xp_cost": "L'enchantement coûte des niveaux d'XP"
+  "gamerule.enchantment-overhaul.enchanting_xp_cost": "L'enchantement coûte des niveaux d'XP",
+  "enchantment.enchantment-overhaul.parry": "Parade",
+  "enchantment.enchantment-overhaul.parry.desc": "Sur un blocage réussi, repousse l'attaquant et épargne toute perte de durabilité au bouclier."
 }
