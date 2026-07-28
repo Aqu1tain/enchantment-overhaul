@@ -42,6 +42,8 @@ jobs:
         with:
           modrinth-id: iPA46eKp
           modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
+          # The token only needs "Create versions"; skip unfeaturing older versions (which needs write scope).
+          modrinth-unfeature-mode: none
           files: build/libs/!(*-sources).jar
           name: Enchantment Overhaul ${{ steps.ver.outputs.value }}
           version: ${{ steps.ver.outputs.value }}
