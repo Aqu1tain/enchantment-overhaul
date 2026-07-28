@@ -22,3 +22,6 @@ logs/
 .DS_Store
 Thumbs.db
 cfr-0.152.jar
+
+# Local working notes
+cahier-des-charges-*.txt
