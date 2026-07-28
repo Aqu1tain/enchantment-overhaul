@@ -31,7 +31,7 @@
         "RaidEnchantmentMixin",
         "FarmlandTrampleMixin",
         "StrongholdLibraryMixin",
-        "ChiseledBookShelfBlockEntitySyncMixin"
+        "BlockEntitySyncMixin"
     ],
     "client": [
         "client.WraithMixin",
