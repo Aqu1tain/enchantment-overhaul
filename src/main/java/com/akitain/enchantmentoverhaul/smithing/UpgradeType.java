@@ -41,16 +41,22 @@ public enum UpgradeType {
         return appliesTo(stack, null);
     }
 
+    // Eligibility is data-driven: add items to the matching enchantment-overhaul:upgradeable tag.
+    // The shipped tags point at the vanilla enchantable tags, so behaviour is unchanged out of the box.
     public boolean appliesTo(ItemStack stack, @Nullable Level level) {
-        return switch (this) {
-            case HONING -> (stack.is(ItemTags.WEAPON_ENCHANTABLE)
-                    || stack.is(ItemTags.BOW_ENCHANTABLE)
-                    || stack.is(ItemTags.CROSSBOW_ENCHANTABLE))
-                    && (honingOnAxes(level) || !stack.is(ItemTags.AXES));
-            case WARDING -> stack.is(ItemTags.ARMOR_ENCHANTABLE);
-            case TEMPERING -> stack.is(ItemTags.DURABILITY_ENCHANTABLE);
-            case GRINDING -> stack.is(ItemTags.MINING_ENCHANTABLE);
+        if (!stack.is(upgradeableTag())) return false;
+        return this != HONING || honingOnAxes(level) || !stack.is(ItemTags.AXES);
+    }
+
+    private TagKey<Item> upgradeableTag() {
+        String name = switch (this) {
+            case HONING -> "honable";
+            case WARDING -> "wardable";
+            case TEMPERING -> "temperable";
+            case GRINDING -> "grindable";
         };
+        return TagKey.create(Registries.ITEM,
+                Identifier.fromNamespaceAndPath(EnchantmentOverhaul.MOD_ID, "upgradeable/" + name));
     }
 
     // Game rules only exist server-side; the client stays permissive and the server's result sync corrects it.
